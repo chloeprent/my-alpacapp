@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YOUR_APP_NAME Setup Guide — Instructions for Claude Chat</title>
+  <meta name="description" content="Step-by-step setup instructions for Claude Chat to guide users through YOUR_APP_NAME infrastructure setup.">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-warm: #faf8f5;
+      --text: #1a1a1a;
+      --text-muted: #666666;
+      --accent: #c9a87c;
+      --accent-light: #f5efe6;
+      --border: #e5e5e5;
+      --code-bg: #faf8f5;
+      --success: #6b8e5a;
+      --success-light: #eef5eb;
+      --warning-bg: #fceee9;
+      --warning-border: #c75b3a;
+      --claude-bg: #f3effc;
+      --claude-border: #7c6a9a;
+      --shadow: 0 1px 3px rgba(26,26,26,0.06), 0 1px 2px rgba(26,26,26,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg-warm);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    .guide-header {
+      background: var(--text);
+      color: #fff;
+      padding: calc(80px + 2rem) 2rem 2rem;
+    }
+    .guide-header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .guide-header a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .guide-header a:hover { text-decoration: underline; }
+    .guide-header h1 {
+      font-size: 2rem;
+      font-weight: 400;
+      line-height: 1.3;
+    }
+    .guide-header h1 span { color: var(--accent); }
+    .guide-header p {
+      color: #b0b0b0;
+      font-size: 0.95rem;
+      margin-top: 0.75rem;
+      max-width: 600px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .guide-note {
+      background: var(--claude-bg);
+      border-left: 3px solid var(--claude-border);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 2rem;
+      font-size: 0.92rem;
+    }
+    .guide-note strong { color: #5a4a7a; display: block; margin-bottom: 0.25rem; }
+    .guide-step {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .guide-step h2 {
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .guide-step h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin: 1.5rem 0 0.5rem;
+    }
+    .guide-step h3:first-of-type { margin-top: 0.75rem; }
+    p { margin-bottom: 0.85rem; }
+    ol, ul { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.35rem; }
+    li::marker { color: var(--accent); font-weight: 600; }
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: var(--accent-light);
+      color: #6b5230;
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+      font-size: 0.86em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    pre code { background: none; color: var(--text); padding: 0; }
+    a { color: var(--accent); }
+    a:hover { color: #a08050; }
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      padding: 1rem 1.25rem;
+      border-radius: 0 6px 6px 0;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .callout.warning {
+      border-color: var(--warning-border);
+      background: var(--warning-bg);
+    }
+    .callout.success {
+      border-color: var(--success);
+      background: var(--success-light);
+    }
+    .callout strong { display: block; margin-bottom: 0.25rem; }
+    .validate {
+      background: var(--success-light);
+      border: 1px solid var(--success);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      margin: 0.75rem 0;
+      color: #4a6b3a;
+    }
+    .validate::before { content: "Validate: "; font-weight: 700; }
+    @media (max-width: 640px) {
+      .guide-header h1 { font-size: 1.6rem; }
+      .guide-step { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<span data-site-version style="display:none;">v260405.02 4:44p</span>
+<div id="siteHeader"></div>
+
+<div class="guide-header">
+  <div class="guide-header-inner">
+    <a href="/infra/">&larr; Back to setup</a>
+    <h1><span>YOUR_APP_NAME</span> Setup Guide</h1>
+    <p>This page is designed for Claude to read and follow. It contains step-by-step instructions for guiding a user through the complete YOUR_APP_NAME infrastructure setup.</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="guide-note">
+    <strong>Instructions for Claude Chat</strong>
+    <p>Walk the user through each numbered step below in order. Do not skip ahead.</p>
+    <p><strong>Checkpoint rule:</strong> Do not move to Step N+1 until every item in Step N is explicitly confirmed by the user. If the user says they've already completed something, still confirm it — ask them to verify (run a command, paste a screenshot, or state the result). "I already did that" requires a quick proof before proceeding.</p>
+    <p><strong>Screenshot dependency:</strong> Step 2 includes setting up one-click screenshots. This is required infrastructure, not optional — all subsequent steps depend on the user being able to paste screenshots for you to verify their progress. Do not skip or deprioritize it.</p>
+    <p><strong>Screenshot verification:</strong> At each step that requires the user to interact with a website or application (GitHub, Supabase, Google Cloud, Cloudflare, etc.), ask them to paste a screenshot so you can verify they're on the right page and guide them to the correct buttons and fields.</p>
+    <p><strong>Adapting to the user:</strong> Adapt commands and instructions to their OS (Mac, Windows, Linux). If they've already completed a full step (e.g., "I already have a Supabase project"), confirm the key details you'll need (project ref, password, etc.) and move on — but still follow step order.</p>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="guide-step">
+    <h2><span class="step-num">1</span> Understand what they're building</h2>
+    <p>Before any setup, ask the user two questions:</p>
+    <ol>
+      <li><strong>What kind of project?</strong> Two profiles are available:
+        <ul>
+          <li><strong>Property Management</strong> &mdash; full stack with spaces, tenants, devices, events, smart home, bookings</li>
+          <li><strong>General AI Enablement</strong> &mdash; core framework for SaaS apps, portfolios, CRMs, booking systems, side projects. No property-specific modules.</li>
+        </ul>
+      </li>
+      <li><strong>Which services do they need?</strong> Walk through this list:
+        <ul>
+          <li><strong>Cloudflare Pages</strong> (hosting) &mdash; Free, always included</li>
+          <li><strong>Supabase</strong> (database, auth, storage, edge functions) &mdash; Free, always included</li>
+          <li><strong>Conductor</strong> (parallel AI coding agents, Mac app) &mdash; Free, always included</li>
+          <li><strong>Google Sign-In</strong> (OAuth user login) &mdash; Free</li>
+          <li><strong>Resend</strong> (transactional email) &mdash; Free, 3,000 emails/month</li>
+          <li><strong>Telnyx</strong> (SMS notifications) &mdash; ~$0.004/SMS + $1/mo phone number</li>
+          <li><strong>Square</strong> (payment processing) &mdash; 2.9% + 30 cents per transaction</li>
+          <li><strong>Stripe</strong> (ACH &amp; card payments, Connect payouts) &mdash; 0.8%&ndash;2.9% per transaction</li>
+          <li><strong>SignWell</strong> (e-signatures) &mdash; Free, 3&ndash;25 docs/month</li>
+          <li><strong>Google Gemini</strong> (AI features) &mdash; Free API</li>
+          <li><strong>Cloudflare R2</strong> (object storage) &mdash; Free 10 GB, zero egress fees</li>
+          <li><strong>Cloudflare D1</strong> (session archive) &mdash; Free, auto-saves Claude Code transcripts</li>
+          <li><strong>gstack</strong> (QA &amp; developer skills) &mdash; Free, open-source headless browser + Claude Code skills for code review, shipping, QA testing</li>
+        </ul>
+      </li>
+    </ol>
+    <p>Record their profile choice and selected services. You'll need these for the Claude Code setup wizard later.</p>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="guide-step">
+    <h2><span class="step-num">2</span> Check prerequisites</h2>
+
+    <h3>Operating system</h3>
+    <p>Ask what OS they're using. This affects install commands throughout.</p>
+
+    <h3>Git</h3>
+    <p>Ask the user to open their terminal and run:</p>
+    <pre><code>git --version</code></pre>
+    <p>If Git is not installed:</p>
+    <ul>
+      <li><strong>Mac:</strong> Run <code>xcode-select --install</code> in Terminal (installs Git along with command-line tools)</li>
+      <li><strong>Windows:</strong> Download from <a href="https://git-scm.com/download/win">git-scm.com/download/win</a> and run the installer. Use the defaults.</li>
+      <li><strong>Linux:</strong> <code>sudo apt install git</code> (Ubuntu/Debian) or <code>sudo dnf install git</code> (Fedora)</li>
+    </ul>
+
+    <h3>GitHub account</h3>
+    <p>Ask if they already have a GitHub account. If not, direct them to <a href="https://github.com/signup">github.com/signup</a>.</p>
+    <div class="validate">Ask the user to confirm they can run <code>git --version</code> successfully and that they have a GitHub account.</div>
+
+    <h3>GitHub CLI (optional but recommended)</h3>
+    <p>The GitHub CLI (<code>gh</code>) simplifies authentication and repo management. Check if installed:</p>
+    <pre><code>gh --version</code></pre>
+    <p>If not installed:</p>
+    <ul>
+      <li><strong>Mac:</strong> <code>brew install gh</code> (requires <a href="https://brew.sh">Homebrew</a>)</li>
+      <li><strong>Windows:</strong> <code>winget install --id GitHub.cli</code></li>
+      <li><strong>Linux:</strong> See <a href="https://github.com/cli/cli/blob/trunk/docs/install_linux.md">github.com/cli/cli install docs</a></li>
+    </ul>
+    <p>Then authenticate: <code>gh auth login</code> (follow prompts, choose HTTPS, authenticate via browser).</p>
+
+    <h3>Claude Code (required for Conductor)</h3>
+    <p>Claude Code is the AI developer engine that powers Conductor. Check if the Claude desktop app is installed:</p>
+    <ol>
+      <li>If not installed, sign up at <a href="https://claude.ai/referral/fzGCallNug" target="_blank">claude.ai</a> (Pro $20/mo recommended &mdash; <a href="https://claude.ai/referral/fzGCallNug" target="_blank">free week here</a>)</li>
+      <li>Download the <a href="https://claude.ai/download" target="_blank">Claude desktop app</a></li>
+      <li>Open the app and verify Claude Code is accessible (click the <strong>Code</strong> tab)</li>
+    </ol>
+    <p>They won&rsquo;t use Claude Code directly &mdash; Conductor manages it for them. They just need it installed.</p>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="guide-step">
+    <h2><span class="step-num">3</span> Create the GitHub repository</h2>
+
+    <h3>Use the template</h3>
+    <p>Direct the user to the template repository:</p>
+    <p><a href="https://github.com/USERNAME/REPO-infra">github.com/USERNAME/REPO-infra</a></p>
+    <ol>
+      <li>Click the green <strong>"Use this template"</strong> button at the top right</li>
+      <li>Click <strong>"Create a new repository"</strong></li>
+      <li>Enter a repository name (lowercase with hyphens, e.g., <code>my-salon-app</code>)</li>
+      <li>Make sure <strong>"Public"</strong> is selected (required for free Cloudflare Pages)</li>
+      <li>Click <strong>"Create repository"</strong></li>
+    </ol>
+
+    <div class="validate">Ask the user to paste a screenshot of their new repository page. Verify it shows their repo name and has files from the template (index.html, shared/, supabase/, etc.).</div>
+
+    <h3>Enable Cloudflare Pages</h3>
+    <p>In their new repository:</p>
+    <ol>
+      <li>Go to <strong>Settings</strong> (gear icon near the top of the repo page)</li>
+      <li>Click <strong>"Pages"</strong> in the left sidebar</li>
+      <li>Under "Build and deployment" &rarr; Source: select <strong>"Deploy from a branch"</strong></li>
+      <li>Branch: select <strong>"main"</strong> and folder <strong>"/ (root)"</strong></li>
+      <li>Click <strong>"Save"</strong></li>
+    </ol>
+    <p>The site will be live at <code>https://USERNAME.github.io/REPO-NAME/</code> within 1&ndash;2 minutes.</p>
+
+    <div class="validate">Ask for a screenshot of the Pages settings page showing "main" branch selected. After 1&ndash;2 minutes, ask them to visit their site URL to confirm it loads.</div>
+
+    <h3>Clone the repository locally</h3>
+    <p>Back in their terminal:</p>
+    <pre><code>git clone https://github.com/USERNAME/REPO-NAME.git
+cd REPO-NAME</code></pre>
+    <p>Replace USERNAME and REPO-NAME with their actual values. If they set up <code>gh</code>, they can also use <code>gh repo clone USERNAME/REPO-NAME</code>.</p>
+
+    <div class="validate">Ask them to confirm they see the project files by running <code>ls</code> (Mac/Linux) or <code>dir</code> (Windows) in the project folder.</div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="guide-step">
+    <h2><span class="step-num">4</span> Set up Supabase</h2>
+
+    <h3>Create a Supabase account and project</h3>
+    <ol>
+      <li>Go to <a href="https://supabase.com/dashboard">supabase.com/dashboard</a></li>
+      <li>Sign up or log in (GitHub login is easiest)</li>
+      <li>Click <strong>"New Project"</strong></li>
+      <li>Choose your organization (or create one)</li>
+      <li>Enter a project name (e.g., same as your repo name)</li>
+      <li><strong>Set a strong database password</strong> &mdash; save this somewhere safe, you'll need it next</li>
+      <li>Select a region close to your users</li>
+      <li>Click <strong>"Create new project"</strong></li>
+    </ol>
+
+    <div class="callout warning">
+      <strong>Important: Save your database password!</strong>
+      Supabase only shows the password during project creation. If you lose it, you'll need to reset it in Settings &rarr; Database &rarr; Database Password.
+    </div>
+
+    <div class="validate">Ask for a screenshot of their Supabase project dashboard. It should show the project name and a "Getting Started" or home page.</div>
+
+    <h3>Find your project ref</h3>
+    <p>The project ref is the random string in the Supabase URL. It looks like this:</p>
+    <pre><code>https://supabase.com/dashboard/project/<strong>abcdefghijklm</strong></code></pre>
+    <p>The bolded part is the project ref. Alternatively:</p>
+    <ol>
+      <li>Go to <strong>Settings</strong> (gear icon in the sidebar)</li>
+      <li>Click <strong>"General"</strong></li>
+      <li>The "Reference ID" is your project ref</li>
+    </ol>
+
+    <div class="validate">Ask the user to share their project ref (the random string) and confirm they have their database password saved. You'll need both for the next step.</div>
+
+    <h3>What you'll need for the next step</h3>
+    <p>Record these two values &mdash; you'll paste them into Conductor in the next step:</p>
+    <ul>
+      <li><strong>Project ref:</strong> the random string from the URL (e.g., <code>abcdefghijklm</code>)</li>
+      <li><strong>Database password:</strong> the password you set during project creation</li>
+    </ul>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="guide-step">
+    <h2><span class="step-num">5</span> Install Conductor and run the setup wizard</h2>
+
+    <p>Conductor is a Mac app that runs Claude Code agents in parallel. Instead of working in Claude Code directly, you&rsquo;ll manage everything from Conductor &mdash; each task gets its own workspace with a dedicated agent.</p>
+
+    <h3>Install Conductor</h3>
+    <ol>
+      <li>Download from <a href="https://conductor.build">conductor.build</a></li>
+      <li>Open Conductor and point it at the project folder you cloned in Step 3</li>
+      <li>Create a new workspace (name it &ldquo;setup&rdquo;)</li>
+    </ol>
+
+    <div class="callout" style="border-color: var(--text-muted); background: #f5f5f5;">
+      <strong>Prerequisites:</strong> Conductor requires Claude Code to be installed (Step 2). If you haven&rsquo;t installed it yet, do that first.
+    </div>
+
+    <h3>Run the setup wizard</h3>
+    <p>In the Conductor workspace, if on the <strong>Max plan</strong> ($100/mo), type:</p>
+    <pre><code>/setup-your-app-infra</code></pre>
+
+    <p>If on the <strong>Pro plan</strong> ($20/mo) or lower (slash commands require Max), paste this prompt instead:</p>
+    <pre><code>Set up my YOUR_APP_NAME project. I chose the [PROFILE] profile and want these services: [LIST].
+My Supabase project ref is: [REF]
+My database password is: [PASSWORD]
+
+Follow the setup wizard in .claude/skills/setup-your-app-infra/SKILL.md to configure everything.
+Handle all terminal work — CLI installs, database setup, edge functions, git pushes.
+Ask me when you need credentials for optional services (API keys, etc.).</code></pre>
+
+    <p>Replace the bracketed values with:</p>
+    <ul>
+      <li><code>[PROFILE]</code> &mdash; "Property Management" or "General AI Enablement"</li>
+      <li><code>[LIST]</code> &mdash; the services they selected in Step 1</li>
+      <li><code>[REF]</code> &mdash; Supabase project ref from Step 4</li>
+      <li><code>[PASSWORD]</code> &mdash; database password from Step 4</li>
+    </ul>
+
+    <h3>What the wizard does</h3>
+    <p>The agent in your Conductor workspace will automatically:</p>
+    <ol>
+      <li>Install and configure the Supabase CLI</li>
+      <li>Link your Supabase project and fetch API keys</li>
+      <li>Create database tables with Row Level Security</li>
+      <li>Set up storage buckets</li>
+      <li>Deploy edge functions</li>
+      <li>Configure each optional service you selected (asking you for API keys as needed)</li>
+      <li>Generate your CLAUDE.md and documentation files</li>
+      <li>Commit and push everything to GitHub</li>
+    </ol>
+
+    <h3>Going forward</h3>
+    <p>After setup, Conductor is how you build everything. Create a new workspace for each task:</p>
+    <ul>
+      <li><strong>&ldquo;Add payments page&rdquo;</strong> &mdash; one workspace</li>
+      <li><strong>&ldquo;Fix login bug&rdquo;</strong> &mdash; another workspace, runs in parallel</li>
+      <li><strong>&ldquo;Write tests&rdquo;</strong> &mdash; a third workspace, all at the same time</li>
+    </ul>
+    <p>Each workspace gets its own git branch so agents never conflict.</p>
+
+    <div class="callout success">
+      <strong>You're done!</strong>
+      Once the setup wizard finishes, your site is live on Cloudflare Pages with a fully configured Supabase backend. Start building by creating new Conductor workspaces and telling them what you want &mdash; the agents handle the code.
+    </div>
+  </div>
+
+  <!-- Optional services reference -->
+  <div class="guide-step">
+    <h2><span class="step-num">?</span> Optional services reference</h2>
+    <p>When the agent asks for credentials for optional services, direct the user to these vendor pages. For each service, the user needs to create an account and get an API key.</p>
+
+    <h3>Google Sign-In (OAuth)</h3>
+    <ul>
+      <li>Google Cloud Console: <a href="https://console.cloud.google.com/">console.cloud.google.com</a></li>
+      <li>Create a new project, then go to <strong>APIs &amp; Services &rarr; Credentials</strong></li>
+      <li>Set up OAuth consent screen (External), then create OAuth 2.0 Client ID (Web application)</li>
+      <li>Add authorized redirect URI: <code>https://PROJECT_REF.supabase.co/auth/v1/callback</code></li>
+      <li>User provides: Client ID and Client Secret</li>
+    </ul>
+
+    <h3>Resend (Email)</h3>
+    <ul>
+      <li>Sign up: <a href="https://resend.com/signup">resend.com/signup</a></li>
+      <li>Create API key: <a href="https://resend.com/api-keys">resend.com/api-keys</a></li>
+      <li>Optional: Add and verify a sending domain for custom from addresses</li>
+      <li>User provides: API key</li>
+    </ul>
+
+    <h3>Telnyx (SMS)</h3>
+    <ul>
+      <li>Sign up: <a href="https://portal.telnyx.com/sign-up">portal.telnyx.com/sign-up</a></li>
+      <li>Buy a phone number, create a Messaging Profile</li>
+      <li>Important: 10DLC registration required for US SMS (takes days for approval)</li>
+      <li>User provides: API key, Messaging Profile ID, phone number</li>
+    </ul>
+
+    <h3>Square (Payments)</h3>
+    <ul>
+      <li>Sign up: <a href="https://squareup.com/signup">squareup.com/signup</a></li>
+      <li>Developer dashboard: <a href="https://developer.squareup.com/apps">developer.squareup.com/apps</a></li>
+      <li>Create an application, get sandbox and production credentials</li>
+      <li>User provides: Application ID, Access Token, Location ID</li>
+    </ul>
+
+    <h3>Stripe (Payments)</h3>
+    <ul>
+      <li>Sign up: <a href="https://dashboard.stripe.com/register">dashboard.stripe.com/register</a></li>
+      <li>API keys: <a href="https://dashboard.stripe.com/apikeys">dashboard.stripe.com/apikeys</a></li>
+      <li>Create webhook endpoint pointing to Supabase edge function</li>
+      <li>User provides: Publishable key, Secret key, Webhook signing secret</li>
+    </ul>
+
+    <h3>SignWell (E-Signatures)</h3>
+    <ul>
+      <li>Sign up: <a href="https://www.signwell.com/">signwell.com</a></li>
+      <li>API key in account settings</li>
+      <li>User provides: API key</li>
+    </ul>
+
+    <h3>Google Gemini (AI)</h3>
+    <ul>
+      <li>Get free API key: <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a></li>
+      <li>User provides: API key</li>
+    </ul>
+
+    <h3>Cloudflare R2 (Storage)</h3>
+    <ul>
+      <li>Sign up: <a href="https://dash.cloudflare.com/sign-up">dash.cloudflare.com/sign-up</a></li>
+      <li>Create R2 bucket, enable Public Development URL</li>
+      <li>Create API token with Object Read &amp; Write permissions</li>
+      <li>User provides: Account ID, Access Key ID, Secret Access Key, bucket name</li>
+    </ul>
+
+    <h3>Cloudflare D1 &mdash; Session Archive (Claude Code transcripts)</h3>
+    <p>Automatically saves every Claude Code session (project, model, duration, transcript summary) to a serverless SQLite database via Cloudflare D1. Sessions are captured in real-time using a <code>Stop</code> hook that fires on every agent response.</p>
+    <ol>
+      <li><strong>Install Wrangler CLI:</strong> <code>npm install -g wrangler</code>, then <code>wrangler login</code></li>
+      <li><strong>Create D1 database:</strong>
+        <pre><code>npx wrangler d1 create claude-sessions</code></pre>
+        Copy the <code>database_id</code> from the output.
+      </li>
+      <li><strong>Configure:</strong> Edit <code>cloudflare/claude-sessions/wrangler.jsonc</code> &mdash; paste your <code>database_id</code>. Edit <code>src/index.js</code> &mdash; set a unique <code>AUTH_TOKEN</code>.</li>
+      <li><strong>Deploy schema + Worker:</strong>
+        <pre><code>cd cloudflare/claude-sessions
+npx wrangler d1 execute claude-sessions --file=schema.sql --remote
+npx wrangler deploy</code></pre>
+        Note the Worker URL (e.g. <code>https://claude-sessions.your-subdomain.workers.dev</code>).
+      </li>
+      <li><strong>Install the hook:</strong>
+        <pre><code>cp cloudflare/claude-sessions/hooks/save-session.sh ~/.claude/hooks/
+chmod +x ~/.claude/hooks/save-session.sh</code></pre>
+        Edit the script: set <code>WORKER_URL</code> and <code>AUTH_TOKEN</code> to match your Worker.
+      </li>
+      <li><strong>Register the hook</strong> in <code>~/.claude/settings.json</code>:
+        <pre><code>"hooks": {
+  "Stop": [{
+    "hooks": [{
+      "type": "command",
+      "command": "$HOME/.claude/hooks/save-session.sh",
+      "timeout": 15
+    }]
+  }]
+}</code></pre>
+        <strong>Important:</strong> Use the <code>Stop</code> event, NOT <code>SessionEnd</code>. The <code>SessionEnd</code> event does not fire for worktree/subagent sessions. <code>Stop</code> fires on every agent response and includes built-in rate-limiting (5-minute cooldown per session).
+      </li>
+      <li><strong>Verify:</strong> Start a new Claude Code session, send a message, then check:
+        <pre><code>curl -H "Authorization: Bearer YOUR_TOKEN" https://YOUR_WORKER_URL/sessions</code></pre>
+      </li>
+    </ol>
+    <p><strong>Note:</strong> Running sessions won't pick up new <code>settings.json</code> hooks &mdash; only sessions started after the config change will auto-save. To backfill existing sessions, use the Worker's <code>POST /sessions</code> endpoint.</p>
+  </div>
+
+  <!-- gstack -->
+  <div class="guide-step">
+    <h3>gstack &mdash; Claude Code Skills &amp; Headless Browser</h3>
+    <p>Open-source CLI that adds powerful skills to Claude Code: headless browser for QA testing, code review, ship workflow, engineering retrospectives, and more. Sub-second commands with zero token overhead.</p>
+    <ol>
+      <li><strong>Install:</strong>
+        <pre><code>curl -fsSL https://raw.githubusercontent.com/garrytan/gstack/main/install.sh | bash</code></pre>
+        This installs the <code>gstack</code> binary and skill definitions to <code>~/.claude/skills/gstack/</code>.
+      </li>
+      <li><strong>Verify installation:</strong>
+        <pre><code>ls ~/.claude/skills/gstack/SKILL.md</code></pre>
+        If the file exists, gstack is installed and Claude Code will automatically detect the skills.
+      </li>
+      <li><strong>Available skills:</strong>
+        <ul>
+          <li><code>/browse</code> &mdash; Headless browser for QA testing and site dogfooding (~100ms per command)</li>
+          <li><code>/review</code> &mdash; Pre-landing code review with production risk detection</li>
+          <li><code>/ship</code> &mdash; Ship workflow: merge base, test, review, bump, push, create PR</li>
+          <li><code>/qa</code> &mdash; Systematic QA testing with auto-fix (Quick/Standard/Exhaustive tiers)</li>
+          <li><code>/retro</code> &mdash; Engineering retrospectives with commit analysis and trend tracking</li>
+          <li><code>/plan-ceo-review</code> &mdash; CEO/founder-mode plan review</li>
+          <li><code>/plan-eng-review</code> &mdash; Engineering manager plan review</li>
+        </ul>
+      </li>
+      <li><strong>Update later:</strong> Run <code>/gstack-upgrade</code> inside Claude Code, or re-run the install script.</li>
+    </ol>
+    <p><strong>Source:</strong> <a href="https://github.com/garrytan/gstack">github.com/garrytan/gstack</a> (MIT license)</p>
+  </div>
+
+</div>
+
+<script src="/vendor/supabase-js-2.39.3.min.js"></script>
+<script type="module" src="/shared/version-info.js"></script>
+<script type="module">
+  import { initPublicPage } from '/shared/public-shell.js';
+  initPublicPage({ transparent: true, light: true });
+</script>
+
+</body>
+</html>

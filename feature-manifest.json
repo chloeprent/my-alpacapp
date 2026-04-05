@@ -1,0 +1,526 @@
+{
+  "_meta": {
+    "description": "Maps features to their files, directories, edge functions, and DB tables. Used by the setup wizard to select features, prune content, and generate documentation based on the selected persona and individual feature choices.",
+    "categories": {
+      "communication": "Email, SMS, WhatsApp, Voice — how the system talks to people",
+      "payments": "Stripe, Square, PayPal — how money moves",
+      "documents": "E-signatures, lease/event templates, PDFs",
+      "smart_home": "Lighting, cameras, music, climate, laundry, oven — IoT device control",
+      "maker_tools": "3D printer, laser cutter — creative workshop equipment",
+      "vehicles": "Tesla Fleet API — vehicle monitoring and commands",
+      "property_ops": "Rentals, events, associates, residents, Airbnb — property management workflows",
+      "ai": "AI assistant, voice calling, Alexa — intelligent automation"
+    }
+  },
+
+  "personas": {
+    "vacation_rental": {
+      "label": "Vacation Rental Manager",
+      "description": "Short-term rental with Airbnb sync, guest check-in, cleaning coordination, event hosting, and smart home controls for guests.",
+      "features": ["email", "sms", "payments_stripe", "esignatures", "documents", "airbnb", "rentals", "events", "residents", "cameras", "lighting", "climate", "music"],
+      "suggested_services": ["email", "payments_stripe", "esignatures"]
+    },
+    "long_term_landlord": {
+      "label": "Long-term Landlord",
+      "description": "Lease management, rent collection via ACH, maintenance coordination, and tenant communication. No smart home overhead.",
+      "features": ["email", "payments_stripe", "esignatures", "documents", "rentals", "residents"],
+      "suggested_services": ["email", "payments_stripe", "esignatures"]
+    },
+    "event_venue": {
+      "label": "Event Venue",
+      "description": "Event hosting pipeline with inquiry → contract → payment → execution workflow. Media galleries and guest communication.",
+      "features": ["email", "sms", "payments_stripe", "payments_paypal", "esignatures", "documents", "events"],
+      "suggested_services": ["email", "payments_stripe"]
+    },
+    "hostel_coliving": {
+      "label": "Hostel / Co-living Space",
+      "description": "Mixed room types, work-trade programs, orientation materials, waivers, associate hour tracking, and shared amenity controls.",
+      "features": ["email", "sms", "payments_stripe", "esignatures", "documents", "rentals", "residents", "associates", "lighting", "music", "laundry"],
+      "suggested_services": ["email", "payments_stripe"]
+    },
+    "personal_ai_hub": {
+      "label": "Personal AI Hub",
+      "description": "AI assistant with smart home control — lights, music, cameras, climate. Voice calling and chat interface. No property management.",
+      "features": ["pai", "lighting", "music", "climate", "cameras", "voice", "residents"],
+      "suggested_services": []
+    },
+    "small_business": {
+      "label": "Small Business Platform",
+      "description": "Customer communication, invoicing, payment collection, and document management. Clean CRM-style foundation.",
+      "features": ["email", "sms", "payments_stripe", "documents", "esignatures"],
+      "suggested_services": ["email", "payments_stripe"]
+    },
+    "developer_portfolio": {
+      "label": "Developer Portfolio / SaaS Starter",
+      "description": "Auth, payments, email notifications — minimal feature set for building a web app or portfolio site.",
+      "features": ["email", "payments_stripe"],
+      "suggested_services": ["email"]
+    }
+  },
+
+  "core": {
+    "_note": "Always included regardless of persona or feature selection. Cannot be disabled. Includes login, devcontrol, and intranet by default.",
+    "category": "core",
+    "dirs": [
+      "shared/supabase.js",
+      "shared/auth.js",
+      "shared/admin-shell.js",
+      "shared/admin-tabs.js",
+      "shared/public-shell.js",
+      "shared/brand-config.js",
+      "shared/config-loader.js",
+      "shared/context-switcher.js",
+      "shared/feature-registry.js",
+      "shared/error-logger.js",
+      "shared/supabase-health.js",
+      "shared/site-components.js",
+      "shared/tab-utils.js",
+      "shared/timezone.js",
+      "shared/version-info.js",
+      "shared/media-service.js",
+      "shared/pdf-service.js",
+      "shared/identity-service.js",
+      "shared/project-service.js",
+      "shared/reservation-service.js",
+      "login/",
+      "contact/",
+      "styles/",
+      "assets/",
+      "spaces/admin/devcontrol/",
+      "spaces/admin/notifications.html",
+      "spaces/admin/notifications.js",
+      "spaces/admin/reservations.html",
+      "spaces/admin/reservations.js"
+    ],
+    "edgeFunctions": [
+      "api",
+      "contact-form",
+      "error-report",
+      "verify-identity",
+      "event-notify",
+      "event-staff-notify",
+      "release-info",
+      "_shared"
+    ],
+    "dbTables": [
+      "app_users",
+      "user_invitations",
+      "property_config",
+      "brand_config",
+      "identity_verifications",
+      "spaces",
+      "people",
+      "assignments",
+      "assignment_spaces",
+      "media",
+      "media_spaces",
+      "media_tags",
+      "media_tag_assignments",
+      "upload_tokens"
+    ]
+  },
+
+  "email": {
+    "label": "Email (Resend)",
+    "category": "communication",
+    "setup_cost": "freemium",
+    "setup_cost_note": "Free: 3,000 emails/month. Pro: $20/mo for 50K+",
+    "dependencies": [],
+    "shared": [
+      "shared/email-service.js",
+      "shared/email-template-service.js"
+    ],
+    "edgeFunctions": [
+      "send-email",
+      "edit-email-template",
+      "resend-inbound-webhook"
+    ],
+    "dbTables": ["email_templates", "inbound_emails"]
+  },
+
+  "sms": {
+    "label": "SMS (Telnyx)",
+    "category": "communication",
+    "setup_cost": "paid",
+    "setup_cost_note": "~$1/mo for phone number + ~$0.004/message",
+    "dependencies": [],
+    "shared": ["shared/sms-service.js"],
+    "edgeFunctions": ["send-sms", "telnyx-webhook"],
+    "dbTables": ["sms_messages", "telnyx_config"]
+  },
+
+  "whatsapp": {
+    "label": "WhatsApp",
+    "category": "communication",
+    "setup_cost": "paid",
+    "setup_cost_note": "Meta Business verification required. ~$0.005-0.08/message depending on region",
+    "dependencies": [],
+    "shared": ["shared/whatsapp-service.js"],
+    "edgeFunctions": ["send-whatsapp", "whatsapp-webhook"],
+    "dbTables": []
+  },
+
+  "payments_stripe": {
+    "label": "Stripe Payments",
+    "category": "payments",
+    "setup_cost": "paid",
+    "setup_cost_note": "2.9% + $0.30/card, 0.8% ACH (capped $5). No monthly fee",
+    "dependencies": [],
+    "shared": [
+      "shared/stripe-service.js",
+      "shared/accounting-service.js",
+      "shared/payout-service.js"
+    ],
+    "edgeFunctions": [
+      "process-stripe-payment",
+      "stripe-webhook",
+      "stripe-connect-onboard",
+      "stripe-payout",
+      "record-payment",
+      "resolve-payment",
+      "confirm-deposit-payment",
+      "create-payment-link"
+    ],
+    "pages": ["pay/"],
+    "dbTables": ["stripe_payments", "stripe_config", "ledger", "payouts", "payment_methods"]
+  },
+
+  "payments_square": {
+    "label": "Square Payments",
+    "category": "payments",
+    "setup_cost": "paid",
+    "setup_cost_note": "2.6% + $0.10/transaction. No monthly fee",
+    "dependencies": [],
+    "shared": [
+      "shared/square-service.js",
+      "shared/accounting-service.js"
+    ],
+    "edgeFunctions": [
+      "process-square-payment",
+      "refund-square-payment",
+      "square-webhook",
+      "record-payment",
+      "resolve-payment",
+      "confirm-deposit-payment",
+      "create-payment-link"
+    ],
+    "pages": ["pay/"],
+    "dbTables": ["square_payments", "square_config", "ledger", "payment_methods"]
+  },
+
+  "payments_paypal": {
+    "label": "PayPal Payments",
+    "category": "payments",
+    "setup_cost": "paid",
+    "setup_cost_note": "3.49% + $0.49/transaction for standard. $0.25/payout",
+    "dependencies": [],
+    "shared": [],
+    "edgeFunctions": [
+      "paypal-checkout",
+      "paypal-payout",
+      "paypal-webhook"
+    ],
+    "dbTables": ["paypal_config"]
+  },
+
+  "esignatures": {
+    "label": "E-Signatures (SignWell)",
+    "category": "documents",
+    "setup_cost": "freemium",
+    "setup_cost_note": "Free: 3 docs/month. Personal: $8/mo for 25 docs",
+    "dependencies": [],
+    "shared": ["shared/signwell-service.js"],
+    "edgeFunctions": ["signwell-webhook"],
+    "dbTables": ["signwell_config"]
+  },
+
+  "documents": {
+    "label": "Document Templates",
+    "category": "documents",
+    "setup_cost": "free",
+    "setup_cost_note": "Built-in markdown templates with placeholder substitution",
+    "dependencies": [],
+    "shared": [
+      "shared/lease-template-service.js",
+      "shared/event-template-service.js",
+      "shared/worktrade-template-service.js"
+    ],
+    "dbTables": ["lease_templates"]
+  },
+
+  "lighting": {
+    "label": "Smart Lighting (Govee)",
+    "category": "smart_home",
+    "setup_cost": "free",
+    "setup_cost_note": "Govee Cloud API is free. Requires Govee hardware",
+    "dependencies": [],
+    "shared": ["shared/services/lighting-data.js"],
+    "edgeFunctions": ["govee-control"],
+    "pages": ["residents/lighting.html", "residents/lighting.js"],
+    "dbTables": ["govee_config", "govee_devices", "govee_models"]
+  },
+
+  "cameras": {
+    "label": "Security Cameras",
+    "category": "smart_home",
+    "setup_cost": "free",
+    "setup_cost_note": "Uses go2rtc for RTSP→HLS restreaming. Requires UniFi/IP cameras + home server",
+    "dependencies": [],
+    "shared": ["shared/services/camera-data.js"],
+    "pages": ["residents/cameras.html", "residents/cameras.js"],
+    "pollers": ["blink-poller/", "camera-event-poller/"],
+    "dbTables": ["camera_streams"]
+  },
+
+  "music": {
+    "label": "Music (Sonos)",
+    "category": "smart_home",
+    "setup_cost": "free",
+    "setup_cost_note": "Sonos HTTP API is free. Requires Sonos hardware + home server",
+    "dependencies": [],
+    "shared": ["shared/services/sonos-data.js"],
+    "edgeFunctions": ["sonos-control"],
+    "pages": ["residents/sonos.html", "residents/sonos.js"],
+    "dbTables": ["sonos_config"]
+  },
+
+  "climate": {
+    "label": "Climate (Nest)",
+    "category": "smart_home",
+    "setup_cost": "free",
+    "setup_cost_note": "Google SDM API is free. Requires Nest thermostat + Google Cloud project",
+    "dependencies": [],
+    "shared": ["shared/services/climate-data.js"],
+    "edgeFunctions": ["nest-control", "nest-token-refresh"],
+    "pages": ["residents/climate.html", "residents/climate.js"],
+    "dbTables": ["nest_config", "nest_devices", "thermostat_rules"]
+  },
+
+  "vehicles": {
+    "label": "Vehicles (Tesla)",
+    "category": "vehicles",
+    "setup_cost": "free",
+    "setup_cost_note": "Tesla Fleet API is free. Requires Tesla vehicle + developer account",
+    "dependencies": [],
+    "shared": ["shared/services/cars-data.js"],
+    "edgeFunctions": ["tesla-command"],
+    "pages": ["residents/cars.html", "residents/cars.js"],
+    "dirs": ["auth/tesla/", "tesla-poller/"],
+    "dbTables": ["tesla_accounts", "vehicles", "vehicle_drivers"]
+  },
+
+  "laundry": {
+    "label": "Laundry (LG ThinQ)",
+    "category": "smart_home",
+    "setup_cost": "free",
+    "setup_cost_note": "LG ThinQ API is free. Requires LG washer/dryer",
+    "dependencies": [],
+    "shared": ["shared/services/laundry-data.js"],
+    "edgeFunctions": ["lg-control"],
+    "pages": ["residents/laundry.html", "residents/laundry.js"],
+    "pollers": ["lg-poller/"],
+    "dbTables": ["lg_config", "lg_appliances", "push_tokens", "laundry_watchers"]
+  },
+
+  "oven": {
+    "label": "Precision Oven (Anova)",
+    "category": "smart_home",
+    "setup_cost": "free",
+    "setup_cost_note": "Anova WebSocket API is free. Requires Anova Precision Oven",
+    "dependencies": [],
+    "shared": ["shared/services/oven-data.js"],
+    "edgeFunctions": ["anova-control"],
+    "pages": ["residents/appliances.html", "residents/appliances.js"],
+    "dbTables": ["anova_config", "anova_ovens"]
+  },
+
+  "printer_3d": {
+    "label": "3D Printer (FlashForge)",
+    "category": "maker_tools",
+    "setup_cost": "free",
+    "setup_cost_note": "FlashForge TCP protocol is free. Requires FlashForge printer + home server proxy",
+    "dependencies": [],
+    "shared": ["shared/services/printer-data.js"],
+    "edgeFunctions": ["printer-control"],
+    "pages": ["residents/3dprinter.html", "residents/3dprinter.js"],
+    "dbTables": ["printer_config", "printer_devices"]
+  },
+
+  "glowforge": {
+    "label": "Laser Cutter (Glowforge)",
+    "category": "maker_tools",
+    "setup_cost": "free",
+    "setup_cost_note": "Glowforge Cloud API (read-only status). Requires Glowforge machine",
+    "dependencies": [],
+    "shared": ["shared/services/glowforge-data.js"],
+    "edgeFunctions": ["glowforge-control"],
+    "dbTables": ["glowforge_config", "glowforge_machines"]
+  },
+
+  "pai": {
+    "label": "AI Assistant (PAI)",
+    "category": "ai",
+    "setup_cost": "freemium",
+    "setup_cost_note": "Gemini free tier: 1,000 req/day. Paid: $0.075/M input tokens",
+    "dependencies": [],
+    "shared": ["shared/pai-widget.js", "shared/chat-widget.js"],
+    "edgeFunctions": [
+      "property-ai",
+      "ask-question",
+      "reprocess-pai-email",
+      "generate-daily-fact",
+      "generate-whispers"
+    ],
+    "pages": ["residents/ask-pai.html", "residents/ask-pai.js", "pai/"],
+    "dirs": ["pai-discord/"],
+    "dbTables": []
+  },
+
+  "voice": {
+    "label": "Voice Calling (Vapi)",
+    "category": "ai",
+    "setup_cost": "paid",
+    "setup_cost_note": "~$0.10-0.30/call minute. Phone number ~$2/mo",
+    "dependencies": ["pai"],
+    "shared": ["shared/voice-service.js"],
+    "edgeFunctions": ["vapi-server", "vapi-webhook"],
+    "dbTables": ["voice_calls", "voice_assistants", "vapi_config"]
+  },
+
+  "alexa": {
+    "label": "Alexa Skill",
+    "category": "ai",
+    "setup_cost": "free",
+    "setup_cost_note": "Alexa Skills Kit is free. Requires Amazon developer account",
+    "dependencies": ["pai"],
+    "edgeFunctions": ["alexa-room-control"],
+    "dbTables": []
+  },
+
+  "airbnb": {
+    "label": "Airbnb Calendar Sync",
+    "category": "property_ops",
+    "setup_cost": "free",
+    "setup_cost_note": "iCal sync — no API key needed, just paste your Airbnb iCal URL",
+    "dependencies": [],
+    "edgeFunctions": ["airbnb-sync", "ical", "regenerate-ical"],
+    "dbTables": []
+  },
+
+  "rentals": {
+    "label": "Rental Pipeline",
+    "category": "property_ops",
+    "setup_cost": "free",
+    "setup_cost_note": "Built-in Kanban workflow: inquiry → apply → review → sign → move-in",
+    "dependencies": [],
+    "suggested_with": ["esignatures", "documents", "payments_stripe"],
+    "shared": ["shared/rental-service.js"],
+    "pages": ["spaces/apply/", "spaces/admin/rentals.html", "spaces/admin/rentals.js"],
+    "edgeFunctions": ["event-payment-reminder", "payment-overdue-check"],
+    "dbTables": ["rental_applications"]
+  },
+
+  "events": {
+    "label": "Event Hosting",
+    "category": "property_ops",
+    "setup_cost": "free",
+    "setup_cost_note": "Built-in pipeline: inquiry → review → contract → payment → confirm",
+    "dependencies": [],
+    "suggested_with": ["esignatures", "documents", "payments_stripe"],
+    "shared": ["shared/event-service.js"],
+    "pages": ["spaces/hostevent/", "spaces/admin/events.html", "spaces/admin/events.js", "events/"],
+    "dbTables": []
+  },
+
+  "associates": {
+    "label": "Associate/Staff Management",
+    "category": "property_ops",
+    "setup_cost": "free",
+    "setup_cost_note": "Clock in/out, timesheets, work photos, payouts",
+    "dependencies": [],
+    "suggested_with": ["payments_stripe", "payments_paypal"],
+    "shared": [
+      "shared/hours-service.js",
+      "shared/associate-shell.js"
+    ],
+    "dirs": ["associates/"],
+    "pages": [
+      "spaces/admin/worktracking.html",
+      "spaces/admin/worktracking.js"
+    ],
+    "edgeFunctions": ["work-photo-reminder", "w9-submit", "generate-1099-data", "get-ninja-rsvp-status"],
+    "dbTables": ["associate_profiles", "time_entries", "work_photos"]
+  },
+
+  "residents": {
+    "label": "Resident Portal",
+    "category": "property_ops",
+    "setup_cost": "free",
+    "setup_cost_note": "User dashboard with profile, media, devices, orientation materials",
+    "dependencies": [],
+    "shared": [
+      "shared/resident-shell.js",
+      "shared/visitor-identity.js",
+      "shared/demo-redact.js",
+      "shared/instant-chrome.js",
+      "shared/services/poll-manager.js",
+      "shared/services/resident-device-scope.js"
+    ],
+    "dirs": [
+      "residents/",
+      "orientation/",
+      "overnight/",
+      "waiver/",
+      "worktrade/",
+      "visiting/",
+      "visiting-1/",
+      "community/",
+      "directory/",
+      "kioskhall/",
+      "photos/",
+      "mobile/"
+    ],
+    "edgeFunctions": ["share-space"],
+    "dbTables": []
+  },
+
+  "clauded": {
+    "label": "Developer Dashboard (Claude Dev)",
+    "category": "core",
+    "setup_cost": "free",
+    "setup_cost_note": "Admin-only dev tools. Session logging requires Cloudflare D1 (free tier)",
+    "dependencies": [],
+    "suggested_with": ["d1-session-logging"],
+    "dirs": ["clauded/"],
+    "dbTables": []
+  },
+
+  "_your-app_specific": {
+    "_note": "YOUR_APP_NAME Playhouse content — always excluded from template clones",
+    "dirs": [
+      "mistiq/",
+      "jackie/",
+      "rahulio/",
+      "sundays/",
+      "house/",
+      "spirit-whisper-worker/",
+      "ai-admin/",
+      "pai-discord/",
+      "image-gen/"
+    ],
+    "edgeFunctions": ["mistiq-apply", "mistiq-form", "release-info"],
+    "docs": [
+      "PRODUCTDESIGN.md",
+      "docs/CHANGELOG.md",
+      "docs/MULTI_TENANCY_EFFORT_ASSESSMENT.md",
+      "docs/DEMO_MODE_FEATURE_PLAN.md",
+      "docs/MUSIC-ASSISTANT-EVALUATION.md",
+      "docs/home-assistant-lighting-design.md",
+      "docs/AWS_VS_DIGITALOCEAN_COMPARISON.md",
+      "docs/OPENCLAW_SAFE_PARTITIONED.md",
+      "docs/slack-ai-admin-reinstall.md",
+      "docs/music-assistant-api-mapping.md",
+      "docs/sauna-hifi.html"
+    ]
+  }
+}

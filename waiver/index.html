@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Guest Waiver - YOUR_PROPERTY_NAME</title>
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1" integrity="sha384-nBSomYN4UWX4we7Pw5GsQDkjtwLh2Wde+3szWl5Lzf0zuN9XncHIZLNoucos4C7f" crossorigin="anonymous"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: #f5f5f0;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 540px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: 0.25rem;
+      color: #2d3024;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Waiver text display */
+    .waiver-text {
+      background: #faf9f7;
+      border: 1px solid #e5e5e0;
+      border-radius: 8px;
+      padding: 1.25rem;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      -webkit-overflow-scrolling: touch;
+    }
+    .waiver-text h1 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 0.5rem;
+      color: #2d3024;
+    }
+    .waiver-text h2 {
+      font-size: 0.9rem;
+      margin: 1rem 0 0.35rem;
+      color: #2d3024;
+    }
+    .waiver-text p {
+      margin-bottom: 0.5rem;
+    }
+    .waiver-text hr {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 0.75rem 0;
+    }
+    .waiver-text ul {
+      margin: 0.35rem 0 0.5rem 1.25rem;
+      padding: 0;
+    }
+    .waiver-text li {
+      margin-bottom: 0.25rem;
+    }
+    .waiver-text strong {
+      color: #1a1a1a;
+    }
+    .scroll-hint {
+      font-size: 0.75rem;
+      color: #999;
+      text-align: center;
+      margin-top: -1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Form fields */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 0.3rem;
+    }
+    .form-group label .required {
+      color: #c0392b;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px; /* Prevents iOS zoom */
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #3d8b7a;
+      box-shadow: 0 0 0 3px rgba(61, 139, 122, 0.12);
+    }
+
+    /* Agreement section */
+    .agreement-box {
+      background: #fef9e7;
+      border: 2px solid #f0c040;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+    }
+    .agreement-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      cursor: pointer;
+    }
+    .agreement-check input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      accent-color: #3d8b7a;
+      cursor: pointer;
+    }
+    .agreement-check span {
+      font-size: 0.85rem;
+      line-height: 1.45;
+      color: #444;
+    }
+
+    /* Signature confirmation */
+    .signature-section {
+      margin-top: 1rem;
+    }
+    .signature-section label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+    .signature-hint {
+      font-size: 0.78rem;
+      color: #888;
+      margin-bottom: 0.4rem;
+    }
+    .signature-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .signature-input:focus {
+      outline: none;
+      border-color: #3d8b7a;
+      border-style: solid;
+    }
+    .signature-input.matched {
+      border-color: #27ae60;
+      border-style: solid;
+      background: #f0faf4;
+    }
+    .signature-match {
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
+      min-height: 1em;
+    }
+    .signature-match.error { color: #c0392b; }
+    .signature-match.success { color: #27ae60; }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem;
+      background: #3d8b7a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover { background: #2d7a6a; }
+    .btn-submit:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Loading */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    .loading.visible { display: block; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #eee;
+      border-top: 3px solid #3d8b7a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    /* Success */
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    .success-state.visible { display: block; }
+    .success-icon {
+      font-size: 3.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .success-state h2 {
+      font-size: 1.4rem;
+      color: #3d8b7a;
+      margin-bottom: 0.5rem;
+    }
+    .success-state p {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+    }
+    .success-details {
+      background: #e5f4f1;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+    .success-details .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid rgba(61, 139, 122, 0.15);
+    }
+    .success-details .detail-row:last-child { border-bottom: none; }
+    .success-details .detail-label { color: #666; }
+    .success-details .detail-value { font-weight: 600; color: #2d3024; }
+
+    /* Error */
+    .error-state {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    .error-state.visible { display: block; }
+    .error-state .error-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .error-state h2 { font-size: 1.2rem; margin-bottom: 0.5rem; color: #c0392b; }
+    .error-state p { color: #666; font-size: 0.9rem; line-height: 1.5; }
+
+    .error-msg {
+      display: none;
+      background: #fef2f2;
+      color: #c0392b;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .error-msg.visible { display: block; }
+
+    .btn-retry {
+      display: inline-block;
+      padding: 0.6rem 1.5rem;
+      background: #3d8b7a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 1rem;
+      text-decoration: none;
+    }
+    .btn-retry:hover { background: #2d7a6a; }
+
+    .questions-contact {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .questions-contact a { color: #3d8b7a; text-decoration: none; }
+    .questions-contact a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .container { margin: 1rem auto; }
+      .card { padding: 1.25rem; }
+      .waiver-text { max-height: 300px; padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <span data-site-version style="display:none;">v260405.02 4:44p</span>
+  <div id="siteHeader"></div>
+
+  <div class="container">
+    <div class="card">
+      <!-- Loading state -->
+      <div id="loadingState" class="loading visible">
+        <div class="spinner"></div>
+        <p class="loading-text">Loading waiver...</p>
+      </div>
+
+      <!-- Error state -->
+      <div id="errorState" class="error-state">
+        <div class="error-icon">&#9888;&#65039;</div>
+        <h2 id="errorTitle">Unable to Load Waiver</h2>
+        <p id="errorMessage">Please try again later or contact us for assistance.</p>
+        <button class="btn-retry" onclick="location.reload()">Try Again</button>
+      </div>
+
+      <!-- Main form -->
+      <div id="formState" style="display: none;">
+        <h1>Guest Waiver</h1>
+        <p class="subtitle">Please read the waiver below, then fill in your information and sign electronically.</p>
+
+        <div id="waiverContent" class="waiver-text"></div>
+        <p id="scrollHint" class="scroll-hint">Scroll to read the full waiver</p>
+
+        <div id="errorMsg" class="error-msg"></div>
+
+        <div class="form-group">
+          <label>Full Name <span class="required">*</span></label>
+          <input type="text" id="nameInput" placeholder="Your full legal name" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+          <label>Email <span class="required">*</span></label>
+          <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <div class="form-group">
+          <label>Phone <span style="color:#999;font-weight:400;">(optional)</span></label>
+          <input type="tel" id="phoneInput" placeholder="(555) 555-5555" autocomplete="tel">
+        </div>
+
+        <div class="agreement-box">
+          <label class="agreement-check">
+            <input type="checkbox" id="agreeCheckbox">
+            <span>I have read and agree to this <strong>Waiver of Liability, Assumption of Risk, and Indemnity Agreement</strong>. I understand I am giving up legal rights, including the right to sue.</span>
+          </label>
+
+          <div class="signature-section" id="signatureSection" style="display: none;">
+            <label>Electronic Signature</label>
+            <p class="signature-hint">Type your full name exactly as entered above to confirm</p>
+            <input type="text" id="signatureInput" class="signature-input" placeholder="Type your name here" autocomplete="off">
+            <p id="signatureMatch" class="signature-match"></p>
+          </div>
+        </div>
+
+        <button id="submitBtn" class="btn-submit" disabled>Sign Waiver</button>
+      </div>
+
+      <!-- Success state -->
+      <div id="successState" class="success-state">
+        <div class="success-icon">&#9989;</div>
+        <h2>Waiver Signed</h2>
+        <p>Thank you! Your waiver has been recorded.</p>
+
+        <div class="success-details">
+          <div class="detail-row">
+            <span class="detail-label">Name</span>
+            <span class="detail-value" id="successName"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Signed</span>
+            <span class="detail-value" id="successDate"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Confirmation</span>
+            <span class="detail-value" id="successRef"></span>
+          </div>
+        </div>
+
+        <p style="color: #999; font-size: 0.8rem;">You may now close this page.</p>
+      </div>
+    </div>
+
+    <p class="questions-contact">Questions? Email <a href="mailto:pai@YOUR_DOMAIN">pai@YOUR_DOMAIN</a> or call <a href="tel:+17377474737">(737) 747-4737</a></p>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    // State
+    let waiverTemplate = null;
+    let isSubmitting = false;
+
+    // UI elements
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    const formState = document.getElementById('formState');
+    const successState = document.getElementById('successState');
+    const waiverContent = document.getElementById('waiverContent');
+    const scrollHint = document.getElementById('scrollHint');
+    const nameInput = document.getElementById('nameInput');
+    const emailInput = document.getElementById('emailInput');
+    const phoneInput = document.getElementById('phoneInput');
+    const agreeCheckbox = document.getElementById('agreeCheckbox');
+    const signatureSection = document.getElementById('signatureSection');
+    const signatureInput = document.getElementById('signatureInput');
+    const signatureMatch = document.getElementById('signatureMatch');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // =============================================
+    // Show/hide states
+    // =============================================
+    function showState(state) {
+      [loadingState, errorState, formState, successState].forEach(el => {
+        el.style.display = 'none';
+        el.classList.remove('visible');
+      });
+      state.style.display = 'block';
+      if (state.classList.contains('loading') || state.classList.contains('success-state') || state.classList.contains('error-state')) {
+        state.classList.add('visible');
+      }
+    }
+
+    function showError(title, message) {
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = message;
+      showState(errorState);
+    }
+
+    // =============================================
+    // Markdown to HTML (lightweight, handles waiver subset)
+    // =============================================
+    function renderMarkdown(md) {
+      // Split into lines for processing
+      const lines = md.split('\n');
+      let html = '';
+      let inList = false;
+
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+
+        // Horizontal rule
+        if (/^---+$/.test(line.trim())) {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += '<hr>';
+          continue;
+        }
+
+        // Headers
+        if (line.startsWith('## ')) {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += `<h2>${formatInline(line.slice(3))}</h2>`;
+          continue;
+        }
+        if (line.startsWith('# ')) {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += `<h1>${formatInline(line.slice(2))}</h1>`;
+          continue;
+        }
+
+        // List items
+        if (line.startsWith('- ')) {
+          if (!inList) { html += '<ul>'; inList = true; }
+          html += `<li>${formatInline(line.slice(2))}</li>`;
+          continue;
+        }
+
+        // Close list if we hit a non-list line
+        if (inList && line.trim() !== '') {
+          html += '</ul>';
+          inList = false;
+        }
+
+        // Empty line = paragraph break (skip)
+        if (line.trim() === '') continue;
+
+        // Regular paragraph
+        html += `<p>${formatInline(line)}</p>`;
+      }
+
+      if (inList) html += '</ul>';
+      return html;
+    }
+
+    function formatInline(text) {
+      // Bold
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      return text;
+    }
+
+    // =============================================
+    // Placeholder substitution
+    // =============================================
+    function substitutePlaceholders(content) {
+      const name = nameInput.value.trim() || '________________';
+      const email = emailInput.value.trim() || '________________';
+
+      // Parse URL params for event date
+      const params = new URLSearchParams(window.location.search);
+      const eventDateParam = params.get('event_date');
+      let eventDate = 'N/A';
+      if (eventDateParam) {
+        try {
+          const d = new Date(eventDateParam + 'T12:00:00');
+          eventDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        } catch (e) { eventDate = eventDateParam; }
+      }
+
+      const now = new Date();
+      const signingDate = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      return content
+        .replace(/\{\{client_name\}\}/g, name)
+        .replace(/\{\{client_email\}\}/g, email)
+        .replace(/\{\{event_date\}\}/g, eventDate)
+        .replace(/\{\{signing_date\}\}/g, signingDate);
+    }
+
+    function updateWaiverDisplay() {
+      if (!waiverTemplate) return;
+      const substituted = substitutePlaceholders(waiverTemplate.content);
+      waiverContent.innerHTML = renderMarkdown(substituted);
+    }
+
+    // =============================================
+    // Validation
+    // =============================================
+    function validateForm() {
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const agreed = agreeCheckbox.checked;
+      const sig = signatureInput.value.trim();
+      const nameMatch = sig.toLowerCase() === name.toLowerCase() && name.length > 0;
+
+      submitBtn.disabled = !(name && email && agreed && nameMatch && !isSubmitting);
+
+      // Signature match feedback
+      if (sig.length > 0 && name.length > 0) {
+        if (nameMatch) {
+          signatureMatch.textContent = 'Signature matches';
+          signatureMatch.className = 'signature-match success';
+          signatureInput.classList.add('matched');
+        } else {
+          signatureMatch.textContent = 'Must match the name above exactly';
+          signatureMatch.className = 'signature-match error';
+          signatureInput.classList.remove('matched');
+        }
+      } else {
+        signatureMatch.textContent = '';
+        signatureMatch.className = 'signature-match';
+        signatureInput.classList.remove('matched');
+      }
+    }
+
+    // =============================================
+    // Event listeners
+    // =============================================
+    nameInput.addEventListener('input', () => {
+      updateWaiverDisplay();
+      validateForm();
+    });
+    emailInput.addEventListener('input', () => {
+      updateWaiverDisplay();
+      validateForm();
+    });
+
+    agreeCheckbox.addEventListener('change', () => {
+      signatureSection.style.display = agreeCheckbox.checked ? 'block' : 'none';
+      if (!agreeCheckbox.checked) {
+        signatureInput.value = '';
+        signatureInput.classList.remove('matched');
+        signatureMatch.textContent = '';
+      }
+      validateForm();
+    });
+
+    signatureInput.addEventListener('input', validateForm);
+
+    // Hide scroll hint once user scrolls the waiver
+    waiverContent.addEventListener('scroll', () => {
+      if (waiverContent.scrollTop > 20) {
+        scrollHint.style.display = 'none';
+      }
+    });
+
+    // =============================================
+    // Submit
+    // =============================================
+    submitBtn.addEventListener('click', async () => {
+      if (isSubmitting) return;
+      isSubmitting = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing...';
+      errorMsg.classList.remove('visible');
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const phone = phoneInput.value.trim();
+
+      const params = new URLSearchParams(window.location.search);
+      const eventRequestId = params.get('event') || null;
+
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/waiver_signatures`,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation',
+            },
+            body: JSON.stringify({
+              waiver_type: 'event_waiver',
+              template_version: waiverTemplate.version,
+              signer_name: name,
+              signer_email: email,
+              signer_phone: phone || null,
+              event_request_id: eventRequestId,
+              signed_at: new Date().toISOString(),
+              user_agent: navigator.userAgent,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.message || `Server error (${response.status})`);
+        }
+
+        const [record] = await response.json();
+
+        const ref = record?.id?.slice(0, 8)?.toUpperCase() || 'CONFIRMED';
+
+        // Prevent duplicate on refresh
+        sessionStorage.setItem('waiver_signed', JSON.stringify({
+          name,
+          signedAt: new Date().toISOString(),
+          ref,
+        }));
+
+        showSuccess(name, new Date(), record?.id);
+
+        // Fire-and-forget confirmation email
+        if (email) {
+          fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({
+              type: 'waiver_confirmation',
+              to: email,
+              data: {
+                signer_name: name,
+                signing_date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                confirmation_ref: ref,
+              },
+            }),
+          }).catch(() => { /* ignore email errors */ });
+        }
+
+      } catch (err) {
+        console.error('Waiver submit error:', err);
+        errorMsg.textContent = 'Something went wrong. Please try again.';
+        errorMsg.classList.add('visible');
+        isSubmitting = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign Waiver';
+      }
+    });
+
+    function showSuccess(name, date, recordId) {
+      document.getElementById('successName').textContent = name;
+      document.getElementById('successDate').textContent = date.toLocaleString('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric',
+        hour: 'numeric', minute: '2-digit',
+      });
+      document.getElementById('successRef').textContent = recordId
+        ? recordId.slice(0, 8).toUpperCase()
+        : 'CONFIRMED';
+      showState(successState);
+    }
+
+    // =============================================
+    // Initialize
+    // =============================================
+    async function init() {
+      // Check for previous signing in this session
+      const previousSign = sessionStorage.getItem('waiver_signed');
+      if (previousSign) {
+        try {
+          const data = JSON.parse(previousSign);
+          document.getElementById('successName').textContent = data.name;
+          document.getElementById('successDate').textContent = new Date(data.signedAt).toLocaleString('en-US', {
+            month: 'long', day: 'numeric', year: 'numeric',
+            hour: 'numeric', minute: '2-digit',
+          });
+          document.getElementById('successRef').textContent = data.ref || 'CONFIRMED';
+          showState(successState);
+          return;
+        } catch (e) { /* ignore parse errors, proceed normally */ }
+      }
+
+      // Pre-fill from URL params
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('name')) nameInput.value = params.get('name');
+      if (params.get('email')) emailInput.value = params.get('email');
+
+      // Fetch active event waiver template
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/lease_templates?type=eq.event_waiver&is_active=eq.true&order=version.desc&limit=1`,
+          {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+          }
+        );
+
+        if (!response.ok) throw new Error('Failed to load waiver template');
+
+        const templates = await response.json();
+        if (!templates || templates.length === 0) {
+          showError('Waiver Not Available', 'No active waiver template found. Please contact us.');
+          return;
+        }
+
+        waiverTemplate = templates[0];
+        updateWaiverDisplay();
+
+        // Check if waiver content overflows (show/hide scroll hint)
+        requestAnimationFrame(() => {
+          if (waiverContent.scrollHeight <= waiverContent.clientHeight) {
+            scrollHint.style.display = 'none';
+          }
+        });
+
+        showState(formState);
+
+      } catch (err) {
+        console.error('Init error:', err);
+        showError('Unable to Load Waiver', 'Please try again later or contact us for assistance.');
+      }
+    }
+
+    init();
+  </script>
+  <script type="module" src="../shared/version-info.js"></script>
+  <script type="module">
+    import { initPublicPage } from '../shared/public-shell.js';
+    initPublicPage({ transparent: false, light: false, activePage: '/waiver/' });
+  </script>
+</body>
+</html>

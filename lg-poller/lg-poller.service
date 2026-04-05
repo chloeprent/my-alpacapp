@@ -1,0 +1,19 @@
+[Unit]
+Description=AlpacApps LG Appliance Data Poller
+After=network.target
+
+[Service]
+Type=simple
+User=bugfixer
+Environment=HOME=/home/bugfixer
+WorkingDirectory=/opt/lg-poller
+EnvironmentFile=/opt/lg-poller/.env
+ExecStart=/usr/bin/node /opt/lg-poller/worker.js
+Restart=always
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=lg-poller
+
+[Install]
+WantedBy=multi-user.target

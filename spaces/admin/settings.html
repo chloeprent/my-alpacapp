@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Settings - AlpacAPPs Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=5">
+  <link rel="stylesheet" href="rentals.css?v=5">
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main app content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs" id="tabNav"></div>
+
+    <!-- Main Content -->
+    <main class="manage-content settings-page">
+
+      <!-- ===== PAYMENTS GROUP ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <h2>Payments</h2>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Payment Methods</h3>
+              <p>Configure payment methods that tenants can use for rent and deposits.</p>
+            </div>
+            <button class="btn-small btn-primary" id="addPaymentMethodBtn">+ Add Method</button>
+          </div>
+          <div class="settings-card-body">
+            <div id="paymentMethodsList" class="payment-methods-grid"></div>
+          </div>
+        </div>
+
+        <!-- Fee Settings -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Default Fees <span class="settings-badge" id="squareModeBadge">Test Mode</span></h3>
+              <p>Default fee amounts for rental applications and event deposits. Processed via Square.</p>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <div class="fee-settings-grid" id="feeSettingsGrid">
+              <!-- Fee settings loaded by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Fee Codes -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Fee Codes</h3>
+              <p>Create codes that set a specific price when entered. Use $0 for a free waiver.</p>
+            </div>
+            <button class="btn-small btn-primary" id="addFeeCodeBtn">+ Add Code</button>
+          </div>
+          <div class="settings-card-body">
+            <div id="feeCodesGrid" class="fee-codes-grid">
+              <!-- Fee codes loaded by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Mistiq Codes -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Mistiq Codes</h3>
+              <p>Promo codes for Mistique Journey bookings. Codes give a % or $ discount off the session price.</p>
+            </div>
+            <button class="btn-small btn-primary" id="addMistiqCodeBtn">+ Add Code</button>
+          </div>
+          <div class="settings-card-body">
+            <div id="mistiqCodesGrid" class="fee-codes-grid">
+              <!-- Mistiq codes loaded by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Square Config -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Square Configuration</h3>
+              <p>Toggle between sandbox and live payment processing.</p>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <label class="settings-toggle">
+              <input type="checkbox" id="squareTestMode">
+              <span class="settings-toggle-label">Test Mode</span>
+              <span class="settings-toggle-hint">Use sandbox credentials for testing</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- PayPal Config -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>PayPal Configuration <span class="settings-badge" id="paypalModeBadge">Test Mode</span></h3>
+              <p>PayPal Payouts API for sending payments to associates. <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener">Developer Dashboard</a></p>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <label class="settings-toggle">
+              <input type="checkbox" id="paypalTestMode">
+              <span class="settings-toggle-label">Test Mode</span>
+              <span class="settings-toggle-hint">Use sandbox credentials for testing</span>
+            </label>
+            <label class="settings-toggle" style="margin-top:0.5rem;">
+              <input type="checkbox" id="paypalIsActive">
+              <span class="settings-toggle-label">Active</span>
+              <span class="settings-toggle-hint">Enable PayPal payouts</span>
+            </label>
+            <div style="margin-top:1rem;">
+              <h4 style="font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);">Sandbox Credentials</h4>
+              <div class="form-row" style="margin-bottom:0.5rem;">
+                <label style="font-size:0.8rem;">Client ID</label>
+                <input type="text" id="paypalSandboxClientId" placeholder="Sandbox Client ID" style="font-size:0.85rem;">
+              </div>
+              <div class="form-row" style="margin-bottom:1rem;">
+                <label style="font-size:0.8rem;">Client Secret</label>
+                <input type="password" id="paypalSandboxClientSecret" placeholder="Sandbox Client Secret" style="font-size:0.85rem;">
+              </div>
+              <h4 style="font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);">Production Credentials</h4>
+              <div class="form-row" style="margin-bottom:0.5rem;">
+                <label style="font-size:0.8rem;">Client ID</label>
+                <input type="text" id="paypalClientId" placeholder="Production Client ID" style="font-size:0.85rem;">
+              </div>
+              <div class="form-row" style="margin-bottom:1rem;">
+                <label style="font-size:0.8rem;">Client Secret</label>
+                <input type="password" id="paypalClientSecret" placeholder="Production Client Secret" style="font-size:0.85rem;">
+              </div>
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn-small btn-primary" id="savePaypalConfig">Save PayPal Config</button>
+                <button class="btn-small" id="testPaypalConnection" style="background:var(--surface-alt,#f0f4ff);border:1px solid var(--border);color:var(--text);">Test Connection</button>
+              </div>
+              <p id="paypalTestResult" style="font-size:0.8rem;margin-top:0.5rem;color:var(--text-muted);"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stripe Config -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Stripe Configuration <span class="settings-badge" id="stripeModeBadge">Test Mode</span></h3>
+              <p>Stripe Connect ACH for low-fee associate payouts. <a href="https://dashboard.stripe.com" target="_blank" rel="noopener">Stripe Dashboard</a></p>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <label class="settings-toggle">
+              <input type="checkbox" id="stripeTestMode">
+              <span class="settings-toggle-label">Test Mode</span>
+              <span class="settings-toggle-hint">Use test credentials for testing</span>
+            </label>
+            <label class="settings-toggle" style="margin-top:0.5rem;">
+              <input type="checkbox" id="stripeIsActive">
+              <span class="settings-toggle-label">Active</span>
+              <span class="settings-toggle-hint">Enable Stripe payouts</span>
+            </label>
+            <label class="settings-toggle" style="margin-top:0.5rem;">
+              <input type="checkbox" id="stripeConnectEnabled">
+              <span class="settings-toggle-label">Connect Enabled</span>
+              <span class="settings-toggle-hint">Allow associates to onboard via Stripe Connect</span>
+            </label>
+            <div style="margin-top:1rem;">
+              <h4 style="font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);">Test Credentials</h4>
+              <div class="form-row" style="margin-bottom:0.5rem;">
+                <label style="font-size:0.8rem;">Publishable Key</label>
+                <input type="text" id="stripeSandboxPublishableKey" placeholder="pk_test_..." style="font-size:0.85rem;">
+              </div>
+              <div class="form-row" style="margin-bottom:1rem;">
+                <label style="font-size:0.8rem;">Secret Key</label>
+                <input type="password" id="stripeSandboxSecretKey" placeholder="sk_test_..." style="font-size:0.85rem;">
+              </div>
+              <h4 style="font-size:0.85rem;margin-bottom:0.5rem;color:var(--text-muted);">Production Credentials</h4>
+              <div class="form-row" style="margin-bottom:0.5rem;">
+                <label style="font-size:0.8rem;">Publishable Key</label>
+                <input type="text" id="stripePublishableKey" placeholder="pk_live_..." style="font-size:0.85rem;">
+              </div>
+              <div class="form-row" style="margin-bottom:1rem;">
+                <label style="font-size:0.8rem;">Secret Key</label>
+                <input type="password" id="stripeSecretKey" placeholder="sk_live_..." style="font-size:0.85rem;">
+              </div>
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn-small btn-primary" id="saveStripeConfig">Save Stripe Config</button>
+                <button class="btn-small" id="testStripeConnection" style="background:var(--surface-alt,#f0f4ff);border:1px solid var(--border);color:var(--text);">Test Connection</button>
+              </div>
+              <p id="stripeTestResult" style="font-size:0.8rem;margin-top:0.5rem;color:var(--text-muted);"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SMS GROUP ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <h2>SMS (Telnyx)</h2>
+          <span class="settings-badge" id="telnyxModeBadge">Loading...</span>
+        </div>
+
+        <!-- SMS Config -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Configuration</h3>
+              <p>Phone: <strong id="telnyxPhoneDisplay">Loading...</strong></p>
+            </div>
+            <div class="settings-card-actions">
+              <button class="btn-small btn-primary" id="openComposeSmsBtn">Compose SMS</button>
+              <button class="btn-small" id="openBulkSmsBtn">Send to All Tenants</button>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <label class="settings-toggle">
+              <input type="checkbox" id="telnyxTestMode">
+              <span class="settings-toggle-label">Test Mode</span>
+              <span class="settings-toggle-hint">Log messages in database without actually sending via Telnyx</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Inbound SMS -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Inbound Messages</h3>
+              <p>Recent inbound SMS from tenants. Click a message to reply.</p>
+            </div>
+            <div class="settings-card-actions">
+              <a href="sms-messages.html" class="btn-small">View All Messages</a>
+              <button class="btn-small" id="refreshInboundSmsBtn">Refresh</button>
+            </div>
+          </div>
+          <div class="settings-card-body settings-card-body--flush">
+            <div id="inboundSmsList" class="inbound-sms-list">
+              <p class="text-muted" style="padding: 1rem;">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== EMAIL FORWARDING GROUP ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <h2>Email Forwarding</h2>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Forwarding Rules</h3>
+              <p>Configure where inbound emails to <strong>@YOUR_DOMAIN</strong> get forwarded.</p>
+            </div>
+            <button class="btn-small btn-primary" id="addForwardingRuleBtn">+ Add Rule</button>
+          </div>
+          <div class="settings-card-body">
+            <div id="forwardingRulesList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== APP DEV GROUP ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <h2>App Dev</h2>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Feature Builder Notifications</h3>
+              <p>Where review notification emails are sent when a feature build needs approval.</p>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <label class="settings-label">Review Notification Email</label>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <input type="email" id="appdevReviewEmail" class="settings-input" placeholder="automation@YOUR_DOMAIN" style="flex:1">
+              <button class="btn-small btn-primary" id="saveAppdevConfigBtn">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== DISPLAYS & KIOSKS GROUP ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <h2>Displays & Kiosks</h2>
+        </div>
+
+        <!-- Display List -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Configured Displays</h3>
+              <p>Manage tablet kiosks and TV displays. Each display gets a unique URL.</p>
+            </div>
+            <button class="btn-small btn-primary" id="addDisplayBtn">+ Add Display</button>
+          </div>
+          <div class="settings-card-body">
+            <div id="displaysList"></div>
+          </div>
+        </div>
+
+        <!-- Today's Fact -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Property Fact of the Day</h3>
+              <p>AI-generated daily fact displayed on the kiosk.</p>
+            </div>
+            <button class="btn-small" id="regenerateFactBtn">Regenerate</button>
+          </div>
+          <div class="settings-card-body">
+            <p id="todayFact" class="text-muted" style="font-style: italic;">Loading...</p>
+          </div>
+        </div>
+
+        <!-- Kiosk Links -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Quick Links</h3>
+              <p>Open these URLs on your display devices.</p>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.85rem;">
+              <div><strong>Tablet Kiosk:</strong> <a href="/kioskhall/" target="_blank">/kioskhall/</a></div>
+              <div id="tvDisplayLinks"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Display Modal -->
+  <div id="displayModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="displayModalTitle">Add Display</h2>
+        <button class="modal-close" id="closeDisplayModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="displayForm" onsubmit="return false;">
+          <input type="hidden" id="displayId">
+          <div class="form-group">
+            <label for="displayName">Name</label>
+            <input type="text" id="displayName" placeholder="e.g., Living Room TCL" required>
+          </div>
+          <div class="form-group">
+            <label for="displayType">Type</label>
+            <select id="displayType">
+              <option value="tv">TV</option>
+              <option value="tablet">Tablet</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="displayMode">Mode</label>
+            <select id="displayMode">
+              <option value="dashboard">Dashboard</option>
+              <option value="cameras">Cameras</option>
+              <option value="signage">Signage</option>
+              <option value="slideshow">Slideshow</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="displayConfig">Configuration (JSON)</label>
+            <textarea id="displayConfig" rows="6" placeholder='{"show_weather": true}' style="font-family: monospace; font-size: 0.8rem;"></textarea>
+            <p class="form-hint" id="displayConfigHint">Dashboard: show_weather, show_events, show_fact, show_occupants. Cameras: cameras[], quality, layout. Signage: message, subtitle. Slideshow: media_tag, slideshow_interval_ms.</p>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="displayActive" checked>
+              Active
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="deleteDisplayBtn" style="margin-right: auto; display: none;">Delete</button>
+        <button class="btn-secondary" id="cancelDisplayBtn">Cancel</button>
+        <button class="btn-primary" id="saveDisplayBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forwarding Rule Modal -->
+  <div id="forwardingRuleModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2 id="forwardingRuleModalTitle">Add Forwarding Rule</h2>
+        <button class="modal-close" id="closeForwardingRuleModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="forwardingRuleForm" onsubmit="return false;">
+          <input type="hidden" id="forwardingRuleId">
+          <div class="form-group">
+            <label for="forwardingPrefix">Address Prefix</label>
+            <div style="display: flex; align-items: center; gap: 0.25rem;">
+              <input type="text" id="forwardingPrefix" placeholder="e.g., team" required style="flex: 1;">
+              <span class="text-muted" style="white-space: nowrap;">@YOUR_DOMAIN</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="forwardingTo">Forward To</label>
+            <input type="email" id="forwardingTo" placeholder="e.g., someone@gmail.com" required>
+          </div>
+          <div class="form-group">
+            <label for="forwardingLabel">Label (optional)</label>
+            <input type="text" id="forwardingLabel" placeholder="e.g., Main inbox">
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="forwardingActive" checked>
+              Active
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="deleteForwardingRuleBtn" style="margin-right: auto; display: none;">Delete</button>
+        <button class="btn-secondary" id="cancelForwardingRuleBtn">Cancel</button>
+        <button class="btn-primary" id="saveForwardingRuleBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fee Code Modal -->
+  <div id="feeCodeModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="feeCodeModalTitle">Add Fee Code</h2>
+        <button class="modal-close" id="closeFeeCodeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="feeCodeForm" onsubmit="return false;">
+          <input type="hidden" id="feeCodeId">
+          <div class="form-group">
+            <label for="feeCodeCode">Code</label>
+            <input type="text" id="feeCodeCode" placeholder="e.g., FRIEND50" required style="text-transform: uppercase;">
+          </div>
+          <div class="form-group">
+            <label for="feeCodeType">Fee Type</label>
+            <select id="feeCodeType" required>
+              <option value="rental_application">Rental Application Fee</option>
+              <option value="event_rental_fee">Event Rental Fee</option>
+              <option value="event_cleaning_deposit">Event Cleaning Deposit</option>
+              <option value="event_reservation_deposit">Event Reservation Deposit</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="feeCodePrice">Price ($)</label>
+            <input type="number" id="feeCodePrice" min="0" step="0.01" value="0" required>
+            <p class="form-hint">Set to 0 for a free waiver</p>
+          </div>
+          <div class="form-group">
+            <label for="feeCodeDescription">Description (optional)</label>
+            <input type="text" id="feeCodeDescription" placeholder="e.g., Friends and family discount">
+          </div>
+          <div class="form-group">
+            <label for="feeCodeUsageLimit">Usage Limit (optional)</label>
+            <input type="number" id="feeCodeUsageLimit" min="1" placeholder="Unlimited">
+          </div>
+          <div class="form-group">
+            <label for="feeCodeExpires">Expires (optional)</label>
+            <input type="date" id="feeCodeExpires">
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="feeCodeActive" checked>
+              Active
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelFeeCodeBtn">Cancel</button>
+        <button class="btn-primary" id="saveFeeCodeBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mistiq Code Modal -->
+  <div id="mistiqCodeModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="mistiqCodeModalTitle">Add Mistiq Code</h2>
+        <button class="modal-close" id="closeMistiqCodeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="mistiqCodeForm" onsubmit="return false;">
+          <input type="hidden" id="mistiqCodeId">
+          <div class="form-group">
+            <label for="mistiqCodeCode">Code</label>
+            <input type="text" id="mistiqCodeCode" placeholder="e.g., BREATHE20" required style="text-transform: uppercase;">
+          </div>
+          <div class="form-group">
+            <label for="mistiqDiscountType">Discount Type</label>
+            <select id="mistiqDiscountType" required>
+              <option value="percent">Percentage (%)</option>
+              <option value="dollar">Dollar ($)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="mistiqDiscountValue">Discount Value</label>
+            <input type="number" id="mistiqDiscountValue" min="0.01" step="0.01" required>
+            <p class="form-hint" id="mistiqDiscountHint">e.g., 20 for 20% off</p>
+          </div>
+          <div class="form-group">
+            <label for="mistiqCodeDescription">Description (optional)</label>
+            <input type="text" id="mistiqCodeDescription" placeholder="e.g., Business card promo">
+          </div>
+          <div class="form-group">
+            <label for="mistiqCodeUsageLimit">Usage Limit (optional)</label>
+            <input type="number" id="mistiqCodeUsageLimit" min="1" placeholder="Unlimited">
+          </div>
+          <div class="form-group">
+            <label for="mistiqCodeExpires">Expires (optional)</label>
+            <input type="date" id="mistiqCodeExpires">
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="mistiqCodeActive" checked>
+              Active
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelMistiqCodeBtn">Cancel</button>
+        <button class="btn-primary" id="saveMistiqCodeBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Method Modal -->
+  <div id="paymentMethodModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2 id="paymentMethodModalTitle">Add Payment Method</h2>
+        <button class="modal-close" id="closePaymentMethodModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentMethodForm" onsubmit="return false;">
+          <input type="hidden" id="paymentMethodId">
+          <div class="form-group">
+            <label for="paymentMethodName">Name</label>
+            <input type="text" id="paymentMethodName" placeholder="e.g., Zelle" required>
+          </div>
+          <div class="form-group">
+            <label for="paymentMethodInstructions">Payment Instructions</label>
+            <textarea id="paymentMethodInstructions" rows="4" placeholder="e.g., Send to payments@example.com"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="paymentMethodActive" checked>
+              Active (visible to tenants)
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="deletePaymentMethodBtn" style="margin-right: auto; display: none;">Delete</button>
+        <button class="btn-secondary" id="cancelPaymentMethodBtn">Cancel</button>
+        <button class="btn-primary" id="savePaymentMethodBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compose SMS Modal -->
+  <div id="composeSmsModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="composeSmsTitle">Send SMS</h2>
+        <button class="modal-close" id="closeComposeSmsModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="smsRecipientSelect">Recipient</label>
+          <select id="smsRecipientSelect">
+            <option value="">Select a tenant...</option>
+          </select>
+        </div>
+
+        <div id="smsConversationSection" class="hidden" style="margin-bottom: 1rem;">
+          <label style="font-size: 0.75rem; color: var(--text-muted);">Conversation History</label>
+          <div id="smsConversationThread" style="max-height: 200px; overflow-y: auto; background: #fafafa; border-radius: 8px; padding: 0.5rem; margin-top: 0.25rem;"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="smsComposeBody">Message</label>
+          <textarea id="smsComposeBody" rows="4" placeholder="Type your message..."></textarea>
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+            <span><span id="smsCharCount">0</span> characters</span>
+            <span><span id="smsSegmentCount">0</span> segment(s)</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelComposeSmsBtn">Cancel</button>
+        <button class="btn-primary" id="sendSmsBtn">Send SMS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk SMS Modal -->
+  <div id="bulkSmsModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Send SMS to All Tenants</h2>
+        <button class="modal-close" id="closeBulkSmsModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted" style="margin-bottom: 1rem;">
+          This will send an SMS to <strong><span id="bulkSmsRecipientCount">0</span></strong> active tenants with valid phone numbers.
+        </p>
+
+        <div class="form-group">
+          <label>Recipients</label>
+          <div id="bulkSmsRecipientList" style="max-height: 150px; overflow-y: auto; background: #fafafa; border-radius: 8px; padding: 0.5rem; font-size: 0.85rem;"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="bulkSmsBody">Message</label>
+          <textarea id="bulkSmsBody" rows="4" placeholder="Type your message..."></textarea>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+            <span id="bulkSmsCharCount">0</span> characters
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelBulkSmsBtn">Cancel</button>
+        <button class="btn-primary" id="sendBulkSmsBtn">Send to All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="settings.js"></script>
+</body>
+</html>

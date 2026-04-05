@@ -1,0 +1,165 @@
+.releases-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.releases-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.releases-toolbar h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.releases-toolbar p {
+  margin: 0.3rem 0 0;
+  color: var(--text-muted);
+}
+
+.releases-toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.release-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.release-summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem;
+}
+
+.release-summary-card h2 {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.release-summary-value {
+  margin: 0.45rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.release-summary-sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.release-history-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.release-history-header {
+  padding: 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.release-history-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.release-history-header p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.release-history-table {
+  width: 100%;
+}
+
+.release-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.release-table th,
+.release-table td {
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 0.87rem;
+}
+
+.release-table th {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.release-table tbody tr:hover {
+  background: var(--bg);
+}
+
+.release-pill {
+  display: inline-block;
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 0.1rem 0.45rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.release-meta {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin-top: 0.15rem;
+}
+
+.release-commits {
+  margin-top: 0.45rem;
+  border-left: 2px solid var(--border);
+  padding-left: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.release-commit-item {
+  font-size: 0.82rem;
+}
+
+.release-commit-hash {
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.75rem;
+  margin-right: 0.35rem;
+}
+
+.release-empty {
+  padding: 1rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  .release-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .release-table th:nth-child(4),
+  .release-table td:nth-child(4) {
+    display: none;
+  }
+}

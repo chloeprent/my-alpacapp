@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Step 1: Capture -->
+  <div id="step-capture" class="step">
+    <h2>YOUR_APP_NAME Bug Reporter</h2>
+    <button id="btn-capture" class="btn-primary">Capture Screenshot</button>
+    <p class="hint">Takes a screenshot of the current tab</p>
+  </div>
+
+  <!-- Step 2: Annotate -->
+  <div id="step-annotate" class="step hidden">
+    <div class="toolbar">
+      <button class="tool active" data-tool="draw" title="Draw">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M12.1 1.9a2 2 0 0 1 2.8 2.8L5.7 14H2v-3.7z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="tool" data-tool="arrow" title="Arrow">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 14L14 2M14 2H6M14 2v8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="tool" data-tool="text" title="Text">
+        <svg width="16" height="16" viewBox="0 0 16 16"><text x="3" y="13" font-size="14" font-weight="bold" fill="currentColor">T</text></svg>
+      </button>
+      <button class="tool" data-tool="rect" title="Rectangle">
+        <svg width="16" height="16" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <div class="separator"></div>
+      <input type="color" id="annotation-color" value="#ff0000" title="Color">
+      <button class="tool" id="btn-undo" title="Undo">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6h6a3 3 0 0 1 0 6H7M4 6l3-3M4 6l3 3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+      <button class="tool" id="btn-clear" title="Clear annotations">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+    </div>
+    <div id="canvas-container">
+      <canvas id="annotation-canvas"></canvas>
+    </div>
+    <button id="btn-next" class="btn-primary">Next: Describe Bug</button>
+  </div>
+
+  <!-- Step 3: Describe & Submit -->
+  <div id="step-submit" class="step hidden">
+    <div class="preview-row">
+      <img id="preview-img" alt="Annotated screenshot">
+      <button id="btn-back-annotate" class="btn-small">Edit</button>
+    </div>
+
+    <label for="input-name">Your Name</label>
+    <input type="text" id="input-name" placeholder="e.g. Sarah">
+
+    <label for="input-email">Your Email</label>
+    <input type="email" id="input-email" placeholder="e.g. sarah@example.com">
+
+    <label for="input-description">What's the bug?</label>
+    <textarea id="input-description" rows="4" placeholder="Describe what's wrong and what you expected to happen..."></textarea>
+
+    <button id="btn-submit" class="btn-primary">Submit Bug Report</button>
+    <div id="submit-status" class="hidden"></div>
+  </div>
+
+  <!-- Step 4: Done -->
+  <div id="step-done" class="step hidden">
+    <div class="done-icon">&#10003;</div>
+    <h2>Bug Report Submitted!</h2>
+    <p>We'll fix it and email you at <strong id="done-email"></strong> when it's resolved.</p>
+    <button id="btn-another" class="btn-primary">Report Another Bug</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

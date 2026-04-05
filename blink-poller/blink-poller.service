@@ -1,0 +1,26 @@
+[Unit]
+Description=Blink Camera Snapshot Poller
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bugfixer
+Group=bugfixer
+WorkingDirectory=/opt/blink-poller
+ExecStart=/usr/bin/node /opt/blink-poller/worker.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=blink-poller
+
+EnvironmentFile=/opt/blink-poller/.env
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/blink-poller
+
+[Install]
+WantedBy=multi-user.target

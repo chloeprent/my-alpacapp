@@ -1,0 +1,14 @@
+{
+  "name": "blink-poller",
+  "version": "1.0.0",
+  "description": "Blink camera snapshot poller — fetches thumbnails from Blink cloud and uploads to Supabase Storage",
+  "type": "module",
+  "main": "worker.js",
+  "scripts": {
+    "start": "node worker.js",
+    "setup": "node worker.js --setup"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.3"
+  }
+}

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Concierge - AlpacAPPs Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=5">
+  <link rel="stylesheet" href="rentals.css?v=5">
+  <style>
+    /* Voice page specific styles */
+    .voice-stats-bar {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .voice-stat {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem 1.5rem;
+      flex: 1;
+      text-align: center;
+    }
+    .voice-stat-value {
+      display: block;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .voice-stat-label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Assistant cards */
+    .voice-assistant-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      transition: border-color 0.15s;
+    }
+    .voice-assistant-card:last-child { margin-bottom: 0; }
+    .voice-assistant-card.is-default { border-color: var(--accent); }
+    .voice-assistant-card.is-inactive { opacity: 0.5; }
+    .voice-assistant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .voice-assistant-name {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .voice-assistant-actions { display: flex; gap: 0.5rem; }
+    .voice-assistant-details {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .voice-assistant-prompt {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      white-space: pre-line;
+    }
+
+    /* Call history table */
+    .voice-calls-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    .voice-calls-table th {
+      text-align: left;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    .voice-call-row {
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .voice-call-row:hover { background: var(--bg); }
+    .voice-call-row td {
+      padding: 0.625rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .voice-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+    }
+    .voice-status--ended { background: #dcfce7; color: #166534; }
+    .voice-status--active { background: #dbeafe; color: #1e40af; }
+    .voice-status--other { background: #f3f4f6; color: #6b7280; }
+
+    /* Call detail */
+    .voice-call-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .voice-call-summary {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+    .voice-transcript {
+      max-height: 300px;
+      overflow-y: auto;
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+    }
+    .voice-transcript-msg {
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .voice-transcript-msg--ai strong { color: var(--accent); }
+    .voice-transcript-msg--user strong { color: var(--text); }
+
+    /* URL display */
+    .voice-url-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0.75rem;
+    }
+    .voice-url-display code {
+      flex: 1;
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+
+    .form-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .voice-stats-bar { flex-direction: column; gap: 0.75rem; }
+      .voice-stat { padding: 1rem; }
+      .voice-stat-value { font-size: 1.25rem; }
+      .voice-assistant-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .voice-assistant-details { flex-wrap: wrap; gap: 0.5rem; }
+      .voice-calls-table { font-size: 0.8rem; }
+      .voice-calls-table th, .voice-call-row td { padding: 0.5rem; }
+      .voice-call-detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main app content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs" id="tabNav"></div>
+
+    <!-- Main Content -->
+    <main class="manage-content settings-page">
+
+      <!-- ===== STATS BAR ===== -->
+      <div class="voice-stats-bar" id="statsBar">
+        <div class="voice-stat">
+          <span class="voice-stat-value" id="statTotalCalls">--</span>
+          <span class="voice-stat-label">Total Calls</span>
+        </div>
+        <div class="voice-stat">
+          <span class="voice-stat-value" id="statTotalMinutes">--</span>
+          <span class="voice-stat-label">Total Minutes</span>
+        </div>
+        <div class="voice-stat">
+          <span class="voice-stat-value" id="statTotalCost">--</span>
+          <span class="voice-stat-label">Total Cost</span>
+        </div>
+      </div>
+
+      <!-- ===== PAI CORE PROMPT ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <h2>PAI Core Prompt</h2>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Shared Prompt Sections</h3>
+              <p>These sections are shared across all PAI channels (chat, voice, email). Edits apply immediately.</p>
+            </div>
+            <button class="btn-small btn-primary" id="savePaiConfigBtn">Save All</button>
+          </div>
+          <div class="settings-card-body">
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="paiIdentity">Identity &amp; Personality</label>
+              <textarea id="paiIdentity" rows="6" placeholder="You are PAI..."></textarea>
+              <p class="form-hint">Who PAI is, its personality, and speaking style. Shared across chat and voice.</p>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="paiPropertyInfo">Property Info</label>
+              <textarea id="paiPropertyInfo" rows="6" placeholder="PROPERTY INFO:..."></textarea>
+              <p class="form-hint">Address, contact info, WiFi, portal URL, and other property details.</p>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="paiAmenities">Amenities &amp; Smart Home</label>
+              <textarea id="paiAmenities" rows="6" placeholder="AMENITIES & SMART HOME:..."></textarea>
+              <p class="form-hint">Property amenities and smart home features PAI can reference.</p>
+            </div>
+            <h4 style="margin: 1.5rem 0 0.75rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Channel-Specific Addendums</h4>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="paiChatAddendum">Chat Widget Addendum</label>
+              <textarea id="paiChatAddendum" rows="3" placeholder="Optional: extra instructions for chat only..."></textarea>
+              <p class="form-hint">Appended only when PAI responds via the chat widget. Leave empty if not needed.</p>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="paiEmailAddendum">Email Addendum</label>
+              <textarea id="paiEmailAddendum" rows="3" placeholder="Optional: extra instructions for email replies..."></textarea>
+              <p class="form-hint">Appended when PAI replies to emails at pai@YOUR_DOMAIN. Use for email-specific tone or formatting guidance.</p>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="paiDiscordAddendum">Discord Addendum</label>
+              <textarea id="paiDiscordAddendum" rows="3" placeholder="Optional: extra instructions for Discord replies..."></textarea>
+              <p class="form-hint">Appended when PAI responds on Discord. Use for Discord-specific formatting (e.g. markdown, emoji usage).</p>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="paiApiAddendum">API Addendum</label>
+              <textarea id="paiApiAddendum" rows="3" placeholder="Optional: extra instructions for API/tool responses..."></textarea>
+              <p class="form-hint">Appended when PAI is called via the internal API (e.g. AlpaClaw OpenClaw gateway, tools).</p>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="paiAI AdminAddendum">AlpaClaw Addendum</label>
+              <textarea id="paiAI AdminAddendum" rows="3" placeholder="Optional: extra instructions for AlpaClaw email replies..."></textarea>
+              <p class="form-hint">Appended when responding to emails at ai-admin@YOUR_DOMAIN. Use for AlpaClaw personality and tone.</p>
+            </div>
+            <p class="form-hint" style="margin-top: 0.5rem; font-style: italic;">Voice-specific instructions are set per assistant in the Voice Assistants section below.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ASSISTANTS GROUP ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          <h2>Voice Assistants</h2>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>AI Assistants</h3>
+              <p>Configure AI personas that handle inbound calls. The default assistant answers all calls.</p>
+            </div>
+            <button class="btn-small btn-primary" id="addAssistantBtn">+ New Assistant</button>
+          </div>
+          <div class="settings-card-body">
+            <div id="assistantsList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CALL HISTORY GROUP ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <h2>Call History</h2>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Recent Calls</h3>
+              <p>All inbound voice calls handled by the AI assistant.</p>
+            </div>
+            <button class="btn-small" id="refreshCallsBtn">Refresh</button>
+          </div>
+          <div class="settings-card-body settings-card-body--flush">
+            <div id="callsList">
+              <p class="text-muted" style="padding: 1rem;">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CONFIGURATION GROUP ===== -->
+      <div class="settings-group">
+        <div class="settings-group-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <h2>Configuration</h2>
+        </div>
+
+        <!-- Vapi Config -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Vapi Settings <span class="settings-badge" id="voiceModeBadge">Loading...</span></h3>
+              <p>API key and phone number configuration for Vapi voice AI.</p>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="vapiApiKey">Vapi API Key</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="password" id="vapiApiKey" placeholder="Enter Vapi API key..." style="flex: 1;">
+                <button class="btn-small" id="toggleApiKeyBtn">Show</button>
+                <button class="btn-small btn-primary" id="saveApiKeyBtn">Save</button>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="vapiPhoneNumberId">Vapi Phone Number ID</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="vapiPhoneNumberId" placeholder="Enter Vapi phone number ID..." style="flex: 1;">
+                <button class="btn-small btn-primary" id="savePhoneIdBtn">Save</button>
+              </div>
+              <p class="form-hint">The phone number ID from your Vapi dashboard (import your Telnyx number there).</p>
+            </div>
+
+            <label class="settings-toggle">
+              <input type="checkbox" id="voiceTestMode">
+              <span class="settings-toggle-label">Test Mode</span>
+              <span class="settings-toggle-hint">Adds a test notice to the AI prompt. Calls still work but the AI mentions it's a test.</span>
+            </label>
+
+            <label class="settings-toggle" style="margin-top: 0.5rem;">
+              <input type="checkbox" id="voiceActive">
+              <span class="settings-toggle-label">Voice System Active</span>
+              <span class="settings-toggle-hint">When disabled, inbound calls won't be answered by the AI.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Webhook URLs -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <h3>Webhook URLs</h3>
+              <p>Set these in your Vapi dashboard under your phone number settings.</p>
+            </div>
+          </div>
+          <div class="settings-card-body">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label>Server URL (Assistant Request)</label>
+              <div class="voice-url-display" id="serverUrlDisplay">
+                <code id="serverUrlValue">Loading...</code>
+                <button class="btn-small" onclick="navigator.clipboard.writeText(document.getElementById('serverUrlValue').textContent); document.getElementById('serverUrlCopied').style.display='inline'; setTimeout(() => document.getElementById('serverUrlCopied').style.display='none', 2000);">Copy</button>
+                <span id="serverUrlCopied" style="display: none; font-size: 0.75rem; color: var(--success);">Copied!</span>
+              </div>
+              <p class="form-hint">Vapi calls this to get the assistant configuration for each inbound call.</p>
+            </div>
+            <div class="form-group">
+              <label>Webhook URL (Call Events)</label>
+              <div class="voice-url-display">
+                <code id="webhookUrlValue">Loading...</code>
+                <button class="btn-small" onclick="navigator.clipboard.writeText(document.getElementById('webhookUrlValue').textContent); document.getElementById('webhookUrlCopied').style.display='inline'; setTimeout(() => document.getElementById('webhookUrlCopied').style.display='none', 2000);">Copy</button>
+                <span id="webhookUrlCopied" style="display: none; font-size: 0.75rem; color: var(--success);">Copied!</span>
+              </div>
+              <p class="form-hint">Receives call lifecycle events (started, ended, transcript).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Assistant Edit Modal -->
+  <div id="assistantModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <h2 id="assistantModalTitle">New Voice Assistant</h2>
+        <button class="modal-close" id="closeAssistantModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="assistantForm" onsubmit="return false;">
+          <input type="hidden" id="assistantId">
+
+          <div class="form-group">
+            <label for="assistantName">Name</label>
+            <input type="text" id="assistantName" placeholder="e.g., Property Inquiries" required>
+          </div>
+
+          <div class="form-group">
+            <label for="assistantFirstMessage">Greeting Message</label>
+            <input type="text" id="assistantFirstMessage" value="Hello! Thanks for calling. How can I help you today?" placeholder="What the AI says first...">
+            <p class="form-hint">If the caller is a known person, the AI will greet them by name instead.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="assistantPrompt">Voice-Specific Instructions</label>
+            <textarea id="assistantPrompt" rows="6" placeholder="Keep responses concise for phone conversation. Use natural number phrasing..." required></textarea>
+            <p class="form-hint">Addendum appended to the shared PAI core prompt for voice calls only. Use this for voice-specific behavior (e.g., brevity, phone etiquette). The core identity, property info, and device lists are shared with PAI chat.</p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="assistantModelProvider">Model Provider</label>
+              <select id="assistantModelProvider">
+                <option value="google">Google (Gemini)</option>
+                <option value="openai">OpenAI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="assistantModelName">Model</label>
+              <select id="assistantModelName">
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
+                <option value="gpt-4o-mini">GPT-4o Mini</option>
+                <option value="gpt-4o">GPT-4o</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="assistantVoiceProvider">Voice Provider</label>
+              <select id="assistantVoiceProvider">
+                <option value="11labs">ElevenLabs</option>
+                <option value="google">Google</option>
+                <option value="playht">PlayHT</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="assistantVoiceId">Voice ID</label>
+              <input type="text" id="assistantVoiceId" value="sarah" placeholder="e.g., sarah, rachel, drew">
+              <p class="form-hint">ElevenLabs: sarah, rachel, drew, clyde, etc.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label for="assistantTemperature">Temperature</label>
+              <input type="number" id="assistantTemperature" value="0.7" min="0" max="2" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="assistantMaxDuration">Max Duration (seconds)</label>
+              <input type="number" id="assistantMaxDuration" value="600" min="60" max="3600" step="60">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="assistantActive" checked>
+              Active
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="deleteAssistantBtn" style="margin-right: auto; display: none;">Delete</button>
+        <button class="btn-secondary" id="cancelAssistantBtn">Cancel</button>
+        <button class="btn-primary" id="saveAssistantBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call Detail Modal -->
+  <div id="callDetailModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>Call Details</h2>
+        <button class="modal-close" id="closeCallDetailModal">&times;</button>
+      </div>
+      <div class="modal-body" id="callDetailBody">
+        <!-- Populated by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="closeCallDetailBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="voice.js"></script>
+</body>
+</html>

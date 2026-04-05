@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Events - AlpacAPPs Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=1">
+  <link rel="stylesheet" href="events.css?v=1">
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Image Lightbox -->
+  <div id="imageLightbox" class="lightbox hidden">
+    <button class="lightbox-close">&times;</button>
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&#10094;</button>
+    <img id="lightboxImage" src="" alt="">
+    <button class="lightbox-nav lightbox-next" id="lightboxNext">&#10095;</button>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="manage-tabs">
+      <!-- Tab navigation rendered by admin-shell.js -->
+    </div>
+
+    <div class="manage-container">
+      <!-- Events Panel -->
+      <div class="manage-panel active">
+        <!-- Pipeline View -->
+        <div class="event-pipeline" id="eventPipeline">
+          <div class="pipeline-column" data-stage="requests">
+            <div class="pipeline-header">
+              <h3>Requests</h3>
+              <span class="pipeline-count" id="eventRequestsCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="eventRequestsCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="approved">
+            <div class="pipeline-header">
+              <h3>Approved</h3>
+              <span class="pipeline-count" id="eventApprovedCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="eventApprovedCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="contract">
+            <div class="pipeline-header">
+              <h3>Contract</h3>
+              <span class="pipeline-count" id="eventContractCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="eventContractCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="deposit">
+            <div class="pipeline-header">
+              <h3>Deposit</h3>
+              <span class="pipeline-count" id="eventDepositCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="eventDepositCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="ready">
+            <div class="pipeline-header">
+              <h3>Ready</h3>
+              <span class="pipeline-count" id="eventReadyCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="eventReadyCards"></div>
+          </div>
+        </div>
+
+        <!-- Denied Section (collapsible) -->
+        <details class="section" id="eventDeniedSection" style="margin-top: 1.5rem;">
+          <summary class="section-header" style="cursor: pointer;">
+            <h2>Denied</h2>
+            <span id="eventDeniedCount" class="text-muted">0</span>
+          </summary>
+          <div class="section-body">
+            <div id="eventDeniedList" class="spaces-list"></div>
+          </div>
+        </details>
+
+        <!-- Events Calendar Section -->
+        <div class="section" style="margin-top: 1.5rem;">
+          <div class="section-header">
+            <h2>Events Calendar</h2>
+            <div class="calendar-controls">
+              <button class="btn-small" id="eventCalendarPrevMonth">&larr;</button>
+              <span id="eventCalendarMonthLabel" class="calendar-month-label"></span>
+              <button class="btn-small" id="eventCalendarNextMonth">&rarr;</button>
+              <button class="btn-small" id="eventCalendarToday" style="margin-left: 0.5rem;">Today</button>
+            </div>
+          </div>
+          <div class="section-body">
+            <div id="eventsCalendar" class="events-calendar">
+              <div class="calendar-loading">Loading events...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create Event Request Section -->
+        <div class="section" style="margin-top: 1.5rem;">
+          <div class="section-header">
+            <h2>Create Event Request</h2>
+          </div>
+          <div class="section-body">
+            <form id="createEventRequestForm" class="add-space-form">
+              <div class="event-form-grid">
+                <div class="form-group">
+                  <label for="newEventPersonId">Client</label>
+                  <select id="newEventPersonId" required>
+                    <option value="">Select a person...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="newEventOrgName">Organization (optional)</label>
+                  <input type="text" id="newEventOrgName" placeholder="If hosting for an org...">
+                </div>
+                <div class="form-group">
+                  <label for="newEventName">Event Name</label>
+                  <input type="text" id="newEventName" required placeholder="e.g., Birthday Party">
+                </div>
+                <div class="form-group">
+                  <label for="newEventType">Event Type</label>
+                  <select id="newEventType">
+                    <option value="party">Party</option>
+                    <option value="workshop">Workshop</option>
+                    <option value="retreat">Retreat</option>
+                    <option value="ceremony">Ceremony</option>
+                    <option value="meeting">Meeting</option>
+                    <option value="photoshoot">Photoshoot</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="newEventDate">Event Date</label>
+                  <input type="date" id="newEventDate" required>
+                </div>
+                <div class="form-group">
+                  <label>Event Time</label>
+                  <div class="time-inputs">
+                    <input type="time" id="newEventStartTime" required>
+                    <span>to</span>
+                    <input type="time" id="newEventEndTime" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="newEventGuests">Expected Guests</label>
+                  <input type="number" id="newEventGuests" required min="1" max="100" value="25">
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="newEventHostedBefore">
+                    Has hosted at venue before
+                  </label>
+                </div>
+                <div class="form-group full-width">
+                  <label for="newEventDescription">Event Description</label>
+                  <textarea id="newEventDescription" rows="2" placeholder="Brief description of the event..."></textarea>
+                </div>
+              </div>
+              <button type="submit" class="btn-primary" style="margin-top: 1rem;">Create Event Request</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Signed Waivers Section -->
+        <details class="section" style="margin-top: 1.5rem;">
+          <summary class="section-header" style="cursor: pointer;">
+            <h2>Signed Waivers</h2>
+            <span id="waiverCount" class="text-muted">0</span>
+          </summary>
+          <div class="section-body">
+            <div class="flex items-center gap-2 mb-3 flex-wrap">
+              <input type="text" id="waiverSearch" placeholder="Search by name or email..." class="form-input" style="flex:1; min-width: 200px;">
+              <a href="https://YOUR_DOMAIN/waiver/" target="_blank" class="btn-small" title="Open guest waiver page" style="white-space: nowrap;">Waiver Page &#8599;</a>
+            </div>
+            <div id="waiverTableContainer" style="overflow-x: auto;">
+              <table class="data-table" id="waiverTable" style="width: 100%; font-size: 0.85rem;">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Signed</th>
+                  </tr>
+                </thead>
+                <tbody id="waiverTableBody">
+                  <tr><td colspan="4" style="text-align:center; color: #999; padding: 1.5rem;">Loading waivers...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Detail Modal -->
+  <div id="eventDetailModal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="eventDetailTitle">Event Details</h2>
+        <span id="eventDetailStatus" class="status-badge"></span>
+        <span id="eventDetailTestBadge" class="status-badge test" style="display: none; background: #f59e0b; color: white;">TEST</span>
+        <button class="modal-close" id="closeEventDetail">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Modal tabs -->
+        <div class="detail-tabs">
+          <button class="event-detail-tab active" data-event-tab="eventInfo">Event Info</button>
+          <button class="event-detail-tab" data-event-tab="eventTerms">Terms</button>
+          <button class="event-detail-tab" data-event-tab="eventDocuments">Documents</button>
+          <button class="event-detail-tab" data-event-tab="eventDeposits">Deposits</button>
+        </div>
+
+        <!-- Event Info Tab -->
+        <div id="eventInfoTab" class="event-detail-tab-content active">
+          <div class="applicant-info">
+            <div class="form-grid">
+              <div class="info-group">
+                <label>Event Name</label>
+                <p id="eventInfoName">-</p>
+              </div>
+              <div class="info-group">
+                <label>Client Name</label>
+                <p id="eventInfoClient">-</p>
+              </div>
+              <div class="info-group">
+                <label>Email</label>
+                <p id="eventInfoEmail">-</p>
+              </div>
+              <div class="info-group">
+                <label>Phone</label>
+                <p id="eventInfoPhone">-</p>
+              </div>
+              <div class="info-group">
+                <label>Organization</label>
+                <p id="eventInfoOrg">-</p>
+              </div>
+              <div class="info-group">
+                <label>Event Date</label>
+                <p id="eventInfoDate">-</p>
+              </div>
+              <div class="info-group">
+                <label>Time</label>
+                <p id="eventInfoTime">-</p>
+              </div>
+              <div class="info-group">
+                <label>Expected Guests</label>
+                <p id="eventInfoGuests">-</p>
+              </div>
+              <div class="info-group">
+                <label>Event Type</label>
+                <p id="eventInfoType">-</p>
+              </div>
+              <div class="info-group">
+                <label>Submitted</label>
+                <p id="eventInfoSubmitted">-</p>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+              <label>Description</label>
+              <p id="eventInfoDescription" class="text-muted">-</p>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+              <label>Special Requests</label>
+              <p id="eventInfoSpecialRequests" class="text-muted">-</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event Terms Tab -->
+        <div id="eventTermsTab" class="event-detail-tab-content">
+          <form id="eventTermsForm" class="terms-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="eventTermMaxGuests">Approved Max Guests <span class="required">*</span></label>
+                <input type="number" id="eventTermMaxGuests" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="eventTermRentalFee">Rental Fee ($) <span class="required">*</span></label>
+                <input type="number" id="eventTermRentalFee" min="0" step="1" value="295">
+              </div>
+              <div class="form-group">
+                <label for="eventTermReservationFee">Reservation Deposit ($)</label>
+                <input type="number" id="eventTermReservationFee" min="0" step="1" value="95">
+                <small class="form-hint">Credits toward rental fee</small>
+              </div>
+              <div class="form-group">
+                <label for="eventTermCleaningDeposit">Cleaning/Damage Deposit ($)</label>
+                <input type="number" id="eventTermCleaningDeposit" min="0" step="1" value="195">
+                <small class="form-hint">Refundable after event</small>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top: 1rem;">
+              <label for="eventTermAdditionalTerms">Additional Terms</label>
+              <textarea id="eventTermAdditionalTerms" rows="4" placeholder="Any additional terms or conditions..."></textarea>
+            </div>
+            <div class="terms-save-row" style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem;">
+              <button type="button" id="saveEventTermsBtn" class="btn-small btn-primary">Save Terms</button>
+              <span id="eventTermsSaveStatus" class="save-status"></span>
+            </div>
+          </form>
+        </div>
+
+        <!-- Event Documents Tab -->
+        <div id="eventDocumentsTab" class="event-detail-tab-content">
+          <div class="documents-section">
+            <!-- Agreement Status -->
+            <div class="document-status">
+              <h4>Event Agreement Status</h4>
+              <p id="eventAgreementStatusDisplay" class="status-badge">Pending</p>
+            </div>
+
+            <!-- Generate Section -->
+            <div id="eventGenerateSection" class="generate-section">
+              <h4>Generate Event Agreement</h4>
+              <p class="text-muted" style="margin-bottom: 1rem;">Preview the event agreement and generate a PDF for signing.</p>
+              <div id="eventLeasePreviewContainer" class="lease-preview-container">
+                <div id="eventLeasePreview" class="lease-preview"></div>
+              </div>
+              <div class="generate-actions" style="margin-top: 1rem;">
+                <button type="button" id="previewEventLeaseBtn" class="btn-small">Preview Agreement</button>
+                <button type="button" id="generateEventPdfBtn" class="btn-small btn-primary">Generate PDF</button>
+              </div>
+              <p id="noEventTemplateWarning" class="warning-text" style="display: none; margin-top: 0.5rem;">
+                No active event template found. Create one in Templates settings.
+              </p>
+            </div>
+
+            <!-- Generated PDF Section -->
+            <div id="eventPdfSection" class="pdf-section" style="display: none;">
+              <h4>Current Document</h4>
+              <div class="pdf-info">
+                <a id="eventPdfDownloadLink" href="#" target="_blank" class="pdf-link">
+                  <span class="pdf-icon">📄</span>
+                  <span id="eventPdfFilename">event-agreement.pdf</span>
+                </a>
+                <span id="eventPdfGeneratedAt" class="text-muted"></span>
+              </div>
+              <div class="pdf-actions" style="margin-top: 1rem;">
+                <button type="button" id="sendEventForSignatureBtn" class="btn-small btn-primary">Send for Signature</button>
+              </div>
+            </div>
+
+            <!-- Signature Section -->
+            <div id="eventSignatureSection" class="signature-section" style="display: none;">
+              <h4>Signature Status</h4>
+              <p id="eventSignatureStatusText">Awaiting signature...</p>
+              <div id="eventSignedPdfSection" style="display: none; margin-top: 1rem;">
+                <a id="eventSignedPdfLink" href="#" target="_blank" class="pdf-link">
+                  <span class="pdf-icon">✅</span>
+                  <span id="eventSignedPdfFilename">Download Signed Agreement</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Event Deposits Tab -->
+        <div id="eventDepositsTab" class="event-detail-tab-content">
+          <!-- Reservation Deposit Credit (if paid via Square) -->
+          <div id="eventReservationFeeSection" class="application-fee-section hidden" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--success-light); border-radius: var(--radius); border-left: 4px solid var(--success);">
+            <h4 style="margin: 0 0 0.5rem 0; color: var(--success);">Reservation Deposit Received</h4>
+            <p style="margin: 0; font-size: 0.9rem;">
+              <strong id="eventReservationFeeAmount">$0</strong> reservation deposit paid
+              <span id="eventReservationFeeCode" class="hidden"> (code: <code id="eventReservationFeeCodeValue"></code>)</span>
+            </p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: var(--text-muted);">
+              This will be credited toward the rental fee of <strong id="eventRentalFeeTotal">$295</strong>.
+              Remaining rental fee due: <strong id="eventRentalFeeDue">$0</strong>
+            </p>
+          </div>
+
+          <div class="deposits-grid">
+            <div class="deposit-card">
+              <h4>Reservation Deposit</h4>
+              <p class="deposit-amount" id="eventReservationDepositAmount">$95</p>
+              <p class="deposit-status" id="eventReservationDepositStatus">Pending</p>
+              <button type="button" id="recordEventReservationBtn" class="btn-small btn-primary">Record Payment</button>
+            </div>
+            <div class="deposit-card">
+              <h4>Cleaning Deposit</h4>
+              <p class="deposit-amount" id="eventCleaningDepositAmount">$195</p>
+              <p class="deposit-status" id="eventCleaningDepositStatus">Pending</p>
+              <button type="button" id="recordEventCleaningBtn" class="btn-small btn-primary">Record Payment</button>
+            </div>
+            <div class="deposit-card">
+              <h4>Rental Fee</h4>
+              <p class="deposit-amount" id="eventRentalFeeAmount">$295</p>
+              <p class="deposit-status" id="eventRentalFeeStatus">Pending</p>
+              <button type="button" id="recordEventRentalFeeBtn" class="btn-small btn-primary">Record Payment</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div id="eventDetailActions" class="modal-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record Deposit Modal -->
+  <div id="recordDepositModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="recordDepositTitle">Record Deposit</h2>
+        <button class="modal-close" id="closeRecordDepositModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="recordDepositForm">
+          <input type="hidden" id="depositType">
+          <div class="form-group">
+            <label>Amount</label>
+            <input type="text" id="depositAmount" readonly>
+          </div>
+          <div class="form-group">
+            <label for="depositMethod">Payment Method <span class="required">*</span></label>
+            <select id="depositMethod" required>
+              <option value="">Select method...</option>
+              <option value="paypal">PayPal (Preferred)</option>
+              <option value="venmo">Venmo</option>
+              <option value="zelle">Zelle</option>
+              <option value="cash">Cash</option>
+              <option value="check">Check</option>
+              <option value="square">Square</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="depositTransactionId">Transaction ID (optional)</label>
+            <input type="text" id="depositTransactionId" placeholder="Reference or confirmation number">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="closeRecordDepositBtn">Cancel</button>
+        <button type="button" class="btn-primary" id="confirmRecordDepositBtn">Record Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="events.js"></script>
+</body>
+</html>

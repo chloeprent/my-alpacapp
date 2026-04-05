@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Email Approval — YOUR_APP_NAME</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f2f0e8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: #2a1f23;
+    }
+    .card {
+      max-width: 520px;
+      width: 100%;
+      background: #faf9f6;
+      border-radius: 16px;
+      padding: 40px 32px;
+      text-align: center;
+      box-shadow: 0 2px 16px rgba(42,31,35,0.08);
+    }
+    .logo { margin-bottom: 24px; }
+    .logo img { height: 32px; vertical-align: middle; }
+    .logo img + img { margin-left: 8px; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+    .details {
+      text-align: left;
+      background: #f2f0e8;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .details .label { color: #7d6f74; font-weight: 600; display: inline-block; width: 70px; }
+    .details .value { color: #2a1f23; }
+    .btn {
+      display: inline-block;
+      padding: 14px 36px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      margin: 0 6px 8px;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-approve { background: #54a326; color: #fff; }
+    .btn-approve-all { background: #d4883a; color: #fff; }
+    .approve-all-note {
+      font-size: 12px;
+      color: #7d6f74;
+      margin-top: 8px;
+    }
+    .footer {
+      margin-top: 24px;
+      font-size: 12px;
+      color: #7d6f74;
+    }
+    .loading { display: none; font-size: 14px; color: #7d6f74; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" style="height:32px;">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" style="height:20px;">
+    </div>
+    <h1>Confirm Email Approval</h1>
+    <div class="details">
+      <div><span class="label">Type:</span> <span class="value" id="type"></span></div>
+      <div><span class="label">To:</span> <span class="value" id="to"></span></div>
+      <div><span class="label">Subject:</span> <span class="value" id="subject"></span></div>
+    </div>
+    <div id="buttons">
+      <a id="approve-btn" class="btn btn-approve" href="#">Approve & Send</a>
+      <br>
+      <a id="approve-all-btn" class="btn btn-approve-all" href="#" style="display:none;">Approve All of This Type</a>
+      <p class="approve-all-note" id="approve-all-note" style="display:none;">This permanently disables approval for this email type.</p>
+    </div>
+    <div class="loading" id="loading">Sending email…</div>
+    <p class="footer">YOUR_APP_NAME Email Approval System</p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const action = params.get('action');
+    const type = params.get('type') || '';
+    const to = params.get('to') || '';
+    const subject = params.get('subject') || '';
+
+    document.getElementById('type').textContent = type;
+    document.getElementById('to').textContent = to;
+    document.getElementById('subject').textContent = subject;
+
+    const base = 'YOUR_SUPABASE_URL/functions/v1/approve-email';
+    const approveUrl = base + '?token=' + encodeURIComponent(token) + '&action=approve_one&confirm=1';
+    const approveAllUrl = base + '?token=' + encodeURIComponent(token) + '&action=approve_all&confirm=1';
+
+    const approveBtn = document.getElementById('approve-btn');
+    approveBtn.href = approveUrl;
+    approveBtn.addEventListener('click', function() {
+      document.getElementById('buttons').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+    });
+
+    // Show Approve All button only if original action was approve_all
+    if (action === 'approve_all') {
+      const allBtn = document.getElementById('approve-all-btn');
+      allBtn.style.display = 'inline-block';
+      allBtn.href = approveAllUrl;
+      allBtn.addEventListener('click', function() {
+        document.getElementById('buttons').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+      });
+      document.getElementById('approve-all-note').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

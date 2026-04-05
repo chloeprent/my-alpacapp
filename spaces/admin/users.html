@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <title>User Management - AlpacAPPs</title>
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=5">
+  <style>
+    .users-container {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 0.5rem 2rem;
+    }
+
+    .section {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-header h2 {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .section-body {
+      padding: 1.5rem;
+    }
+
+    .invite-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .invite-form-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .invite-optional {
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .invite-optional:focus-within {
+      opacity: 1;
+    }
+
+    .invite-optional input {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .invite-form .email-typeahead-wrap {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+
+    .invite-form input[type="text"],
+    .invite-form input[type="email"],
+    .invite-form input[type="tel"] {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 0.875rem;
+      box-sizing: border-box;
+    }
+
+    .invite-form input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .typeahead-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .typeahead-dropdown.hidden {
+      display: none;
+    }
+
+    .typeahead-item {
+      padding: 0.5rem 0.875rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .typeahead-item:last-child {
+      border-bottom: none;
+    }
+
+    .typeahead-item:hover,
+    .typeahead-item.active {
+      background: var(--accent-light);
+    }
+
+    .typeahead-item .ta-name {
+      font-weight: 500;
+    }
+
+    .typeahead-item .ta-email {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .typeahead-item .ta-type {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      background: var(--bg);
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .invite-form select {
+      padding: 0.625rem 0.875rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 0.875rem;
+      background: var(--bg-card);
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .users-table th,
+    .users-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .users-table td:first-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .users-table th {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: var(--bg);
+    }
+
+    .users-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .users-table tr:hover td {
+      background: var(--bg);
+    }
+
+    .role-select {
+      padding: 0.375rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      background: var(--bg-card);
+    }
+
+    .role-select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .you-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 4px;
+      margin-left: 0.5rem;
+    }
+
+    .btn-danger {
+      padding: 0.375rem 0.75rem;
+      border: 1px solid var(--occupied);
+      background: var(--bg-card);
+      color: var(--occupied);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-danger:hover {
+      background: var(--occupied);
+      color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+    }
+
+    .back-link:hover {
+      color: var(--accent);
+    }
+
+    .invite-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+    }
+
+    /* Email status styles */
+    .email-status {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .status-not-sent {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-sent-recent {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-sent {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+
+    .send-count {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-left: 0.25rem;
+    }
+
+    .expired-row {
+      opacity: 0.7;
+    }
+
+    .expired-text {
+      text-decoration: line-through;
+    }
+
+    .expired-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.15rem 0.4rem;
+      background: var(--occupied);
+      color: white;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      white-space: nowrap;
+      overflow: visible;
+    }
+
+    .btn-small {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+    }
+
+    .btn-secondary.btn-small {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+    }
+
+    .btn-text {
+      padding: 0.3rem 0.5rem;
+      border: none;
+      background: none;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .btn-text:hover {
+      color: var(--accent-dark);
+    }
+
+    /* Current Resident toggle */
+    .residency-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+
+    .residency-toggle:hover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .residency-toggle.is-here {
+      border-color: var(--available);
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .residency-toggle.manual {
+      border-style: dashed;
+    }
+
+    .person-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .person-link {
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    .btn-unlink {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 0.25rem;
+      line-height: 1;
+    }
+
+    .btn-unlink:hover {
+      color: var(--occupied);
+    }
+
+    .refresh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+      transition: all 0.15s ease;
+    }
+
+    .refresh-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs"></div>
+
+    <div class="users-container">
+
+      <!-- Invite Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Invite New User</h2>
+        </div>
+        <div class="section-body">
+          <form id="inviteForm" class="invite-form">
+            <div class="invite-form-row">
+              <div class="email-typeahead-wrap">
+                <input type="text" id="inviteEmail" placeholder="Search by name or type an email..." autocomplete="off" required>
+                <div id="typeaheadDropdown" class="typeahead-dropdown hidden"></div>
+              </div>
+              <select id="inviteRole">
+                <option value="prospect">Prospect (view spaces, no login)</option>
+                <option value="public">Public (view spaces)</option>
+                <option value="demo">Demo (demo YOUR_APP_NAME)</option>
+                <option value="resident">Resident (cameras & lighting)</option>
+                <option value="associate">Associate (cameras & lighting)</option>
+                <option value="staff">Staff (full read access)</option>
+                <option value="admin">Admin (full access)</option>
+              </select>
+              <button type="submit" class="btn-primary">Send Invitation</button>
+            </div>
+            <div class="invite-form-row invite-optional">
+              <input type="text" id="inviteFirstName" placeholder="First name (optional)">
+              <input type="text" id="inviteLastName" placeholder="Last name (optional)">
+              <input type="tel" id="invitePhone" placeholder="Phone (optional)">
+            </div>
+          </form>
+          <p class="invite-note">
+            Users must sign in with the exact email address you invite. Prospects get a shareable link instead (no login needed).
+          </p>
+        </div>
+      </div>
+
+      <!-- Pending Invitations -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Pending Invitations</h2>
+          <span id="pendingCount" class="role-badge staff">0</span>
+        </div>
+        <div id="pendingSection">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Active Users -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Active Users</h2>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <button class="refresh-btn" onclick="refreshResidencyStatus()" title="Recompute residency from assignments">&#8635; Refresh</button>
+            <span id="usersCount" class="role-badge staff">0</span>
+          </div>
+        </div>
+        <div id="usersSection">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invitation Text Modal -->
+  <div id="inviteTextModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 550px;">
+      <div class="modal-header">
+        <h2>Invitation Ready</h2>
+        <button class="modal-close" onclick="closeInviteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">
+          The invitation has been created. Copy the text below and send it via email or message:
+        </p>
+        <textarea id="inviteTextContent" readonly style="width: 100%; height: 250px; padding: 1rem; font-family: inherit; font-size: 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); resize: none; background: var(--bg);"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeInviteModal()">Close</button>
+        <button class="btn-primary" onclick="copyInviteText()">Copy to Clipboard</button>
+        <button class="btn-primary" id="sendInviteEmailBtn" style="background: var(--available);" onclick="sendInviteEmail()">Send Email</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Person Modal -->
+  <div id="linkPersonModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 450px;">
+      <div class="modal-header">
+        <h2>Link Person Record</h2>
+        <button class="modal-close" onclick="closeLinkPersonModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.875rem;">
+          Link this app user to a person record from the rental system. This enables auto-deriving residency status from assignments.
+        </p>
+        <select id="linkPersonSelect" style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); font-family: inherit; font-size: 0.875rem;">
+          <option value="">-- Select a person --</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeLinkPersonModal()">Cancel</button>
+        <button class="btn-primary" onclick="confirmLinkPerson()">Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permissions Modal -->
+  <div id="permissionsModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 820px;">
+      <div class="modal-header">
+        <h2>Permissions — <span id="permUserName"></span> <span id="permUserRoleBadge" class="role-badge" style="font-size:0.75rem; margin-left:0.5rem;"></span></h2>
+        <button class="modal-close" onclick="closePermissionsModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="max-height: 65vh; overflow-y: auto; padding: 0;">
+        <div id="permissionCategories"></div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:0.7rem; color:var(--text-muted);">
+          <span style="color:#22c55e;">&#9679;</span> granted
+          <span style="color:#ef4444; margin-left:0.5rem;">&#9679;</span> revoked
+        </span>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-secondary" onclick="resetPermissions()">Reset to Defaults</button>
+          <button class="btn-primary" id="permSaveBtn" onclick="savePermissions()" disabled style="opacity:0.4;">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Permissions modal - grouped sections */
+    .perm-super-section {
+      font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0.55rem 0.75rem; color: #333; background: #eaeaea;
+      border-top: 2px solid #ccc; border-bottom: 1px solid #ccc;
+    }
+    .perm-group { margin-bottom: 0; }
+    .perm-group-header {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 0.4rem 0.75rem; border-bottom: 1px solid rgba(0,0,0,0.08);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .perm-group-header .pg-icon { font-size: 0.85rem; opacity: 0.7; }
+    .perm-group-header .pg-count { font-size: 0.6rem; font-weight: 400; opacity: 0.5; margin-left: auto; }
+
+    .perm-col-headers {
+      display: flex; align-items: center; padding: 0.2rem 0.75rem;
+      font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); border-bottom: 1px solid var(--border); background: #f9f9f9;
+      position: sticky; top: 0; z-index: 2;
+    }
+    .perm-col-headers .pch-check { width: 26px; flex-shrink: 0; }
+    .perm-col-headers .pch-name { width: 30%; flex-shrink: 0; }
+    .perm-col-headers .pch-desc { flex: 1; }
+    .perm-col-headers .pch-roles { width: 20%; text-align: right; flex-shrink: 0; }
+
+    .perm-table { width: 100%; border-collapse: collapse; }
+    .perm-table td { padding: 0.25rem 0.75rem; font-size: 0.8rem; vertical-align: middle; border-bottom: 1px solid rgba(0,0,0,0.04); }
+    .perm-table tr:last-child td { border-bottom: none; }
+    .perm-table tr:hover td { filter: brightness(0.97); }
+    .perm-table .pt-check { width: 26px; text-align: center; padding-right: 0; }
+    .perm-table .pt-name { width: 30%; font-weight: 500; white-space: nowrap; }
+    .perm-table .pt-desc { color: rgba(0,0,0,0.45); font-size: 0.75rem; }
+    .perm-table .pt-roles { width: 20%; text-align: right; white-space: nowrap; }
+    .perm-table .pt-indent td.pt-name { padding-left: 1.5rem; font-weight: 400; font-size: 0.75rem; color: var(--text-muted); }
+    .perm-table input[type="checkbox"] { margin: 0; cursor: pointer; accent-color: var(--text-muted); }
+    .perm-table tr.perm-granted input[type="checkbox"] { accent-color: #22c55e; }
+    .perm-table tr.perm-revoked input[type="checkbox"] { accent-color: #ef4444; }
+    .perm-table tr.perm-revoked .pt-name { text-decoration: line-through; color: #ef4444; }
+    .perm-role-chip {
+      display: inline-block; font-size: 0.55rem; font-weight: 600;
+      padding: 0.1rem 0.3rem; border-radius: 3px; margin-left: 1px;
+      text-transform: uppercase; opacity: 0.85;
+    }
+    @media (max-width: 600px) {
+      .perm-table .pt-desc { display: none; }
+      .perm-table .pt-roles { display: none; }
+      .perm-table .pt-name { width: auto; }
+      .perm-col-headers .pch-desc { display: none; }
+      .perm-col-headers .pch-roles { display: none; }
+      .perm-col-headers .pch-name { width: auto; }
+    }
+  </style>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="users.js"></script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+/* =============================================
+   TEMPLATES PAGE — Two-Panel Layout
+   ============================================= */
+
+/* Main two-panel layout */
+.tmpl-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 160px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ---- Sidebar ---- */
+.tmpl-sidebar {
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  border-radius: var(--radius-lg, 12px) 0 0 var(--radius-lg, 12px);
+  box-shadow: var(--shadow);
+  overflow-y: auto;
+  max-height: calc(100vh - 140px);
+  position: sticky;
+  top: 140px;
+}
+
+.tmpl-sidebar-header {
+  padding: 1rem 1rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tmpl-sidebar-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+}
+
+.tmpl-sidebar-search {
+  padding: 0 0.75rem 0.75rem;
+}
+
+.tmpl-sidebar-search input {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.tmpl-sidebar-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.tmpl-sidebar-search input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ---- Nav Groups ---- */
+.tmpl-nav-group {
+  padding: 0.25rem 0;
+}
+
+.tmpl-nav-group-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 1rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+.tmpl-nav-count {
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--border);
+  color: var(--text-muted);
+  padding: 0.1rem 0.45rem;
+  border-radius: 100px;
+  min-width: 1.3rem;
+  text-align: center;
+}
+
+/* ---- Nav Items ---- */
+.tmpl-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 450;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+  line-height: 1.3;
+}
+
+.tmpl-nav-item:hover {
+  background: var(--bg);
+}
+
+.tmpl-nav-item.active {
+  background: var(--accent-light, #eff6ff);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.tmpl-nav-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 4px;
+  font-size: 0.7rem;
+}
+
+.tmpl-icon-doc {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.tmpl-icon-doc::before {
+  content: '';
+  width: 10px;
+  height: 12px;
+  border: 1.5px solid #4338ca;
+  border-radius: 1px;
+}
+
+.tmpl-nav-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Email nav section ---- */
+.tmpl-nav-email-section {
+  padding: 0.25rem 0 0.5rem;
+  border-top: 1px solid var(--border);
+  margin-top: 0.25rem;
+}
+
+.tmpl-nav-email-items {
+  /* Container for JS-rendered email nav items */
+}
+
+/* Collapsible category groups in sidebar */
+.tmpl-nav-category {
+  margin: 0;
+}
+
+.tmpl-nav-category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.tmpl-nav-category-header:hover {
+  color: var(--text);
+}
+
+.tmpl-nav-category-header .cat-arrow {
+  font-size: 0.5rem;
+  transition: transform 0.2s;
+  display: inline-block;
+  width: 8px;
+}
+
+.tmpl-nav-category-header .cat-arrow.collapsed {
+  transform: rotate(-90deg);
+}
+
+.tmpl-nav-category-header .cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tmpl-nav-category-header .cat-count {
+  margin-left: auto;
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.tmpl-nav-category-items {
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.tmpl-nav-category-items.collapsed {
+  max-height: 0 !important;
+}
+
+.tmpl-nav-item.email-item {
+  padding: 0.35rem 1rem 0.35rem 1.75rem;
+  font-size: 0.78rem;
+}
+
+.tmpl-nav-item.email-item .tmpl-nav-icon {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  font-size: 0;
+}
+
+/* ---- Editor Panel ---- */
+.tmpl-editor-panel {
+  min-width: 0;
+  padding: 0 0 2rem;
+}
+
+.tmpl-editor-panel .section {
+  border-radius: 0;
+  border-left: none;
+}
+
+.tmpl-editor-panel .section:first-child {
+  border-radius: 0 var(--radius-lg, 12px) 0 0;
+}
+
+.tmpl-editor-panel .section:last-child {
+  border-radius: 0 0 var(--radius-lg, 12px) 0;
+}
+
+/* ---- Welcome state ---- */
+.tmpl-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--text-muted);
+  min-height: 400px;
+}
+
+.tmpl-welcome-icon {
+  color: var(--border);
+  margin-bottom: 1rem;
+}
+
+.tmpl-welcome h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 0.5rem;
+}
+
+.tmpl-welcome p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.tmpl-welcome-stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.tmpl-welcome-stat {
+  text-align: center;
+}
+
+.tmpl-welcome-stat .stat-num {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  display: block;
+}
+
+.tmpl-welcome-stat .stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---- Mobile sidebar overlay ---- */
+.tmpl-mobile-toggle {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-size: 1.25rem;
+  cursor: pointer;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .tmpl-layout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .tmpl-sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    height: 100vh;
+    max-height: 100vh;
+    z-index: 200;
+    border-radius: 0;
+    transition: left 0.25s ease;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+  }
+
+  .tmpl-sidebar.open {
+    left: 0;
+  }
+
+  .tmpl-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 199;
+  }
+
+  .tmpl-sidebar-backdrop.open {
+    display: block;
+  }
+
+  .tmpl-mobile-toggle {
+    display: flex;
+  }
+
+  .tmpl-editor-panel .section {
+    border-radius: var(--radius-lg, 12px);
+    border-left: 1px solid rgba(0,0,0,0.04);
+  }
+
+  .tmpl-editor-panel .section:first-child,
+  .tmpl-editor-panel .section:last-child {
+    border-radius: var(--radius-lg, 12px);
+  }
+
+  .tmpl-editor-panel {
+    padding: 0 0 4rem;
+  }
+}
+
+/* =============================================
+   EMAIL VISUAL EDITOR
+   ============================================= */
+
+/* Mode toggle pills */
+.email-editor-mode-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  width: fit-content;
+  margin-bottom: 0.75rem;
+}
+
+.email-editor-mode-btn {
+  padding: 0.35rem 0.85rem;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.email-editor-mode-btn:hover:not(.active) {
+  background: var(--bg);
+}
+
+.email-editor-mode-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Visual preview iframe */
+.email-visual-preview {
+  width: 100%;
+  height: 520px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  background: white;
+}
+
+/* AI Edit area */
+.ai-edit-area {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+}
+
+.ai-edit-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.ai-edit-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-edit-input-row input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 8px);
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: var(--bg-card);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.ai-edit-input-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ai-edit-input-row input::placeholder {
+  color: var(--text-muted);
+}
+
+#aiEditStatus {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  min-height: 1.2em;
+}
+
+.ai-edit-loading {
+  color: var(--accent);
+}
+
+.ai-edit-loading::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 6px;
+  vertical-align: -2px;
+}

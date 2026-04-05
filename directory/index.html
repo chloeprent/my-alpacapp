@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YOUR_PROPERTY_NAME</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+  <link rel="stylesheet" href="/directory/styles.css">
+</head>
+<body>
+  <span data-site-version style="display:none;">v260405.02 4:44p</span>
+  <div id="siteHeader"></div>
+
+  <!-- Loading state -->
+  <div id="loadingState" class="dir-state">
+    <div class="dir-spinner"></div>
+  </div>
+
+  <!-- Not Found state -->
+  <div id="notFoundState" class="dir-state aap-hidden">
+    <div class="dir-empty">
+      <div class="dir-empty-icon">🦙</div>
+      <h2>Person Not Found</h2>
+      <p>No one here goes by that name.</p>
+      <a href="/spaces/" class="aap-btn aap-btn--outline">View Available Spaces</a>
+    </div>
+  </div>
+
+  <!-- Profile state -->
+  <div id="profileState" class="dir-container aap-hidden"></div>
+
+  <!-- Footer -->
+  <div id="siteFooter"></div>
+
+  <script type="module" src="/directory/app.js"></script>
+</body>
+</html>

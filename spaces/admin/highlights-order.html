@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Reorder Highlights - AlpacAPPs Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <style>
+    .reorder-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .reorder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .reorder-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .reorder-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .photo-count {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .reorder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+    }
+
+    .reorder-item {
+      aspect-ratio: 1;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: grab;
+      background: #f0f0f0;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .reorder-item:hover {
+      border-color: var(--primary-color, #4A90A4);
+    }
+
+    .reorder-item.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+
+    .reorder-item.drag-over {
+      border-color: #22c55e;
+      transform: scale(1.02);
+    }
+
+    .reorder-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .reorder-item__number {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .reorder-item__drag-handle {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 4px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .reorder-item:hover .reorder-item__drag-handle {
+      opacity: 1;
+    }
+
+    .save-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index: 100;
+    }
+
+    .save-bar.visible {
+      transform: translateY(0);
+    }
+
+    .save-bar p {
+      margin: 0;
+    }
+
+    .btn-save {
+      background: #22c55e;
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-save:hover {
+      background: #16a34a;
+    }
+
+    .btn-save:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: white;
+      border: 1px solid #666;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+      border-color: white;
+    }
+
+    .loading-grid {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .reorder-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+      }
+
+      .reorder-item__number {
+        font-size: 0.65rem;
+        padding: 1px 6px;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <main class="reorder-container">
+      <div class="reorder-header">
+        <div>
+          <h2>Photo Gallery Order</h2>
+          <p class="photo-count">Drag and drop to reorder. <span id="photoCount">0</span> photos.</p>
+        </div>
+        <div class="reorder-actions">
+          <button id="shuffleBtn" class="btn-secondary">Shuffle All</button>
+        </div>
+      </div>
+
+      <div id="reorderGrid" class="reorder-grid">
+        <div class="loading-grid">
+          <p>Loading photos...</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Save bar (appears when changes are made) -->
+    <div id="saveBar" class="save-bar">
+      <p>You have unsaved changes</p>
+      <button id="cancelBtn" class="btn-cancel">Cancel</button>
+      <button id="saveBtn" class="btn-save">Save Order</button>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module">
+    import { supabase } from '../../shared/supabase.js';
+    import { checkAdminAuth, showUnauthorized, setupSignOut } from '../../shared/auth.js';
+
+    const HIGHLIGHTS_TAG_ID = 'ba1b6478-21a1-4374-b4e2-96e9dce8635e';
+
+    let photos = [];
+    let originalOrder = [];
+    let hasChanges = false;
+
+    // Check auth
+    const user = await checkAdminAuth();
+    if (!user) {
+      showUnauthorized();
+    } else {
+      document.getElementById('loadingOverlay').classList.add('hidden');
+      document.getElementById('appContent').classList.remove('hidden');
+      document.getElementById('userInfo').textContent = user.email;
+      setupSignOut();
+      await loadPhotos();
+    }
+
+    async function loadPhotos() {
+      const grid = document.getElementById('reorderGrid');
+
+      try {
+        // Fetch photos with highlights tag, ordered by display_order
+        const { data: tagAssignments, error: tagError } = await supabase
+          .from('media_tag_assignments')
+          .select('media_id, display_order')
+          .eq('tag_id', HIGHLIGHTS_TAG_ID)
+          .order('display_order', { ascending: true });
+
+        if (tagError) throw tagError;
+
+        if (tagAssignments.length === 0) {
+          grid.innerHTML = '<p>No photos tagged as highlights yet.</p>';
+          return;
+        }
+
+        // Get media details
+        const mediaIds = tagAssignments.map(t => t.media_id);
+        const { data: mediaData, error: mediaError } = await supabase
+          .from('media')
+          .select('id, url, title, caption')
+          .in('id', mediaIds);
+
+        if (mediaError) throw mediaError;
+
+        // Combine and sort by display_order
+        photos = tagAssignments.map(ta => {
+          const media = mediaData.find(m => m.id === ta.media_id);
+          return {
+            ...media,
+            display_order: ta.display_order
+          };
+        }).sort((a, b) => a.display_order - b.display_order);
+
+        // Store original order for cancel
+        originalOrder = photos.map(p => p.id);
+
+        document.getElementById('photoCount').textContent = photos.length;
+        renderGrid();
+
+      } catch (error) {
+        console.error('Error loading photos:', error);
+        grid.innerHTML = '<p>Error loading photos. Please try again.</p>';
+      }
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('reorderGrid');
+
+      grid.innerHTML = photos.map((photo, index) => `
+        <div class="reorder-item" data-id="${photo.id}" data-index="${index}" draggable="true">
+          <img src="${photo.url}" alt="${photo.title || photo.caption || 'Photo'}" loading="lazy">
+          <span class="reorder-item__number">${index + 1}</span>
+          <span class="reorder-item__drag-handle">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+              <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+            </svg>
+          </span>
+        </div>
+      `).join('');
+
+      // Setup drag and drop
+      setupDragAndDrop();
+    }
+
+    function setupDragAndDrop() {
+      const grid = document.getElementById('reorderGrid');
+      let draggedItem = null;
+      let draggedIndex = null;
+
+      grid.querySelectorAll('.reorder-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          draggedIndex = parseInt(item.dataset.index);
+          item.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          grid.querySelectorAll('.reorder-item').forEach(i => i.classList.remove('drag-over'));
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          if (item !== draggedItem) {
+            item.classList.add('drag-over');
+          }
+        });
+
+        item.addEventListener('dragleave', () => {
+          item.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+
+          if (item === draggedItem) return;
+
+          const targetIndex = parseInt(item.dataset.index);
+
+          // Reorder photos array
+          const [movedPhoto] = photos.splice(draggedIndex, 1);
+          photos.splice(targetIndex, 0, movedPhoto);
+
+          // Re-render and mark as changed
+          renderGrid();
+          markChanged();
+        });
+      });
+    }
+
+    function markChanged() {
+      hasChanges = true;
+      document.getElementById('saveBar').classList.add('visible');
+    }
+
+    function clearChanges() {
+      hasChanges = false;
+      document.getElementById('saveBar').classList.remove('visible');
+    }
+
+    // Shuffle button
+    document.getElementById('shuffleBtn').addEventListener('click', () => {
+      photos = photos.sort(() => Math.random() - 0.5);
+      renderGrid();
+      markChanged();
+    });
+
+    // Cancel button
+    document.getElementById('cancelBtn').addEventListener('click', async () => {
+      // Restore original order
+      const originalPhotos = originalOrder.map(id => photos.find(p => p.id === id));
+      photos = originalPhotos;
+      renderGrid();
+      clearChanges();
+    });
+
+    // Save button
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        // Update display_order for each photo
+        for (let i = 0; i < photos.length; i++) {
+          const { error } = await supabase
+            .from('media_tag_assignments')
+            .update({ display_order: i + 1 })
+            .eq('media_id', photos[i].id)
+            .eq('tag_id', HIGHLIGHTS_TAG_ID);
+
+          if (error) throw error;
+        }
+
+        // Update original order reference
+        originalOrder = photos.map(p => p.id);
+
+        clearChanges();
+        showToast('Order saved successfully!', 'success');
+
+      } catch (error) {
+        console.error('Error saving order:', error);
+        showToast('Failed to save order. Please try again.', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Order';
+      }
+    });
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('toast-fade-out');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Warn before leaving with unsaved changes
+    window.addEventListener('beforeunload', (e) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  </script>
+</body>
+</html>

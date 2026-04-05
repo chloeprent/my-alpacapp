@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Accounting - YOUR_PROPERTY_NAME Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="manage-shared.css?v=1">
+  <link rel="stylesheet" href="accounting.css?v=1">
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs"></div>
+
+    <div class="manage-container">
+      <!-- Monthly Columns View -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Monthly Overview</h2>
+          <span class="text-muted" style="font-size: 0.75rem; margin-left: 0.5rem;">Accrual basis &mdash; rent applied to service period</span>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 0.4rem;">
+            <label for="monthWindowSelect" style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); white-space: nowrap;">Summary window:</label>
+            <select id="monthWindowSelect" class="filter-input" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; width: auto;">
+              <option value="2">2 months</option>
+              <option value="3" selected>3 months</option>
+              <option value="4">4 months</option>
+              <option value="5">5 months</option>
+              <option value="6">6 months</option>
+              <option value="7">7 months</option>
+              <option value="8">8 months</option>
+              <option value="9">9 months</option>
+              <option value="10">10 months</option>
+              <option value="11">11 months</option>
+              <option value="12">12 months</option>
+            </select>
+          </div>
+        </div>
+        <div class="section-body month-columns-scroll" id="monthColumnsContainer">
+          <div class="empty-state">Loading monthly data...</div>
+        </div>
+      </div>
+
+      <!-- Unit Breakdown Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Unit Breakdown</h2>
+          <span class="text-muted" style="font-size: 0.75rem; margin-left: 0.5rem;">Current snapshot</span>
+        </div>
+        <div class="section-body">
+          <div class="unit-breakdown" id="unitBreakdown">
+            <div class="empty-state">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Transactions</h2>
+          <span id="transactionCount" class="count-badge">0</span>
+          <div style="margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button id="addTransactionBtn" class="btn-primary btn-small">+ Record Payment</button>
+            <button id="exportCsvBtn" class="btn-secondary btn-small">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="section-filters">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>Date Range</label>
+              <div class="date-range-row">
+                <input type="date" id="filterDateFrom" class="filter-input">
+                <span>to</span>
+                <input type="date" id="filterDateTo" class="filter-input">
+              </div>
+            </div>
+            <div class="filter-group">
+              <label>Presets</label>
+              <div class="preset-buttons">
+                <button class="preset-btn active" data-preset="month">This Month</button>
+                <button class="preset-btn" data-preset="last-month">Last Month</button>
+                <button class="preset-btn" data-preset="quarter">This Quarter</button>
+                <button class="preset-btn" data-preset="ytd">YTD</button>
+                <button class="preset-btn" data-preset="all">All</button>
+              </div>
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-group">
+              <label>Direction</label>
+              <select id="filterDirection" class="filter-input">
+                <option value="">All</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Category</label>
+              <select id="filterCategory" class="filter-input">
+                <option value="">All Categories</option>
+                <option value="application_fee">Application Fee</option>
+                <option value="rent">Rent</option>
+                <option value="prorated_rent">Prorated Rent</option>
+                <option value="security_deposit">Security Deposit</option>
+                <option value="move_in_deposit">Move-in Deposit</option>
+                <option value="reservation_deposit">Reservation Deposit</option>
+                <option value="event_rental_fee">Event Rental Fee</option>
+                <option value="event_reservation_deposit">Event Reservation Deposit</option>
+                <option value="event_cleaning_deposit">Event Cleaning Deposit</option>
+                <option value="refund">Refund</option>
+                <option value="damage_deduction">Damage Deduction</option>
+                <option value="late_fee">Late Fee</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Method</label>
+              <select id="filterMethod" class="filter-input">
+                <option value="">All Methods</option>
+                <option value="paypal">PayPal</option>
+                <option value="square">Square</option>
+                <option value="stripe">Stripe</option>
+                <option value="venmo">Venmo</option>
+                <option value="zelle">Zelle</option>
+                <option value="bank_ach">Bank/ACH</option>
+                <option value="cash">Cash</option>
+                <option value="check">Check</option>
+                <option value="stripe">Stripe</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="filter-group" id="filterReconciledGroup" style="display:none">
+              <label>Reconciled</label>
+              <select id="filterReconciled" class="filter-input">
+                <option value="">All</option>
+              </select>
+            </div>
+            <div class="filter-group filter-search">
+              <label>Search</label>
+              <input type="text" id="filterSearch" class="filter-input" placeholder="Name, description, notes...">
+            </div>
+            <div class="filter-group" style="display: flex; align-items: flex-end;">
+              <label class="toggle-label" style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; cursor: pointer; white-space: nowrap;">
+                <input type="checkbox" id="filterShowTest"> Show test
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-body" id="transactionsTableContainer">
+          <div class="empty-state">Loading transactions...</div>
+        </div>
+      </div>
+
+      <!-- API Usage Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>API Usage</h2>
+          <span class="text-muted" style="font-size: 0.75rem; margin-left: 0.5rem;">Limits & costs this month</span>
+          <span id="apiUsageTotalCost" class="count-badge" style="margin-left: 0.5rem;">$0.00</span>
+          <div style="margin-left: auto; display: flex; gap: 0.5rem; align-items: center;">
+            <select id="apiUsageMonthSelect" class="filter-input" style="padding: 0.3rem 0.5rem; font-size: 0.8rem; width: auto;"></select>
+          </div>
+        </div>
+        <div class="section-body" id="apiUsageContainer">
+          <div class="empty-state">Loading API usage...</div>
+        </div>
+      </div>
+
+      <!-- Compute Costs Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Compute Costs</h2>
+          <span class="text-muted" style="font-size: 0.75rem; margin-left: 0.5rem;">Hosting & Token Gen</span>
+          <span id="computeCostTotal" class="count-badge" style="margin-left: 0.5rem;">$0.00</span>
+          <div style="margin-left: auto;">
+            <button id="addComputeCostBtn" class="btn-primary btn-small">+ Add Entry</button>
+          </div>
+        </div>
+        <div class="section-body" id="computeCostsContainer">
+          <div class="empty-state">Loading compute costs...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Compute Cost Modal -->
+  <div id="computeCostModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 id="computeCostModalTitle">Add Compute Cost</h2>
+        <button class="modal-close" id="closeComputeCostModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="computeCostForm">
+          <input type="hidden" id="ccId">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="ccDate">Date</label>
+              <input type="date" id="ccDate" required>
+            </div>
+            <div class="form-group">
+              <label for="ccService">Service</label>
+              <select id="ccService" required>
+                <option value="gemini">Gemini</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="digitalocean">DigitalOcean</option>
+                <option value="supabase">Supabase</option>
+                <option value="telnyx">Telnyx</option>
+                <option value="resend">Resend</option>
+                <option value="signwell">SignWell</option>
+                <option value="vapi">Vapi</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="ccDescription">Description</label>
+            <input type="text" id="ccDescription" required placeholder="e.g. Generated 28 AI images">
+          </div>
+          <div class="form-group">
+            <label for="ccCost">Cost (USD)</label>
+            <input type="number" id="ccCost" step="0.0001" min="0" required placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label for="ccNotes">Notes</label>
+            <textarea id="ccNotes" rows="2" placeholder="Token counts, model info, etc."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelComputeCostBtn">Cancel</button>
+        <button class="btn-primary" id="saveComputeCostBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record Transaction Modal -->
+  <div id="transactionModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="transactionModalTitle">Record Payment</h2>
+        <button class="modal-close" id="closeTransactionModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="transactionForm">
+          <input type="hidden" id="txId">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="txDirection">Type</label>
+              <select id="txDirection" required>
+                <option value="income">Income (Received)</option>
+                <option value="expense">Expense (Paid Out)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="txCategory">Category</label>
+              <select id="txCategory" required>
+                <option value="application_fee">Application Fee</option>
+                <option value="rent">Rent</option>
+                <option value="prorated_rent">Prorated Rent</option>
+                <option value="security_deposit">Security Deposit</option>
+                <option value="move_in_deposit">Move-in Deposit</option>
+                <option value="reservation_deposit">Reservation Deposit</option>
+                <option value="event_rental_fee">Event Rental Fee</option>
+                <option value="event_reservation_deposit">Event Reservation Deposit</option>
+                <option value="event_cleaning_deposit">Event Cleaning Deposit</option>
+                <option value="refund">Refund</option>
+                <option value="damage_deduction">Damage Deduction</option>
+                <option value="late_fee">Late Fee</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="txAmount">Amount ($)</label>
+              <input type="number" id="txAmount" step="0.01" min="0.01" required placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label for="txMethod">Payment Method</label>
+              <select id="txMethod" required>
+                <option value="paypal">PayPal (Preferred)</option>
+                <option value="square">Square</option>
+                <option value="stripe">Stripe</option>
+                <option value="venmo">Venmo</option>
+                <option value="zelle">Zelle</option>
+                <option value="bank_ach">Bank/ACH</option>
+                <option value="cash">Cash</option>
+                <option value="check">Check</option>
+                <option value="stripe">Stripe</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="txDate">Date</label>
+              <input type="date" id="txDate" required>
+            </div>
+            <div class="form-group">
+              <label for="txPerson">Person</label>
+              <select id="txPerson">
+                <option value="">-- Select Person --</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid" id="periodFields" style="display: none;">
+            <div class="form-group">
+              <label for="txPeriodStart">Period Start</label>
+              <input type="date" id="txPeriodStart">
+            </div>
+            <div class="form-group">
+              <label for="txPeriodEnd">Period End</label>
+              <input type="date" id="txPeriodEnd">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="txDescription">Description</label>
+            <input type="text" id="txDescription" placeholder="Brief description...">
+          </div>
+          <div class="form-group">
+            <label for="txNotes">Notes</label>
+            <textarea id="txNotes" rows="3" placeholder="Additional notes..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelTransactionBtn">Cancel</button>
+        <button class="btn-primary" id="saveTransactionBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Refund Modal -->
+  <div id="refundModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2>Process Refund</h2>
+        <button class="modal-close" id="closeRefundModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="refund-details">
+          <p><strong>Original Payment:</strong> <span id="refundOriginalAmount">$0.00</span></p>
+          <p><strong>Already Refunded:</strong> <span id="refundAlreadyRefunded">$0.00</span></p>
+          <p><strong>Refundable:</strong> <span id="refundRefundable">$0.00</span></p>
+        </div>
+        <div class="form-group">
+          <label for="refundAmount">Refund Amount ($)</label>
+          <input type="number" id="refundAmount" step="0.01" min="0.01" required placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="refundReason">Reason</label>
+          <input type="text" id="refundReason" placeholder="Reason for refund...">
+        </div>
+        <input type="hidden" id="refundLedgerId">
+        <input type="hidden" id="refundSquarePaymentId">
+        <input type="hidden" id="refundPaymentRecordId">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelRefundBtn">Cancel</button>
+        <button class="btn-danger" id="processRefundBtn">Process Refund</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="accounting.js"></script>
+</body>
+</html>

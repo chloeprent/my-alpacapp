@@ -1,0 +1,20 @@
+{
+  "name": "your-app-infra",
+  "version": "1.0.0",
+  "description": "Property management platform template. Clone and customize for your organization.",
+  "main": "app.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "css:build": "tailwindcss -i styles/tailwind.css -o styles/tailwind.out.css --minify",
+    "css:watch": "tailwindcss -i styles/tailwind.css -o styles/tailwind.out.css --watch"
+  },
+  "keywords": ["property-management", "supabase", "tailwind", "github-pages"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.18",
+    "tailwindcss": "^4.1.18"
+  }
+}

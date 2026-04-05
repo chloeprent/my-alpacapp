@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Hours - AlpacAPPs</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../spaces/styles.css?v=5">
+  <link rel="stylesheet" href="../spaces/admin/styles.css?v=5">
+  <link rel="stylesheet" href="../spaces/admin/manage-shared.css?v=5">
+  <style>
+    :root {
+      --clock-green: #22c55e;
+      --clock-red: #ef4444;
+      --paid-bg: #d1fae5;
+      --paid-text: #065f46;
+      --unpaid-bg: #fef3c7;
+      --unpaid-text: #92400e;
+    }
+
+    .app-container { max-width: 600px; margin: 0 auto; padding: 1rem; }
+
+    /* Clock In/Out Section */
+    .clock-section { text-align: center; padding: 1.5rem 1rem; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 1rem; }
+    .clock-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 180px; height: 180px; border-radius: 50%; border: none; cursor: pointer;
+      font-size: 1.4rem; font-weight: 700; color: #fff;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15); transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .clock-btn:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .clock-btn.clock-in { background: var(--clock-green); }
+    .clock-btn.clock-out { background: var(--clock-red); }
+    .clock-btn:disabled { opacity: 0.5; cursor: wait; }
+
+    .timer { font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 0.75rem 0 0.25rem; color: var(--text); }
+    .timer-label { font-size: 0.8rem; color: var(--text-muted); }
+    .rate-display { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+    /* Clock-out description prompt */
+    .clockout-prompt { margin-top: 1rem; display: none; }
+    .clockout-prompt.visible { display: block; }
+    .clockout-prompt textarea {
+      width: 100%; box-sizing: border-box; padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 8px;
+      font-size: 0.9rem; min-height: 70px; resize: vertical; font-family: inherit;
+    }
+    .clockout-prompt .prompt-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; justify-content: center; }
+    .clockout-prompt .btn-submit {
+      background: var(--clock-red); color: #fff; border: none; padding: 0.5rem 1.5rem;
+      border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;
+    }
+    .clockout-prompt .btn-skip {
+      background: #f3f4f6; color: var(--text); border: 1px solid #d1d5db; padding: 0.5rem 1rem;
+      border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+    }
+
+    /* Tab Switcher — underline style (matches admin detail tabs) */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border, #e5e5e5); margin-bottom: 1rem; overflow-x: auto; }
+    .tabs button {
+      flex: none; padding: 0.625rem 1rem; background: none; border: none;
+      border-bottom: 2px solid transparent; margin-bottom: -2px;
+      font-size: 0.85rem; font-weight: 500; color: var(--text-muted);
+      cursor: pointer; white-space: nowrap; transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .tabs button:hover { color: var(--text, #1c1618); }
+    .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+    /* Today Section */
+    .today-card { background: #fff; border-radius: 10px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 0.75rem; }
+    .today-card h3 { margin: 0 0 0.75rem; font-size: 1rem; }
+    .today-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .today-stat { text-align: center; }
+    .today-stat .val { font-size: 1.3rem; font-weight: 700; }
+    .today-stat .lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+
+    .entry-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.85rem; }
+    .entry-row:last-child { border-bottom: none; }
+    .entry-times { color: var(--text); }
+    .entry-duration { font-weight: 600; color: var(--text); }
+
+    /* Photo Upload */
+    .photo-section { background: #fff; border-radius: 10px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 0.75rem; }
+    .photo-section h3 { margin: 0 0 0.75rem; font-size: 1rem; }
+    .photo-type-selector { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .photo-type-selector button {
+      flex: 1; padding: 0.4rem; border: 1px solid #d1d5db; border-radius: 6px;
+      background: #fff; cursor: pointer; font-size: 0.8rem; font-weight: 500;
+    }
+    .photo-type-selector button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .photo-upload-actions { display: flex; gap: 0.75rem; }
+    .photo-action-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 1rem 0.5rem; border: 2px dashed #d1d5db; border-radius: 10px;
+      background: #fff; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+      font-family: inherit;
+    }
+    .photo-action-btn:hover { border-color: var(--accent); background: #f8fafc; }
+    .photo-action-btn:active { background: #f1f5f9; transform: scale(0.98); }
+    .photo-action-btn input[type="file"] { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    .photo-action-icon { font-size: 1.5rem; margin-bottom: 0.2rem; }
+    .photo-action-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+    .photo-action-hint { font-size: 0.65rem; color: #94a3b8; margin-top: 0.15rem; }
+
+    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.75rem; }
+    .photo-thumb { border-radius: 6px; overflow: hidden; aspect-ratio: 1; cursor: pointer; position: relative; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-thumb .type-tag {
+      position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.6); color: #fff;
+      font-size: 0.6rem; padding: 0.1rem 0.3rem; border-radius: 3px;
+    }
+    .photo-thumb.file-thumb {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #f8fafc; border: 1px solid #e5e7eb; gap: 0.2rem;
+    }
+    .photo-thumb.file-thumb .file-icon { font-size: 1.5rem; }
+    .photo-thumb.file-thumb .file-name {
+      font-size: 0.6rem; color: #64748b; text-align: center; padding: 0 0.25rem;
+      word-break: break-all; line-height: 1.2; max-height: 2.4em; overflow: hidden;
+    }
+
+    /* Photo Required Banners */
+    .photo-required-banner {
+      background: #fef3c7; border: 2px solid #f59e0b; border-radius: 10px;
+      padding: 1rem; margin-bottom: 1rem; text-align: center;
+      animation: photoBannerPulse 2s ease-in-out 3;
+    }
+    .photo-required-banner .banner-icon { font-size: 2rem; margin-bottom: 0.25rem; }
+    .photo-required-banner .banner-title { font-size: 1rem; font-weight: 700; color: #92400e; margin-bottom: 0.25rem; }
+    .photo-required-banner .banner-desc { font-size: 0.85rem; color: #92400e; margin: 0; }
+    .photo-required-banner .banner-dismiss {
+      margin-top: 0.5rem; background: none; border: 1px solid #d97706; color: #92400e;
+      padding: 0.3rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem;
+    }
+    @keyframes photoBannerPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+      50% { box-shadow: 0 0 0 8px rgba(245,158,11,0.2); }
+    }
+
+    /* History Section */
+    .history-filters { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    .history-filters select, .history-filters input {
+      padding: 0.4rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem;
+      flex: 1; min-width: 100px;
+    }
+
+    .history-summary {
+      background: #fff; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; text-align: center;
+    }
+    .history-summary .hs-val { font-size: 1.1rem; font-weight: 700; }
+    .history-summary .hs-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.1rem; }
+
+    .day-group { background: #fff; border-radius: 12px; margin-bottom: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+    .day-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.75rem 1rem; background: #f8fafc; border-bottom: 1px solid #f0f0f0;
+    }
+    .day-header .day-date { font-weight: 700; font-size: 0.9rem; color: #1e293b; }
+    .day-header .day-totals { text-align: right; }
+    .day-header .day-hours { font-size: 0.85rem; font-weight: 600; color: #334155; }
+    .day-header .day-amount { font-size: 0.85rem; font-weight: 700; color: #0f766e; }
+    .day-badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.6rem; font-weight: 700; margin-left: 0.4rem; letter-spacing: 0.03em; text-transform: uppercase; }
+    .day-badge.paid { background: var(--paid-bg); color: var(--paid-text); }
+    .day-badge.unpaid { background: var(--unpaid-bg); color: var(--unpaid-text); }
+    .day-badge.mixed { background: #ede9fe; color: #5b21b6; }
+
+    .day-entries { padding: 0; }
+    .history-entry {
+      display: flex; align-items: center; padding: 0.6rem 1rem; gap: 0.75rem;
+      border-bottom: 1px solid #f5f5f5; font-size: 0.85rem;
+    }
+    .history-entry:last-child { border-bottom: none; }
+    .entry-time-block {
+      display: flex; flex-direction: column; align-items: center; min-width: 52px;
+      background: #f1f5f9; border-radius: 8px; padding: 0.35rem 0.5rem;
+    }
+    .entry-time-block .etb-in { font-weight: 600; font-size: 0.8rem; color: #1e293b; }
+    .entry-time-block .etb-out { font-size: 0.7rem; color: #64748b; }
+    .entry-time-block .etb-divider { font-size: 0.55rem; color: #94a3b8; line-height: 1; }
+    .entry-detail { flex: 1; min-width: 0; }
+    .entry-detail .ed-duration { font-weight: 600; color: #1e293b; }
+    .entry-detail .ed-desc { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .entry-detail .ed-rate { font-size: 0.7rem; color: #94a3b8; }
+    .entry-earned { font-weight: 700; font-size: 0.85rem; color: #0f766e; white-space: nowrap; }
+    .entry-paid-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .entry-paid-dot.paid { background: #22c55e; }
+    .entry-paid-dot.unpaid { background: #f59e0b; }
+
+    .day-desc { font-size: 0.78rem; color: var(--text-muted); padding: 0.5rem 1rem 0.65rem; background: #fafbfc; border-top: 1px solid #f0f0f0; }
+
+    .history-empty { text-align: center; padding: 2rem 1rem; }
+    .history-empty .he-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .history-empty .he-text { color: var(--text-muted); font-size: 0.9rem; }
+    .history-empty .he-sub { color: #94a3b8; font-size: 0.8rem; margin-top: 0.25rem; }
+
+    /* Payment Tab */
+    .pay-card { background: #fff; border-radius: 10px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 0.75rem; }
+    .pay-card h3 { margin: 0 0 0.75rem; font-size: 1rem; }
+    .pay-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; }
+    .pay-stat { text-align: center; padding: 0.75rem 0.5rem; background: #f9fafb; border-radius: 8px; }
+    .pay-stat .val { font-size: 1.1rem; font-weight: 700; }
+    .pay-stat .val.green { color: var(--clock-green); }
+    .pay-stat .val.red { color: var(--clock-red); }
+    .pay-stat .lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 0.15rem; }
+
+    .pay-form-row { margin-bottom: 0.75rem; }
+    .pay-form-row label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem; text-transform: uppercase; }
+    .pay-form-row select, .pay-form-row input {
+      width: 100%; box-sizing: border-box; padding: 0.5rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.9rem;
+    }
+    .pay-form-row .rate-display { font-size: 1.1rem; font-weight: 700; color: var(--text); padding: 0.5rem 0; }
+    .btn-save-pref {
+      background: var(--accent); color: #fff; border: none; padding: 0.5rem 1.5rem;
+      border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; width: 100%;
+    }
+
+    /* Request Payment Button */
+    .btn-request-payment {
+      background: #6366f1; color: #fff; border: none; padding: 0.6rem 1.5rem;
+      border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem;
+      width: 100%; margin-top: 0.75rem;
+    }
+    .btn-request-payment:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Rate mismatch banner */
+    .rate-mismatch-banner {
+      border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.75rem;
+      font-size: 0.85rem; line-height: 1.4;
+      background: #fef3c7; border: 1px solid #f59e0b; color: #92400e;
+    }
+    .rate-mismatch-banner strong { display: block; margin-bottom: 0.25rem; }
+    .rate-mismatch-banner .mismatch-detail { font-size: 0.8rem; margin-top: 0.35rem; color: #78350f; }
+
+    /* Unpaid details breakdown */
+    .unpaid-breakdown {
+      margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f0f0f0;
+      font-size: 0.8rem; color: #64748b;
+    }
+    .unpaid-breakdown .ub-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.25rem 0;
+    }
+    .unpaid-breakdown .ub-hours { font-weight: 600; color: #334155; }
+    .unpaid-breakdown .ub-amount { font-weight: 700; }
+    .unpaid-breakdown .ub-amount.zero { color: #ef4444; }
+    .unpaid-breakdown .ub-amount.positive { color: #0f766e; }
+    .unpaid-breakdown .ub-note { font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem; font-style: italic; }
+
+    /* Manual entry link */
+    .manual-entry-link {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.8rem; color: #6366f1; cursor: pointer; margin-top: 0.75rem;
+      background: none; border: none; font-weight: 500;
+    }
+    .manual-entry-link:hover { text-decoration: underline; }
+
+    /* Manual entry modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; justify-content: center; align-items: flex-end; }
+    .modal-overlay.visible { display: flex; }
+    @media (min-width: 500px) { .modal-overlay.visible { align-items: center; } }
+    .modal-sheet {
+      background: #fff; border-radius: 16px 16px 0 0; width: 100%; max-width: 480px; max-height: 90vh;
+      overflow-y: auto; padding: 1.25rem; animation: slideUp 0.25s ease-out;
+    }
+    @media (min-width: 500px) { .modal-sheet { border-radius: 16px; } }
+    @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .modal-header h3 { margin: 0; font-size: 1.05rem; }
+    .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #64748b; padding: 0.25rem; }
+    .modal-field { margin-bottom: 0.85rem; }
+    .modal-field label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.3rem; }
+    .modal-field input, .modal-field textarea, .modal-field select {
+      width: 100%; box-sizing: border-box; padding: 0.55rem 0.65rem; border: 1px solid #d1d5db;
+      border-radius: 8px; font-size: 0.9rem; font-family: inherit;
+    }
+    .modal-field textarea { min-height: 60px; resize: vertical; }
+    .modal-field .field-hint { font-size: 0.7rem; color: #94a3b8; margin-top: 0.2rem; }
+    .modal-field.required label::after { content: ' *'; color: #ef4444; }
+    .modal-row { display: flex; gap: 0.75rem; }
+    .modal-row .modal-field { flex: 1; }
+    .modal-field .computed-duration {
+      font-size: 0.85rem; font-weight: 600; color: #0f766e; padding: 0.4rem 0; min-height: 1.3em;
+    }
+    .btn-modal-submit {
+      background: #6366f1; color: #fff; border: none; padding: 0.6rem; border-radius: 8px;
+      font-weight: 600; cursor: pointer; font-size: 0.9rem; width: 100%; margin-top: 0.25rem;
+    }
+    .btn-modal-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Manual badge in history */
+    .manual-badge {
+      display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.55rem; font-weight: 700;
+      color: #6366f1; background: #eef2ff; padding: 0.1rem 0.35rem; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.03em; margin-left: 0.35rem; cursor: default;
+    }
+
+    /* Space selector */
+    .space-selector {
+      display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem;
+      padding: 0.5rem 0.75rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e5e7eb;
+    }
+    .space-selector label { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; white-space: nowrap; }
+    .space-selector select {
+      flex: 1; padding: 0.4rem 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;
+      font-size: 0.85rem; background: #fff; max-width: 100%;
+    }
+    .space-tag { font-size: 0.6rem; font-weight: 600; color: #6366f1; background: #eef2ff; padding: 0.1rem 0.35rem; border-radius: 4px; margin-left: 0.3rem; }
+
+    /* ID Verification banner */
+    .id-banner { border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 0.75rem; font-size: 0.85rem; line-height: 1.4; }
+    .id-banner.warn { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
+    .id-banner.info { background: #e0f2fe; border: 1px solid #38bdf8; color: #0c4a6e; }
+    .id-banner.ok { background: #d1fae5; border: 1px solid #34d399; color: #065f46; }
+    .id-banner.error { background: #fee2e2; border: 1px solid #f87171; color: #991b1b; }
+    .id-banner strong { display: block; margin-bottom: 0.25rem; }
+    .id-banner .btn-verify {
+      display: inline-block; margin-top: 0.5rem; padding: 0.45rem 1rem; background: #3d8b7a; color: #fff;
+      border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; text-decoration: none;
+    }
+    .id-banner .btn-verify:hover { background: #2d7a6a; }
+
+    /* Toast overrides for mobile associate pages */
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* Scheduling Section */
+    .schedule-details {
+      margin-bottom: 1rem;
+    }
+    .schedule-details summary {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: #fff; border-radius: 10px; padding: 0.75rem 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer;
+      font-weight: 600; font-size: 0.9rem; color: #1e293b;
+      list-style: none;
+    }
+    .schedule-details summary::-webkit-details-marker { display: none; }
+    .schedule-details summary::before {
+      content: '\25B6'; font-size: 0.65rem; color: #94a3b8; transition: transform 0.2s;
+    }
+    .schedule-details[open] summary::before { transform: rotate(90deg); }
+
+    .schedule-body {
+      background: #fff; border-radius: 0 0 10px 10px; margin-top: -0.25rem;
+      padding: 0.75rem 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .schedule-summary {
+      display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;
+      margin-bottom: 0.75rem; font-size: 0.8rem; color: #64748b;
+    }
+    .schedule-summary .ss-val { font-weight: 700; color: #1e293b; }
+    .schedule-summary .ss-pct { font-weight: 700; }
+    .schedule-summary .ss-pct.green { color: #16a34a; }
+    .schedule-summary .ss-pct.yellow { color: #ca8a04; }
+    .schedule-summary .ss-pct.red { color: #dc2626; }
+    .schedule-summary .ss-mods { font-size: 0.7rem; color: #94a3b8; margin-left: auto; }
+
+    .schedule-grid { display: flex; flex-direction: column; gap: 0.35rem; }
+    .schedule-row {
+      display: grid; grid-template-columns: 90px 1fr 12px 1fr 50px 50px 20px;
+      align-items: center; gap: 0.4rem; padding: 0.35rem 0;
+      border-bottom: 1px solid #f5f5f5; font-size: 0.82rem;
+    }
+    .schedule-row:last-child { border-bottom: none; }
+    .schedule-row .sr-date { font-weight: 600; color: #334155; white-space: nowrap; }
+    .schedule-row .sr-date.today { color: #6366f1; }
+    .schedule-row .sr-arrow { color: #94a3b8; text-align: center; font-size: 0.7rem; }
+    .schedule-row input[type="time"] {
+      padding: 0.3rem 0.25rem; border: 1px solid #e5e7eb; border-radius: 6px;
+      font-size: 0.8rem; width: 100%; box-sizing: border-box;
+      background: #f9fafb; text-align: center;
+    }
+    .schedule-row input[type="time"]:focus { border-color: #6366f1; outline: none; background: #fff; }
+    .schedule-row .sr-planned { text-align: right; font-size: 0.75rem; color: #64748b; font-weight: 500; }
+    .schedule-row .sr-actual { text-align: right; font-size: 0.75rem; font-weight: 600; }
+    .schedule-row .sr-actual.met { color: #16a34a; }
+    .schedule-row .sr-actual.partial { color: #ca8a04; }
+    .schedule-row .sr-actual.none { color: #94a3b8; }
+    .schedule-row .sr-clear {
+      display: flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border: none; background: none;
+      color: #cbd5e1; font-size: 1rem; cursor: pointer; padding: 0;
+      border-radius: 50%; line-height: 1;
+    }
+    .schedule-row .sr-clear:hover { color: #ef4444; background: #fef2f2; }
+    .schedule-row .sr-clear.has-value { color: #94a3b8; }
+
+    .schedule-week-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 0 0.3rem; margin-top: 0.5rem;
+      border-top: 2px solid #e5e7eb; font-size: 0.7rem; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700;
+    }
+    .schedule-week-header:first-child { margin-top: 0; border-top: none; }
+    .schedule-week-totals {
+      display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem;
+      padding: 0.4rem 0 0.2rem; font-size: 0.75rem; border-top: 1px dashed #e5e7eb;
+      margin-bottom: 0.25rem;
+    }
+    .schedule-week-totals .swt-label { color: #94a3b8; font-weight: 500; }
+    .schedule-week-totals .swt-hours { font-weight: 700; color: #334155; }
+    .schedule-week-totals .swt-mods { font-size: 0.65rem; color: #94a3b8; }
+
+    /* History schedule comparison */
+    .history-schedule-bar {
+      background: #f8fafc; border-radius: 10px; padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .history-schedule-bar h4 { margin: 0 0 0.5rem; font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; }
+    .hsb-weeks { display: flex; flex-direction: column; gap: 0.5rem; }
+    .hsb-week {
+      display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: center;
+      padding: 0.5rem 0.65rem; background: #fff; border-radius: 8px; border: 1px solid #f0f0f0;
+    }
+    .hsb-week-label { font-size: 0.78rem; font-weight: 600; color: #334155; }
+    .hsb-week-label .hsb-dates { font-weight: 400; color: #94a3b8; font-size: 0.7rem; display: block; }
+    .hsb-week-stats { display: flex; gap: 0.75rem; align-items: center; text-align: right; font-size: 0.75rem; }
+    .hsb-stat { display: flex; flex-direction: column; align-items: flex-end; }
+    .hsb-stat .hsb-num { font-weight: 700; font-size: 0.8rem; }
+    .hsb-stat .hsb-lbl { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; }
+    .hsb-stat.sched .hsb-num { color: #6366f1; }
+    .hsb-stat.actual .hsb-num { color: #1e293b; }
+    .hsb-stat.delta .hsb-num.positive { color: #16a34a; }
+    .hsb-stat.delta .hsb-num.negative { color: #dc2626; }
+    .hsb-stat.delta .hsb-num.zero { color: #94a3b8; }
+    .hsb-mods { font-size: 0.6rem; color: #94a3b8; }
+
+    /* Coworkers Tab */
+    .cw-empty { text-align: center; padding: 2rem 1rem; }
+    .cw-empty .cw-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .cw-empty .cw-text { color: var(--text-muted); font-size: 0.9rem; }
+    .cw-empty .cw-sub { color: #94a3b8; font-size: 0.8rem; margin-top: 0.25rem; }
+
+    .cw-group { margin-bottom: 1rem; }
+    .cw-group-name { font-size: 0.75rem; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+
+    .cw-card {
+      background: #fff; border-radius: 10px; padding: 0.75rem 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 0.5rem;
+    }
+    .cw-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .cw-name { font-weight: 700; font-size: 0.9rem; color: #1e293b; }
+    .cw-name.is-you { color: #6366f1; }
+    .cw-week-stats { display: flex; gap: 0.5rem; align-items: center; font-size: 0.75rem; color: #64748b; }
+    .cw-week-stats .cw-pct { font-weight: 700; }
+    .cw-week-stats .cw-pct.green { color: #16a34a; }
+    .cw-week-stats .cw-pct.yellow { color: #ca8a04; }
+    .cw-week-stats .cw-pct.red { color: #dc2626; }
+
+    .cw-days { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+    .cw-day {
+      display: flex; flex-direction: column; align-items: center; gap: 0.1rem;
+      min-width: 36px; padding: 0.25rem 0.2rem; border-radius: 6px;
+      font-size: 0.65rem; background: #f9fafb; border: 1px solid #f0f0f0;
+    }
+    .cw-day .cw-d-label { font-weight: 700; color: #64748b; text-transform: uppercase; }
+    .cw-day .cw-d-hours { font-weight: 600; color: #334155; font-size: 0.7rem; }
+    .cw-day .cw-d-status { font-size: 0.7rem; }
+    .cw-day.met { background: #f0fdf4; border-color: #bbf7d0; }
+    .cw-day.partial { background: #fffbeb; border-color: #fde68a; }
+    .cw-day.missed { background: #fef2f2; border-color: #fecaca; }
+    .cw-day.none { background: #f9fafb; border-color: #f0f0f0; }
+    .cw-day.today { border-color: #6366f1; }
+
+    .cw-mods { font-size: 0.65rem; color: #94a3b8; margin-top: 0.35rem; }
+
+    .btn-save-schedule {
+      background: #6366f1; color: #fff; border: none; padding: 0.5rem 1.5rem;
+      border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+      width: 100%; margin-top: 0.75rem;
+    }
+    .btn-save-schedule:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Edit entry button */
+    .entry-edit-btn {
+      background: none; border: none; cursor: pointer; padding: 0.35rem;
+      color: #6366f1; display: inline-flex; align-items: center; border-radius: 6px;
+    }
+    .entry-edit-btn:hover { background: rgba(99,102,241,0.1); }
+    .entry-edit-btn svg { width: 15px; height: 15px; }
+
+    /* Pending edit request badge */
+    .pending-edit-badge {
+      display: inline-flex; align-items: center; gap: 0.2rem; font-size: 0.55rem; font-weight: 700;
+      color: #d97706; background: #fffbeb; padding: 0.1rem 0.35rem; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.03em; margin-left: 0.35rem; border: 1px solid #fde68a;
+    }
+
+    /* Tasks Tab */
+    .task-card {
+      background: #fff; border-radius: 10px; padding: 0.85rem 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 0.5rem;
+      border-left: 4px solid #94a3b8; transition: border-color 0.15s;
+    }
+    .task-card.priority-1 { border-left-color: #dc2626; }
+    .task-card.priority-2 { border-left-color: #f59e0b; }
+    .task-card.priority-3 { border-left-color: #3b82f6; }
+    .task-card.priority-4 { border-left-color: #94a3b8; }
+    .task-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+    .task-title { font-weight: 700; font-size: 0.9rem; color: #1e293b; flex: 1; }
+    .task-priority-badge {
+      display: inline-block; font-size: 0.6rem; font-weight: 700; padding: 0.15rem 0.5rem;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap;
+    }
+    .task-priority-badge.p1 { color: #dc2626; background: #fef2f2; }
+    .task-priority-badge.p2 { color: #d97706; background: #fffbeb; }
+    .task-priority-badge.p3 { color: #2563eb; background: #eff6ff; }
+    .task-priority-badge.p4 { color: #64748b; background: #f8fafc; }
+    .task-meta { display: flex; gap: 0.75rem; margin-top: 0.35rem; font-size: 0.75rem; color: #64748b; }
+    .task-meta span { display: flex; align-items: center; gap: 0.2rem; }
+    .task-notes { font-size: 0.8rem; color: #4b5563; margin-top: 0.35rem; line-height: 1.4; }
+    .task-status-btn {
+      margin-top: 0.5rem; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.75rem;
+      border-radius: 6px; border: 1px solid #d1d5db; background: #f9fafb;
+      color: #374151; cursor: pointer;
+    }
+    .task-status-btn:hover { background: #f0fdf4; border-color: #22c55e; color: #16a34a; }
+    .task-status-btn.in-progress { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
+
+    .tasks-empty { text-align: center; padding: 2rem 1rem; }
+    .tasks-empty .te-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .tasks-empty .te-text { color: var(--text-muted); font-size: 0.9rem; }
+    .tasks-empty .te-sub { color: #94a3b8; font-size: 0.8rem; margin-top: 0.25rem; }
+
+    .tasks-section-label {
+      font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;
+      letter-spacing: 0.04em; margin: 0.75rem 0 0.4rem; padding-bottom: 0.25rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    @media (max-width: 768px) {
+      .app-container { padding: 0.75rem; }
+      .clock-btn { width: 150px; height: 150px; font-size: 1.2rem; }
+      .timer { font-size: 1.6rem; }
+      .schedule-row { grid-template-columns: 72px 1fr 10px 1fr 40px 40px 18px; gap: 0.25rem; }
+      .schedule-row .sr-date { font-size: 0.75rem; }
+    }
+  </style>
+  <script type="module" src="../shared/version-info.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/site.css">
+  <link rel="stylesheet" href="../styles/tailwind.out.css">
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main app content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Associate</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs" id="tabNav"></div>
+
+    <div class="app-container">
+      <!-- Clock In/Out -->
+      <div class="clock-section" id="clockSection">
+        <button class="clock-btn clock-in" id="clockBtn">Clock In</button>
+        <div class="timer" id="timerDisplay" style="display:none;">0:00:00</div>
+        <div class="timer-label" id="timerLabel" style="display:none;">Time this session</div>
+        <div class="rate-display" id="rateDisplay"></div>
+
+        <div class="clockout-prompt" id="clockoutPrompt">
+          <div class="photo-warning" id="afterPhotoWarning" style="display:none;">
+            <div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:0.75rem;margin-bottom:0.75rem;text-align:center;">
+              <strong style="color:#92400e;">📸 After Photos Needed</strong>
+              <p style="margin:0.25rem 0 0;font-size:0.85rem;color:#92400e;">Please upload after photos of your work before clocking out. Scroll down to the photo section.</p>
+            </div>
+          </div>
+          <textarea id="clockoutDesc" placeholder="What did you work on? (optional)"></textarea>
+          <div class="prompt-actions">
+            <button class="btn-skip" id="btnClockoutSkip">Skip</button>
+            <button class="btn-submit" id="btnClockoutSubmit">Clock Out</button>
+          </div>
+        </div>
+
+        <div class="space-selector">
+          <label>Workplace</label>
+          <select id="workplaceSelector">
+            <option value="onsite">YOUR_PROPERTY_NAME</option>
+            <option value="remote">Remote</option>
+          </select>
+        </div>
+        <div class="space-selector">
+          <label>Space</label>
+          <select id="spaceSelector">
+            <option value="">Select space...</option>
+          </select>
+        </div>
+        <div class="space-selector">
+          <label>Task</label>
+          <select id="taskSelector">
+            <option value="">No specific task</option>
+          </select>
+        </div>
+
+        <button class="manual-entry-link" id="btnManualEntry">+ Add manual entry</button>
+      </div>
+
+      <!-- Scheduling -->
+      <details class="schedule-details" id="scheduleDetails">
+        <summary>Scheduling</summary>
+        <div class="schedule-body">
+          <div class="schedule-summary" id="scheduleSummary"></div>
+          <div class="schedule-grid" id="scheduleGrid"></div>
+          <button class="btn-save-schedule" id="btnSaveSchedule">Save Schedule</button>
+        </div>
+      </details>
+
+      <!-- Tab Navigation -->
+      <div class="tabs" id="workTabs">
+        <button data-tab="today">Today</button>
+        <button class="active" data-tab="tasks">Tasks</button>
+        <button data-tab="history">History</button>
+        <button data-tab="coworkers">Coworkers</button>
+        <button data-tab="payment">Payment</button>
+      </div>
+
+      <!-- Today Tab -->
+      <div class="tab-content" id="tabToday">
+        <!-- Clock-In Summary: tasks + photo reminder (shown after clock-in) -->
+        <div id="clockInSummary" style="display:none;">
+          <div class="photo-required-banner" style="border-color:#3d8b7a;background:#ecfdf5;">
+            <div class="banner-icon">📋</div>
+            <div class="banner-title" style="color:#065f46;">You're Clocked In — Here's Your Task List</div>
+            <div id="clockInTaskList" style="text-align:left;margin:0.5rem 0;font-size:0.9rem;color:#065f46;"></div>
+            <p class="banner-desc" style="color:#065f46;margin-top:0.75rem;">📸 <strong>Before photos required</strong> — scroll down to take a photo of the area before you start.</p>
+            <button class="banner-dismiss" onclick="document.getElementById('clockInSummary').style.display='none'">Got it</button>
+          </div>
+        </div>
+
+        <div class="today-card">
+          <h3>Today's Work</h3>
+          <div class="today-stats">
+            <div class="today-stat"><div class="val" id="todayHours">0:00</div><div class="lbl">Hours</div></div>
+            <div class="today-stat"><div class="val" id="todayAmount">$0.00</div><div class="lbl">Earned</div></div>
+          </div>
+          <div id="todayEntries"><p style="color:var(--text-muted);text-align:center;font-size:0.85rem;">No entries yet today</p></div>
+        </div>
+
+        <div class="photo-section" id="photoSection">
+          <div class="photo-required-banner" id="beforePhotoBanner" style="display:none;">
+            <div class="banner-icon">📸</div>
+            <div class="banner-title">Before Photos Required</div>
+            <p class="banner-desc">Take a photo of the area before you start working. This helps track progress and quality.</p>
+            <button class="banner-dismiss" onclick="document.getElementById('beforePhotoBanner').style.display='none'">Got it</button>
+          </div>
+          <div class="photo-required-banner" id="afterPhotoBanner" style="display:none;">
+            <div class="banner-icon">📸</div>
+            <div class="banner-title">After Photos Required</div>
+            <p class="banner-desc">Take a photo of your completed work before clocking out. This documents what you accomplished.</p>
+            <button class="banner-dismiss" onclick="document.getElementById('afterPhotoBanner').style.display='none'">Got it</button>
+          </div>
+          <h3>Work Photos & Files</h3>
+          <div class="photo-type-selector">
+            <button class="active" data-photo-type="before">Before</button>
+            <button data-photo-type="progress">Progress</button>
+            <button data-photo-type="after">After</button>
+          </div>
+          <div class="photo-upload-actions">
+            <label class="photo-action-btn">
+              <input type="file" id="cameraInput" accept="image/*" capture="environment">
+              <span class="photo-action-icon">📷</span>
+              <span class="photo-action-label">Take Photo</span>
+            </label>
+            <label class="photo-action-btn">
+              <input type="file" id="fileInput" multiple>
+              <span class="photo-action-icon">📁</span>
+              <span class="photo-action-label">Upload File</span>
+              <span class="photo-action-hint">Photos, docs, PDFs</span>
+            </label>
+          </div>
+          <div class="photo-grid" id="todayPhotos"></div>
+        </div>
+      </div>
+
+      <!-- Tasks Tab -->
+      <div class="tab-content active" id="tabTasks">
+        <div id="tasksList"><p style="color:var(--text-muted);text-align:center;font-size:0.85rem;">Loading tasks...</p></div>
+      </div>
+
+      <!-- History Tab -->
+      <div class="tab-content" id="tabHistory">
+        <div class="history-filters">
+          <select id="historyPeriod">
+            <option value="30">Last 30 Days</option>
+            <option value="7">Last 7 Days</option>
+            <option value="60">Last 60 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="all">All Time</option>
+          </select>
+          <select id="historyStatus">
+            <option value="">All</option>
+            <option value="unpaid">Pending</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+        <div id="historyList"><p style="color:var(--text-muted);text-align:center;font-size:0.85rem;">Loading history...</p></div>
+      </div>
+
+      <!-- Coworkers Tab -->
+      <div class="tab-content" id="tabCoworkers">
+        <div id="coworkersList"><p style="color:var(--text-muted);text-align:center;font-size:0.85rem;">Loading...</p></div>
+      </div>
+
+      <!-- Payment Tab -->
+      <div class="tab-content" id="tabPayment">
+        <div id="idVerificationBanner" style="display:none;"></div>
+        <div id="rateMismatchBanner" style="display:none;"></div>
+        <div class="pay-card">
+          <h3>Earnings Summary</h3>
+          <div class="pay-summary">
+            <div class="pay-stat"><div class="val" id="payTotal">$0</div><div class="lbl">Total Earned</div></div>
+            <div class="pay-stat"><div class="val green" id="payPaid">$0</div><div class="lbl">Paid</div></div>
+            <div class="pay-stat"><div class="val red" id="payUnpaid">$0</div><div class="lbl">Pending</div></div>
+          </div>
+          <div id="unpaidDetails" style="display:none;"></div>
+          <button class="btn-request-payment" id="btnRequestPayment" style="display:none;">Request Payment</button>
+        </div>
+
+        <div class="pay-card">
+          <h3>Your Rate</h3>
+          <div class="pay-form-row">
+            <label>Hourly Rate (set by admin)</label>
+            <div class="rate-display" id="payRate">$0.00/hr</div>
+          </div>
+        </div>
+
+        <div class="pay-card">
+          <h3>Payment Preference</h3>
+          <div class="pay-form-row">
+            <label>How would you like to be paid?</label>
+            <select id="payMethod">
+              <option value="">Select...</option>
+              <option value="stripe">Stripe ACH (Preferred)</option>
+              <option value="paypal">PayPal</option>
+              <option value="venmo">Venmo</option>
+              <option value="zelle">Zelle</option>
+              <option value="square">Square / Cash App</option>
+              <option value="cash">Cash</option>
+              <option value="check">Check</option>
+              <option value="bank_ach">Bank / ACH</option>
+            </select>
+          </div>
+          <!-- Stripe Connect section (shown when Stripe selected) -->
+          <div id="stripeConnectSection" style="display:none;">
+            <div style="background:#f0fdf4;border-radius:8px;padding:0.75rem 1rem;margin-bottom:0.75rem;font-size:0.85rem;">
+              <p id="stripeConnectStatus" style="margin:0 0 0.5rem;color:var(--text-muted);">Checking Stripe status...</p>
+              <button class="btn-save-pref" id="btnStripeConnect" style="background:#635bff;width:auto;padding:0.5rem 1.25rem;">Connect with Stripe</button>
+            </div>
+          </div>
+          <div class="pay-form-row" id="payHandleRow">
+            <label>Username / Email / Phone for payment</label>
+            <input type="text" id="payHandle" placeholder="e.g. @username, email, or phone number">
+          </div>
+          <button class="btn-save-pref" id="btnSavePref">Save Preference</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Entry Modal -->
+  <div class="modal-overlay" id="editEntryModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Edit Time Entry</h3>
+        <button class="modal-close" id="btnEditClose">&times;</button>
+      </div>
+      <div class="modal-field">
+        <label>Date</label>
+        <input type="date" id="editDate">
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>Clock In</label>
+          <input type="time" id="editClockIn">
+        </div>
+        <div class="modal-field">
+          <label>Clock Out</label>
+          <input type="time" id="editClockOut">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Duration</label>
+        <div class="computed-duration" id="editDuration">—</div>
+      </div>
+      <div class="modal-field">
+        <label>Work Description</label>
+        <textarea id="editDesc" placeholder="What did you work on?"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Space</label>
+        <select id="editSpace"></select>
+      </div>
+      <button class="btn-modal-submit" id="btnEditSubmit">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Manual Entry Modal -->
+  <div class="modal-overlay" id="manualEntryModal">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Add Manual Entry</h3>
+        <button class="modal-close" id="btnManualClose">&times;</button>
+      </div>
+      <div class="modal-field">
+        <label>Date</label>
+        <input type="date" id="manualDate">
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label>Clock In</label>
+          <input type="time" id="manualClockIn">
+        </div>
+        <div class="modal-field">
+          <label>Clock Out</label>
+          <input type="time" id="manualClockOut">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Duration</label>
+        <div class="computed-duration" id="manualDuration">—</div>
+      </div>
+      <div class="modal-field">
+        <label>Work Description</label>
+        <textarea id="manualDesc" placeholder="What did you work on?"></textarea>
+      </div>
+      <div class="modal-field required">
+        <label>Reason for manual entry</label>
+        <input type="text" id="manualReason" placeholder="e.g. Forgot to clock in, phone died, worked offline">
+        <div class="field-hint">Manual entries are tracked separately for transparency</div>
+      </div>
+      <button class="btn-modal-submit" id="btnManualSubmit">Add Entry</button>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../shared/instant-chrome.js"></script>
+
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="worktracking.js"></script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>FAQ Management - AlpacAPPs Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=5">
+  <link rel="stylesheet" href="faq.css?v=2">
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs"></div>
+
+    <div class="faq-container">
+
+      <!-- Test AI Assistant Section -->
+      <div class="section test-ai-section">
+        <div class="section-header">
+          <h2>Test AI Assistant</h2>
+          <span id="testModeLabel" class="test-ai-label">Same as contact page</span>
+        </div>
+        <div class="section-body">
+          <p class="context-description">Ask a question to test the AI assistant exactly as visitors would experience it on the contact page.</p>
+
+          <!-- User Impersonation (admin only) -->
+          <div id="impersonationRow" class="impersonation-row hidden">
+            <label class="impersonation-label">Test as:</label>
+            <div class="impersonation-input-wrap">
+              <input type="text" id="impersonateInput" class="impersonation-input" placeholder="Anonymous (contact page)" autocomplete="off">
+              <div id="impersonateDropdown" class="impersonation-dropdown hidden"></div>
+            </div>
+            <button id="impersonateClearBtn" class="btn-small btn-secondary impersonation-clear hidden">Clear</button>
+          </div>
+          <div id="impersonateChip" class="impersonate-chip hidden">
+            <span id="impersonateChipName"></span>
+            <span id="impersonateChipRole" class="impersonate-chip-role"></span>
+          </div>
+
+          <div class="test-question-wrapper">
+            <input type="text" id="testQuestionInput" class="test-question-input" placeholder="What would you like to know?" autocomplete="off">
+            <button id="testAskBtn" class="btn-primary test-ask-btn">Ask</button>
+          </div>
+
+          <div id="testAnswerContainer" class="test-answer-container">
+            <div id="testAnswerText" class="test-answer-text"></div>
+
+            <div id="testLowConfidenceNotice" class="test-low-confidence-notice">
+              ⚠️ Low confidence — This answer would trigger the follow-up form on the contact page.
+            </div>
+
+            <div id="testConfidenceMeta" class="test-confidence-meta">
+              <span id="testConfidenceLabel"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Context Compilation Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>AI Context</h2>
+          <div class="context-meta">
+            <span id="lastCompiled">Last compiled: Never</span>
+            <button id="recompileBtn" class="btn-primary">Recompile Context</button>
+          </div>
+        </div>
+        <div class="section-body">
+          <p class="context-description">
+            The AI chat assistant uses compiled context from spaces data, FAQ entries, and external links.
+            Recompile after making changes to update the assistant's knowledge.
+          </p>
+          <div id="contextStats" class="context-stats">
+            <div class="stat">
+              <span class="stat-value" id="statSpaces">-</span>
+              <span class="stat-label">Spaces</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="statFaqs">-</span>
+              <span class="stat-label">FAQ Entries</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="statLinks">-</span>
+              <span class="stat-label">Context Links</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Log (all auto-logged questions with AI answers) -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Question Log</h2>
+          <span id="questionLogCount" class="count-badge">0</span>
+        </div>
+        <div id="questionLogSection" class="section-body">
+          <div class="empty-state">No questions asked yet</div>
+        </div>
+      </div>
+
+      <!-- Pending Questions (user feedback / low confidence needing answers) -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Pending Questions</h2>
+          <span id="pendingCount" class="count-badge">0</span>
+        </div>
+        <div id="pendingSection" class="section-body">
+          <div class="empty-state">No pending questions</div>
+        </div>
+      </div>
+
+      <!-- Answered FAQ Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>FAQ Entries</h2>
+          <span id="faqCount" class="count-badge">0</span>
+          <button id="addFaqBtn" class="btn-secondary btn-small" style="margin-left: auto;">+ Add Entry</button>
+        </div>
+        <div id="faqSection" class="section-body">
+          <div class="empty-state">No FAQ entries yet</div>
+        </div>
+      </div>
+
+      <!-- Context Entries (key-value knowledge base) -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Context Entries</h2>
+          <span id="contextEntriesCount" class="count-badge">0</span>
+          <button id="addContextEntryBtn" class="btn-secondary btn-small" style="margin-left: auto;">+ Add Entry</button>
+        </div>
+        <div id="contextEntriesSection" class="section-body">
+          <div class="empty-state">No context entries</div>
+        </div>
+      </div>
+
+      <!-- Context Links Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Context Links</h2>
+          <span id="linksCount" class="count-badge">0</span>
+          <button id="addLinkBtn" class="btn-secondary btn-small" style="margin-left: auto;">+ Add Link</button>
+        </div>
+        <div id="linksSection" class="section-body">
+          <div class="empty-state">No context links added</div>
+        </div>
+      </div>
+
+      <!-- Voice Assistant Config Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2>Voice Assistant</h2>
+          <span class="test-ai-label">Vapi · Inbound Calls</span>
+          <button id="editVoiceBtn" class="btn-secondary btn-small hidden" style="margin-left: auto;" onclick="openVoiceModal()">Edit</button>
+        </div>
+        <div id="voiceConfigSection" class="section-body">
+          <div class="empty-state">Loading voice config...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Modal -->
+  <div id="faqModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="faqModalTitle">Add FAQ Entry</h2>
+        <button class="modal-close" onclick="closeFaqModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="faqForm">
+          <input type="hidden" id="faqId">
+          <div class="form-group">
+            <label for="faqQuestion">Question</label>
+            <textarea id="faqQuestion" rows="3" placeholder="What question will this answer?" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="faqAnswer">Answer</label>
+            <textarea id="faqAnswer" rows="6" placeholder="Provide a helpful answer..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="faqPublished">
+              Include in AI context (published)
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeFaqModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveFaq()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Link Modal -->
+  <div id="linkModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="linkModalTitle">Add Context Link</h2>
+        <button class="modal-close" onclick="closeLinkModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="linkForm">
+          <input type="hidden" id="linkId">
+          <div class="form-group">
+            <label for="linkUrl">URL</label>
+            <input type="url" id="linkUrl" placeholder="https://docs.google.com/document/d/..." required>
+            <p class="form-hint">Supports Google Docs, web pages, and other publicly accessible URLs</p>
+          </div>
+          <div class="form-group">
+            <label for="linkTitle">Title</label>
+            <input type="text" id="linkTitle" placeholder="House Rules Document" required>
+          </div>
+          <div class="form-group">
+            <label for="linkDescription">Description (optional)</label>
+            <input type="text" id="linkDescription" placeholder="Contains policies and guidelines for residents">
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="linkActive" checked>
+              Include in context compilation
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeLinkModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveLink()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context Entry Modal -->
+  <div id="contextEntryModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="contextEntryModalTitle">Add Context Entry</h2>
+        <button class="modal-close" onclick="closeContextEntryModal()">&times;</button>
+      </div>
+      <div class="modal-body ce-modal-body">
+        <form id="contextEntryForm">
+          <input type="hidden" id="contextEntryId">
+          <div class="form-group">
+            <label for="contextEntryTitle">Title</label>
+            <input type="text" id="contextEntryTitle" placeholder="e.g. Wifi & Internet, Parking Rules, etc." required>
+          </div>
+          <div class="form-group">
+            <label for="contextEntryContent">Content</label>
+            <textarea id="contextEntryContent" rows="8" placeholder="Write the factual information the AI should know about this topic..." required></textarea>
+          </div>
+          <div class="ce-bottom-row">
+            <div class="form-group ce-order-group">
+              <label for="contextEntryOrder">Order</label>
+              <input type="number" id="contextEntryOrder" value="0" min="0">
+            </div>
+            <label class="ce-toggle-label">
+              <input type="checkbox" id="contextEntryActive" checked>
+              <span>Active (include in AI context)</span>
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeContextEntryModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveContextEntry()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recompile Progress Modal -->
+  <div id="recompileModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Compiling Context</h2>
+      </div>
+      <div class="modal-body">
+        <div class="recompile-progress">
+          <div class="progress-item" id="progressSpaces">
+            <span class="progress-icon">&#9711;</span>
+            <span>Loading spaces data...</span>
+          </div>
+          <div class="progress-item" id="progressFaqs">
+            <span class="progress-icon">&#9711;</span>
+            <span>Loading FAQ entries...</span>
+          </div>
+          <div class="progress-item" id="progressLinks">
+            <span class="progress-icon">&#9711;</span>
+            <span>Fetching external content...</span>
+          </div>
+          <div class="progress-item" id="progressUpload">
+            <span class="progress-icon">&#9711;</span>
+            <span>Uploading context file...</span>
+          </div>
+        </div>
+        <div id="recompileError" class="error-message hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Voice Assistant Edit Modal -->
+  <div id="voiceModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h2>Edit Voice Assistant</h2>
+        <button class="modal-close" onclick="closeVoiceModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="voiceForm">
+          <input type="hidden" id="voiceAssistantId">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="voiceName">Name</label>
+              <input type="text" id="voiceName" placeholder="AI Concierge" required>
+            </div>
+            <div class="form-group form-group--narrow">
+              <label for="voiceTemperature">Temperature</label>
+              <input type="number" id="voiceTemperature" min="0" max="2" step="0.1" value="0.7">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="voiceModelProvider">Model Provider</label>
+              <select id="voiceModelProvider" onchange="onModelProviderChange()">
+                <option value="google">Google</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="groq">Groq</option>
+                <option value="deepinfra">DeepInfra</option>
+                <option value="together-ai">TogetherAI</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="perplexity-ai">Perplexity</option>
+                <option value="azure-openai">Azure OpenAI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="voiceModelName">Model Name</label>
+              <select id="voiceModelName"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="voiceVoiceProvider">Voice Provider</label>
+              <select id="voiceVoiceProvider" onchange="onVoiceProviderChange()">
+                <option value="vapi">Vapi</option>
+                <option value="11labs">ElevenLabs</option>
+                <option value="playht">PlayHT</option>
+                <option value="cartesia">Cartesia</option>
+                <option value="openai">OpenAI</option>
+                <option value="azure">Azure</option>
+                <option value="deepgram">Deepgram</option>
+                <option value="lmnt">LMNT</option>
+                <option value="rime-ai">RimeAI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="voiceVoiceId">Voice ID</label>
+              <select id="voiceVoiceId"></select>
+            </div>
+          </div>
+          <div class="form-row form-row--three">
+            <div class="form-group">
+              <label for="voiceTranscriberProvider">Transcriber</label>
+              <select id="voiceTranscriberProvider" onchange="onTranscriberProviderChange()">
+                <option value="deepgram">Deepgram</option>
+                <option value="google">Google</option>
+                <option value="gladia">Gladia</option>
+                <option value="speechmatics">Speechmatics</option>
+                <option value="talkscriber">Talkscriber</option>
+                <option value="assembly-ai">AssemblyAI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="voiceTranscriberModel">Model</label>
+              <select id="voiceTranscriberModel"></select>
+            </div>
+            <div class="form-group form-group--narrow">
+              <label for="voiceTranscriberLanguage">Language</label>
+              <select id="voiceTranscriberLanguage"></select>
+            </div>
+          </div>
+          <div class="form-group form-group--narrow">
+            <label for="voiceMaxDuration">Max Duration (min)</label>
+            <input type="number" id="voiceMaxDuration" min="1" max="60" value="10">
+          </div>
+          <div class="form-group">
+            <label for="voiceFirstMessage">First Message</label>
+            <textarea id="voiceFirstMessage" rows="2" placeholder="Hello! Thanks for calling..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="voiceSystemPrompt">System Prompt</label>
+            <textarea id="voiceSystemPrompt" rows="10" placeholder="You are..." class="mono-textarea"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeVoiceModal()">Cancel</button>
+        <button class="btn-primary" id="saveVoiceBtn" onclick="saveVoiceAssistant()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="faq.js"></script>
+</body>
+</html>

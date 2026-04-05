@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "lastUpdated": "2026-04-05",
+  "templateRepo": "https://github.com/rsonnad/alpacapps-infra",
+  "updatesPage": "https://alpacaplayhouse.com/infra/updates.html",
+  "upgradeGuide": "https://raw.githubusercontent.com/rsonnad/alpacapps-infra/main/infra/infra-upgrade-guide.md",
+  "features": [
+    {
+      "id": "d1-session-logging",
+      "name": "Session Logging to Cloudflare D1",
+      "date": "2026-03-08",
+      "description": "Auto-save Claude Code session transcripts to Cloudflare D1. Search past sessions, track tokens and costs.",
+      "requires": ["cloudflare-account"],
+      "detects": ["cloudflare/claude-sessions/src/index.js"]
+    },
+    {
+      "id": "on-demand-context",
+      "name": "On-Demand Context System",
+      "date": "2026-03-08",
+      "description": "Split CLAUDE.md into slim index + on-demand docs/ files. Saves thousands of tokens per conversation.",
+      "requires": [],
+      "detects": ["docs/SCHEMA.md", "docs/PATTERNS.md", "docs/KEY-FILES.md"]
+    },
+    {
+      "id": "open-brain",
+      "name": "Open Brain — Session Transparency Dashboard",
+      "reference": "https://natesnewsletter.substack.com/p/every-ai-you-use-forgets-you-heres",
+      "date": "2026-03-10",
+      "description": "View Claude Code session history, search transcripts, track costs. Radical transparency for AI usage.",
+      "requires": ["d1-session-logging"],
+      "detects": ["open-brain/index.html"]
+    },
+    {
+      "id": "poll-manager",
+      "name": "Smart Polling with Circuit Breaker",
+      "date": "2026-03-09",
+      "description": "Intelligent data refresh — pauses on hidden tabs, exponential backoff on failures, auto-recovery.",
+      "requires": ["supabase"],
+      "detects": ["shared/services/poll-manager.js"]
+    },
+    {
+      "id": "tab-visibility",
+      "name": "Intranet Tab Visibility Config",
+      "date": "2026-03-09",
+      "description": "Database-driven tab show/hide. Toggle intranet sections without code changes.",
+      "requires": ["supabase"],
+      "detects": ["supabase/migrations/001_page_display_config.sql"]
+    },
+    {
+      "id": "error-logger",
+      "name": "Centralized Error Logger",
+      "date": "2026-03-08",
+      "description": "Standardized error capture and formatting utility for consistent error handling.",
+      "requires": [],
+      "detects": ["shared/error-logger.js"]
+    },
+    {
+      "id": "stop-hook-upgrade",
+      "name": "Stop Hook Upgrade (replaces SessionEnd)",
+      "date": "2026-03-12",
+      "description": "Captures worktree and subagent sessions. Rate-limited to prevent duplicate saves.",
+      "requires": ["d1-session-logging"],
+      "detects": []
+    },
+    {
+      "id": "update-checker",
+      "name": "Auto Update Checker",
+      "date": "2026-03-14",
+      "description": "Admin notification when new template features are available. Checks monthly against the template repo.",
+      "requires": [],
+      "detects": ["shared/update-checker.js"]
+    },
+    {
+      "id": "devcontrol-dashboard",
+      "name": "DevControl — AI Development Dashboard",
+      "date": "2026-03-17",
+      "description": "Six-tab admin dashboard: overview, releases (GitHub PR changelog), sessions (D1 transcript viewer), tokens & cost, context window analysis with 90-day history chart, backups, and task management.",
+      "requires": ["d1-session-logging", "supabase"],
+      "detects": ["spaces/admin/devcontrol/index.html", "spaces/admin/devcontrol/devcontrol.js"]
+    },
+    {
+      "id": "devdocs-library",
+      "name": "DevDocs Reference Library",
+      "date": "2026-03-28",
+      "description": "Browsable internal docs page with search, section grouping, chronological view, and expandable cards. Auto-indexes all docs/ markdown files.",
+      "requires": ["supabase"],
+      "detects": ["spaces/admin/devcontrol/devdocs/index.html"]
+    },
+    {
+      "id": "secrets-bitwarden",
+      "name": "Bitwarden Secrets Management",
+      "date": "2026-03-17",
+      "description": "bw-read shell helper and patterns for accessing API keys, SSH credentials, and service passwords from Bitwarden CLI.",
+      "requires": [],
+      "detects": ["docs/SECRETS-BITWARDEN.md"]
+    },
+    {
+      "id": "upgrade-guide",
+      "name": "LLM Upgrade Guide",
+      "date": "2026-03-28",
+      "description": "Step-by-step upgrade instructions that Claude can follow to sync new features from the template repo into an existing project.",
+      "requires": [],
+      "detects": ["infra/infra-upgrade-guide.md"]
+    },
+    {
+      "id": "cloudflare-pages",
+      "name": "Cloudflare Pages Deployment",
+      "date": "2026-04-05",
+      "description": "Deploy via Cloudflare Pages instead of GitHub Pages. Faster global CDN, automatic HTTPS, preview deployments for branches, and native Cloudflare Workers integration.",
+      "requires": ["cloudflare-account"],
+      "detects": [".github/workflows/bump-version-on-push.yml"]
+    },
+    {
+      "id": "notifications-system",
+      "name": "Notification Subscriptions",
+      "date": "2026-04-05",
+      "description": "Database-driven notification system with subscription preferences. Users can subscribe to event types and receive targeted notifications.",
+      "requires": ["supabase"],
+      "detects": ["spaces/admin/notifications.html", "supabase/migrations/20260331_notification_subscriptions.sql"]
+    },
+    {
+      "id": "reservations-system",
+      "name": "Reservation Management",
+      "date": "2026-04-05",
+      "description": "Full reservation pipeline with booking, confirmation, and calendar integration. Includes reservation-service.js shared module.",
+      "requires": ["supabase"],
+      "detects": ["spaces/admin/reservations.html", "shared/reservation-service.js"]
+    },
+    {
+      "id": "admin-tabs-system",
+      "name": "Admin Tabs & Context Switcher",
+      "date": "2026-04-05",
+      "description": "Modular admin tab management with context switching. Enables dynamic tab organization and role-based section visibility.",
+      "requires": [],
+      "detects": ["shared/admin-tabs.js", "shared/context-switcher.js"]
+    }
+  ]
+}

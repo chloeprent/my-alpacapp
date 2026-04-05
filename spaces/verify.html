@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Identity Verification - YOUR_PROPERTY_NAME</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1" integrity="sha384-nBSomYN4UWX4we7Pw5GsQDkjtwLh2Wde+3szWl5Lzf0zuN9XncHIZLNoucos4C7f" crossorigin="anonymous"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: #f5f5f0;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .site-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 2rem;
+      background: #2d3024;
+      color: white;
+    }
+    .site-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+    .site-nav__icon { height: 32px; width: auto; }
+
+    .container {
+      max-width: 500px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #2d3024;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .upload-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 1rem;
+    }
+    .upload-area:hover, .upload-area.dragover {
+      border-color: #3d8b7a;
+      background: #f0faf7;
+    }
+    .upload-area.has-file {
+      border-color: #3d8b7a;
+      border-style: solid;
+      padding: 1rem;
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .upload-text {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .upload-text strong {
+      color: #3d8b7a;
+    }
+
+    .preview-container {
+      display: none;
+    }
+    .preview-container.visible {
+      display: block;
+    }
+    .preview-img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 6px;
+      display: block;
+      margin: 0 auto;
+    }
+    .file-name {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+    .change-file {
+      display: block;
+      text-align: center;
+      color: #3d8b7a;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    .tips {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: #555;
+    }
+    .tips ul {
+      margin: 0.5rem 0 0 1.2rem;
+      padding: 0;
+    }
+    .tips li { margin-bottom: 0.25rem; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem;
+      background: #3d8b7a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background: #2d7a6a; }
+    .btn-submit:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    .loading.visible { display: block; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #eee;
+      border-top: 3px solid #3d8b7a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    /* Success / Review result screens */
+    .result {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    .result.visible { display: block; }
+
+    .result .icon {
+      font-size: 3.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .result h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .result-success h2 { color: #3d8b7a; }
+    .result-review h2 { color: #e67e22; }
+
+    .result > p {
+      color: #666;
+      margin-bottom: 1rem;
+      max-width: 450px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* What's Next Section */
+    .whats-next {
+      background: #e5f4f1;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+    .whats-next h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #3d8b7a;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+    .whats-next ol {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+    .whats-next li {
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    .whats-next li:last-child { margin-bottom: 0; }
+
+    /* Infra image */
+    .infra-banner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #faf9f7;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1.5rem 0;
+      text-decoration: none;
+      color: #333;
+      border: 1px solid #e5e5e0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .infra-banner:hover {
+      border-color: #3d8b7a;
+      box-shadow: 0 2px 8px rgba(61, 139, 122, 0.1);
+    }
+    .infra-banner img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .infra-banner .infra-text {
+      text-align: left;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .infra-banner .infra-text strong {
+      display: block;
+      font-size: 0.9rem;
+      color: #3d8b7a;
+      margin-bottom: 0.15rem;
+    }
+
+    .error-state {
+      text-align: center;
+      padding: 2rem;
+    }
+    .error-state .error-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .error-state h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: #c0392b;
+    }
+    .error-state p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .error-msg {
+      display: none;
+      background: #fef2f2;
+      color: #c0392b;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .error-msg.visible { display: block; }
+
+    input[type="file"] { display: none; }
+
+    /* Ask Section */
+    .ask-section {
+      background: #e5f4f1;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+    .ask-section h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #3d8b7a;
+      margin: 0 0 0.5rem;
+      text-align: center;
+    }
+    .ask-section > p {
+      color: #666;
+      font-size: 0.85rem;
+      margin: 0 0 0.75rem;
+      text-align: center;
+    }
+    .question-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .question-input {
+      flex: 1;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .question-input:focus {
+      outline: none;
+      border-color: #3d8b7a;
+      box-shadow: 0 0 0 3px rgba(61, 139, 122, 0.1);
+    }
+    .ask-btn {
+      padding: 0.625rem 1.25rem;
+      background: #3d8b7a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .ask-btn:hover { background: #327a6a; }
+    .ask-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .answer-container {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e5e5e0;
+    }
+    .answer-container.visible { display: block; }
+    .answer-text {
+      line-height: 1.6;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      color: #333;
+    }
+    .answer-feedback {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #e5e5e0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .answer-feedback span {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .feedback-btn {
+      padding: 0.375rem 0.75rem;
+      border: 1px solid #e5e5e0;
+      background: white;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .feedback-btn:hover {
+      border-color: #3d8b7a;
+      color: #3d8b7a;
+    }
+    .feedback-btn--negative {
+      border-color: #e74c3c;
+      color: #e74c3c;
+    }
+    .feedback-btn--negative:hover {
+      background: #fef2f2;
+    }
+    .low-confidence-notice {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: #fef3c7;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #92400e;
+    }
+    .low-confidence-notice.visible { display: block; }
+    .followup-form {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+    .followup-form.visible { display: block; }
+    .followup-form p {
+      margin: 0 0 0.5rem;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .followup-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      margin-bottom: 0.5rem;
+    }
+    .followup-input {
+      padding: 0.375rem 0.625rem;
+      border: 1px solid #e5e5e0;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+    .followup-btn {
+      padding: 0.375rem 0.75rem;
+      background: #3d8b7a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .question-submitted {
+      display: none;
+      padding: 0.75rem;
+      background: #d1fae5;
+      border-radius: 8px;
+      color: #065f46;
+      font-size: 0.85rem;
+    }
+    .question-submitted.visible { display: block; }
+
+    .questions-contact {
+      font-size: 0.85rem;
+      color: #666;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    .questions-contact a { color: #3d8b7a; text-decoration: none; }
+    .questions-contact a:hover { text-decoration: underline; }
+
+    .btn-community {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #3d8b7a;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: background 0.15s ease;
+    }
+    .btn-community:hover { background: #327568; }
+
+    @media (max-width: 600px) {
+      .site-nav { padding: 0.75rem 1rem; }
+      .container { margin: 1rem auto; }
+      .card { padding: 1.5rem; }
+      .question-input-wrapper { flex-direction: column; }
+      .infra-banner img { width: 60px; height: 60px; }
+    }
+  </style>
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+</head>
+<body>
+  <span data-site-version style="display:none;">v260405.02 4:44p</span>
+  <div id="siteHeader"></div>
+
+  <div class="container">
+    <div class="card">
+      <!-- Loading state while validating token -->
+      <div id="validatingState" class="loading visible">
+        <div class="spinner"></div>
+        <p class="loading-text">Validating your link...</p>
+      </div>
+
+      <!-- Error state (invalid/expired token) -->
+      <div id="errorState" class="error-state" style="display: none;">
+        <div class="error-icon">&#128683;</div>
+        <h2 id="errorTitle">Invalid Link</h2>
+        <p id="errorMessage">This upload link is no longer valid. Please contact us for a new link.</p>
+      </div>
+
+      <!-- Upload form -->
+      <div id="uploadForm" style="display: none;">
+        <h1>Identity Verification</h1>
+        <p class="subtitle">
+          Hi <strong id="applicantName"></strong>, please upload a clear photo of your driver's license or state ID or other valid government ID to verify your identity.
+        </p>
+
+        <div class="tips">
+          <strong>Tips for a good photo:</strong>
+          <ul>
+            <li>Use good lighting - avoid glare and shadows</li>
+            <li>Make sure all text is readable</li>
+            <li>Include the full card in the frame</li>
+            <li>Front side of the ID only</li>
+          </ul>
+        </div>
+
+        <div id="errorMsg" class="error-msg"></div>
+
+        <div id="uploadArea" class="upload-area">
+          <div id="uploadPrompt">
+            <div class="upload-icon">&#128247;</div>
+            <p class="upload-text"><strong>Tap to take a photo</strong> or choose from gallery</p>
+            <p class="upload-text" style="font-size: 0.8rem; margin-top: 0.25rem;">JPG, PNG, or HEIC - max 10MB</p>
+          </div>
+          <div id="previewContainer" class="preview-container">
+            <img id="previewImg" class="preview-img" alt="ID preview">
+            <p id="fileName" class="file-name"></p>
+            <span class="change-file">Tap to change photo</span>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+
+        <button id="submitBtn" class="btn-submit" disabled>Upload & Verify</button>
+      </div>
+
+      <!-- Loading state during upload/processing -->
+      <div id="processingState" class="loading">
+        <div class="spinner"></div>
+        <p class="loading-text">Analyzing your ID... This may take a few seconds.</p>
+      </div>
+
+      <!-- Success result -->
+      <div id="successResult" class="result result-success">
+        <div class="icon">&#129433;</div>
+        <h2>Identity Verified!</h2>
+        <p>Your identity has been successfully verified. You're all set - no further action is needed.</p>
+
+        <div class="whats-next">
+          <h3>What Happens Next</h3>
+          <ol>
+            <li>Your ID verification has been added to your file</li>
+            <li>You're all set — no further action needed on your end</li>
+            <li>If you have any questions, don't hesitate to reach out</li>
+          </ol>
+        </div>
+
+        <!-- Ask a Question -->
+        <div class="ask-section">
+          <h3>Have a question?</h3>
+          <p>Get instant answers about rentals, the community, and more.</p>
+          <div class="question-input-wrapper">
+            <input type="text" id="questionInput1" class="question-input" placeholder="What would you like to know?" autocomplete="off">
+            <button class="ask-btn" data-target="1">Ask</button>
+          </div>
+          <div id="answerContainer1" class="answer-container">
+            <div id="answerText1" class="answer-text"></div>
+            <div id="lowConfidence1" class="low-confidence-notice">
+              I'm not fully confident in this answer. If this didn't help, let us know and we'll get back to you.
+            </div>
+            <div class="answer-feedback" id="feedback1">
+              <span>Was this helpful?</span>
+              <button class="feedback-btn" onclick="handleFeedback(true, '1')">Yes, thanks!</button>
+              <button class="feedback-btn feedback-btn--negative" onclick="handleFeedback(false, '1')">Not quite</button>
+            </div>
+            <div id="followupForm1" class="followup-form">
+              <p>Sorry about that! Leave your info and we'll get back to you with an answer.</p>
+              <div class="followup-fields">
+                <input type="text" id="followupName1" class="followup-input" placeholder="Your name">
+                <input type="email" id="followupEmail1" class="followup-input" placeholder="Email">
+                <input type="tel" id="followupPhone1" class="followup-input" placeholder="Phone (optional)">
+              </div>
+              <button class="followup-btn" onclick="submitFollowup('1')">Submit to a Human</button>
+            </div>
+            <div id="questionSubmitted1" class="question-submitted">
+              Thanks! We've received your question and will get back to you.
+            </div>
+          </div>
+        </div>
+
+        <p class="questions-contact">Or email us at <a href="mailto:pai@YOUR_DOMAIN">pai@YOUR_DOMAIN</a></p>
+
+        <a href="https://USERNAME.github.io/REPO/docs/your-appinfra.html" class="infra-banner">
+          <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/infra/animalservers2.jpg" alt="Propertys in a server room">
+          <div class="infra-text">
+            <strong>YOUR_APP_NAME Infra</strong>
+            Built with $0/month infrastructure. See how we set up messaging, marketing, and customer management with AI.
+          </div>
+        </a>
+
+        <a href="https://YOUR_DOMAIN/community/" class="btn-community">Learn About Our Community</a>
+      </div>
+
+      <!-- Review result -->
+      <div id="reviewResult" class="result result-review">
+        <div class="icon">&#129433;</div>
+        <h2>Submitted for Review</h2>
+        <p>Your ID has been uploaded and is being reviewed by our team. We'll confirm your identity shortly.</p>
+
+        <div class="whats-next">
+          <h3>What Happens Next</h3>
+          <ol>
+            <li>Our team will review your ID (usually within 1 business day)</li>
+            <li>Once verified, we'll update your file and be in touch</li>
+            <li>If you have questions, feel free to reach out below</li>
+          </ol>
+        </div>
+
+        <!-- Ask a Question -->
+        <div class="ask-section">
+          <h3>Have a question?</h3>
+          <p>Get instant answers about rentals, the community, and more.</p>
+          <div class="question-input-wrapper">
+            <input type="text" id="questionInput2" class="question-input" placeholder="What would you like to know?" autocomplete="off">
+            <button class="ask-btn" data-target="2">Ask</button>
+          </div>
+          <div id="answerContainer2" class="answer-container">
+            <div id="answerText2" class="answer-text"></div>
+            <div id="lowConfidence2" class="low-confidence-notice">
+              I'm not fully confident in this answer. If this didn't help, let us know and we'll get back to you.
+            </div>
+            <div class="answer-feedback" id="feedback2">
+              <span>Was this helpful?</span>
+              <button class="feedback-btn" onclick="handleFeedback(true, '2')">Yes, thanks!</button>
+              <button class="feedback-btn feedback-btn--negative" onclick="handleFeedback(false, '2')">Not quite</button>
+            </div>
+            <div id="followupForm2" class="followup-form">
+              <p>Sorry about that! Leave your info and we'll get back to you with an answer.</p>
+              <div class="followup-fields">
+                <input type="text" id="followupName2" class="followup-input" placeholder="Your name">
+                <input type="email" id="followupEmail2" class="followup-input" placeholder="Email">
+                <input type="tel" id="followupPhone2" class="followup-input" placeholder="Phone (optional)">
+              </div>
+              <button class="followup-btn" onclick="submitFollowup('2')">Submit to a Human</button>
+            </div>
+            <div id="questionSubmitted2" class="question-submitted">
+              Thanks! We've received your question and will get back to you.
+            </div>
+          </div>
+        </div>
+
+        <p class="questions-contact">Or email us at <a href="mailto:pai@YOUR_DOMAIN">pai@YOUR_DOMAIN</a></p>
+
+        <a href="https://USERNAME.github.io/REPO/docs/your-appinfra.html" class="infra-banner">
+          <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/infra/animalservers2.jpg" alt="Propertys in a server room">
+          <div class="infra-text">
+            <strong>YOUR_APP_NAME Infra</strong>
+            Built with $0/month infrastructure. See how we set up messaging, marketing, and customer management with AI.
+          </div>
+        </a>
+
+        <a href="https://YOUR_DOMAIN/community/" class="btn-community">Learn About Our Community</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const VERIFY_URL = `${SUPABASE_URL}/functions/v1/verify-identity`;
+
+    let selectedFile = null;
+    let tokenValue = null;
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // UI elements
+    const validatingState = document.getElementById('validatingState');
+    const errorState = document.getElementById('errorState');
+    const uploadForm = document.getElementById('uploadForm');
+    const processingState = document.getElementById('processingState');
+    const successResult = document.getElementById('successResult');
+    const reviewResult = document.getElementById('reviewResult');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImg = document.getElementById('previewImg');
+    const fileName = document.getElementById('fileName');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const applicantName = document.getElementById('applicantName');
+
+    function showState(state) {
+      [validatingState, errorState, uploadForm, processingState, successResult, reviewResult]
+        .forEach(el => el.style.display = 'none');
+      state.style.display = state.classList.contains('loading') || state.classList.contains('result')
+        ? 'block' : (state === errorState ? 'block' : 'block');
+      if (state.classList.contains('loading')) state.classList.add('visible');
+      if (state.classList.contains('result')) state.classList.add('visible');
+    }
+
+    function showError(title, message) {
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = message;
+      showState(errorState);
+    }
+
+    // Validate token on page load
+    async function validateToken() {
+      const params = new URLSearchParams(window.location.search);
+      tokenValue = params.get('token');
+
+      if (!tokenValue) {
+        showError('Missing Link', 'No upload token found. Please use the link from your email.');
+        return;
+      }
+
+      try {
+        const { data: token, error } = await sb
+          .from('upload_tokens')
+          .select('*, person:person_id(first_name, last_name), app_user:app_user_id(first_name, last_name)')
+          .eq('token', tokenValue)
+          .single();
+
+        if (error || !token) {
+          showError('Invalid Link', 'This upload link is not valid. Please contact us for a new link.');
+          return;
+        }
+
+        if (token.is_used) {
+          showError('Already Used', 'This upload link has already been used. Your ID has been submitted.');
+          return;
+        }
+
+        if (new Date(token.expires_at) < new Date()) {
+          showError('Link Expired', 'This upload link has expired. Please contact us for a new link.');
+          return;
+        }
+
+        // Show the form — use person (rental) or app_user (associate) for name
+        const person = token.person || token.app_user;
+        if (person) {
+          applicantName.textContent = person.first_name || 'there';
+        }
+        showState(uploadForm);
+
+      } catch (err) {
+        console.error('Token validation error:', err);
+        showError('Something Went Wrong', 'Unable to validate your link. Please try again later.');
+      }
+    }
+
+    // File selection
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      // Validate type
+      if (!file.type.startsWith('image/')) {
+        errorMsg.textContent = 'Please select an image file (JPG, PNG, or HEIC).';
+        errorMsg.classList.add('visible');
+        return;
+      }
+
+      // Validate size (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        errorMsg.textContent = 'File is too large. Please select an image under 10MB.';
+        errorMsg.classList.add('visible');
+        return;
+      }
+
+      errorMsg.classList.remove('visible');
+      selectedFile = file;
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        uploadPrompt.style.display = 'none';
+        previewContainer.classList.add('visible');
+        uploadArea.classList.add('has-file');
+        submitBtn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+      fileName.textContent = file.name;
+    }
+
+    // Compress image if needed
+    async function compressImage(file, maxWidth = 2000, quality = 0.85) {
+      if (file.size <= 2 * 1024 * 1024) return file; // Skip if under 2MB
+
+      return new Promise((resolve) => {
+        const img = new Image();
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          }, 'image/jpeg', quality);
+        };
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    // Submit
+    submitBtn.addEventListener('click', async () => {
+      if (!selectedFile || !tokenValue) return;
+
+      showState(processingState);
+
+      try {
+        // Compress if needed
+        const fileToUpload = await compressImage(selectedFile);
+
+        const formData = new FormData();
+        formData.append('token', tokenValue);
+        formData.append('file', fileToUpload);
+
+        const response = await fetch(VERIFY_URL, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          // Show error but allow retry
+          errorMsg.textContent = result.error || 'Verification failed. Please try again.';
+          errorMsg.classList.add('visible');
+          showState(uploadForm);
+          return;
+        }
+
+        if (result.verification_status === 'auto_approved') {
+          showState(successResult);
+        } else {
+          showState(reviewResult);
+        }
+
+      } catch (err) {
+        console.error('Upload error:', err);
+        errorMsg.textContent = 'Something went wrong. Please try again.';
+        errorMsg.classList.add('visible');
+        showState(uploadForm);
+      }
+    });
+
+    // Initialize
+    validateToken();
+
+    // =============================================
+    // ASK A QUESTION (Gemini-powered)
+    // =============================================
+    let currentQuestion = '';
+
+    document.querySelectorAll('.ask-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleAskQuestion(btn.dataset.target));
+    });
+    document.querySelectorAll('.question-input').forEach(input => {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const target = input.id.replace('questionInput', '');
+          handleAskQuestion(target);
+        }
+      });
+    });
+
+    async function handleAskQuestion(suffix) {
+      const input = document.getElementById(`questionInput${suffix}`);
+      const btn = input.parentElement.querySelector('.ask-btn');
+      const question = input.value.trim();
+      if (!question) return;
+
+      currentQuestion = question;
+      btn.disabled = true;
+      btn.textContent = 'Thinking...';
+
+      const container = document.getElementById(`answerContainer${suffix}`);
+      const answerText = document.getElementById(`answerText${suffix}`);
+      const lowConf = document.getElementById(`lowConfidence${suffix}`);
+      const followup = document.getElementById(`followupForm${suffix}`);
+      const submitted = document.getElementById(`questionSubmitted${suffix}`);
+      const feedback = document.getElementById(`feedback${suffix}`);
+
+      container.classList.remove('visible');
+      lowConf.classList.remove('visible');
+      followup.classList.remove('visible');
+      submitted.classList.remove('visible');
+      if (feedback) feedback.style.display = '';
+
+      try {
+        const resp = await fetch(`${SUPABASE_URL}/functions/v1/ask-question`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ question }),
+        });
+        const result = await resp.json();
+
+        answerText.textContent = result.answer || result.text || 'Sorry, I could not find an answer.';
+        container.classList.add('visible');
+
+        if (result.confident === false) {
+          lowConf.classList.add('visible');
+        }
+      } catch (err) {
+        answerText.textContent = "Sorry, I had trouble getting an answer. Leave your info below and we'll get back to you.";
+        container.classList.add('visible');
+        if (feedback) feedback.style.display = 'none';
+        followup.classList.add('visible');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Ask';
+      }
+    }
+
+    window.handleFeedback = function(helpful, suffix) {
+      const feedback = document.getElementById(`feedback${suffix}`);
+      const submitted = document.getElementById(`questionSubmitted${suffix}`);
+      const followup = document.getElementById(`followupForm${suffix}`);
+
+      if (helpful) {
+        if (feedback) feedback.style.display = 'none';
+        submitted.textContent = 'Great! Glad we could help.';
+        submitted.classList.add('visible');
+      } else {
+        followup.classList.add('visible');
+      }
+    };
+
+    window.submitFollowup = async function(suffix) {
+      const name = document.getElementById(`followupName${suffix}`).value.trim();
+      const email = document.getElementById(`followupEmail${suffix}`).value.trim();
+      const phone = document.getElementById(`followupPhone${suffix}`).value.trim();
+
+      if (!email) {
+        alert('Please enter your email address.');
+        return;
+      }
+
+      try {
+        await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            type: 'faq_unanswered',
+            to: 'admin@YOUR_DOMAIN',
+            data: {
+              question: currentQuestion,
+              name: name || 'Verify page visitor',
+              email,
+              phone: phone || 'N/A',
+              source: 'identity_verification_page',
+            },
+          }),
+        });
+
+        const followup = document.getElementById(`followupForm${suffix}`);
+        const submitted = document.getElementById(`questionSubmitted${suffix}`);
+        followup.classList.remove('visible');
+        submitted.classList.add('visible');
+      } catch (err) {
+        alert('Something went wrong. Please email us directly.');
+      }
+    };
+  </script>
+  <script type="module" src="../shared/version-info.js"></script>
+  <script type="module">
+    import { initPublicPage } from '../shared/public-shell.js';
+
+    initPublicPage({ transparent: false, light: false, activePage: '/spaces/' });
+  </script>
+</body>
+</html>

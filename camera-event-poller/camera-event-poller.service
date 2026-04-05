@@ -1,0 +1,19 @@
+[Unit]
+Description=AlpacApps Camera Event Poller
+After=network.target
+
+[Service]
+Type=simple
+User=bugfixer
+Environment=HOME=/home/bugfixer
+WorkingDirectory=/opt/camera-event-poller
+EnvironmentFile=/opt/camera-event-poller/.env
+ExecStart=/usr/bin/node /opt/camera-event-poller/worker.js
+Restart=always
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=camera-event-poller
+
+[Install]
+WantedBy=multi-user.target

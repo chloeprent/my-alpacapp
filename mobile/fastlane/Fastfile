@@ -1,0 +1,99 @@
+# Fastfile for Alpaca Playhouse mobile app
+# Usage:
+#   fastlane ios beta      - Build and upload to TestFlight
+#   fastlane ios release   - Build and submit to App Store
+#   fastlane android beta  - Build and upload to Google Play internal testing
+#   fastlane android release - Build and submit to Google Play production
+
+default_platform(:ios)
+
+# ──────────────────────────────────────────────
+# Shared: sync web assets before any build
+# ──────────────────────────────────────────────
+
+before_all do
+  sh("cd .. && node scripts/copy-web.js")
+end
+
+# ──────────────────────────────────────────────
+# iOS
+# ──────────────────────────────────────────────
+
+platform :ios do
+  desc "Sync Capacitor and build iOS"
+  private_lane :prepare do
+    sh("cd .. && npx cap sync ios")
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    prepare
+    build_app(
+      workspace: "ios/App/App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "AlpacaPlayhouse.ipa"
+    )
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Build and submit to App Store"
+  lane :release do
+    prepare
+    build_app(
+      workspace: "ios/App/App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "AlpacaPlayhouse.ipa"
+    )
+    upload_to_app_store(
+      force: true,
+      skip_screenshots: true,
+      skip_metadata: false
+    )
+  end
+end
+
+# ──────────────────────────────────────────────
+# Android
+# ──────────────────────────────────────────────
+
+platform :android do
+  desc "Sync Capacitor and build Android"
+  private_lane :prepare do
+    sh("cd .. && npx cap sync android")
+  end
+
+  desc "Build and upload to Google Play internal testing"
+  lane :beta do
+    prepare
+    gradle(
+      project_dir: "android",
+      task: "bundleRelease"
+    )
+    upload_to_play_store(
+      track: "internal",
+      aab: "android/app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Build and submit to Google Play production"
+  lane :release do
+    prepare
+    gradle(
+      project_dir: "android",
+      task: "bundleRelease"
+    )
+    upload_to_play_store(
+      track: "production",
+      aab: "android/app/build/outputs/bundle/release/app-release.aab"
+    )
+  end
+end

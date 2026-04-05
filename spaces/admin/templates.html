@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Templates - AlpacAPPs Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=5">
+  <link rel="stylesheet" href="rentals.css?v=5">
+  <link rel="stylesheet" href="templates.css?v=1">
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main app content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs" id="tabNav"></div>
+
+    <!-- Main Content -->
+    <main class="manage-content">
+      <div class="tmpl-layout">
+        <!-- LEFT: Template Navigation Sidebar -->
+        <aside class="tmpl-sidebar" id="tmplSidebar">
+          <div class="tmpl-sidebar-header">
+            <h3>Templates</h3>
+          </div>
+
+          <!-- Search -->
+          <div class="tmpl-sidebar-search">
+            <input type="text" id="tmplSearch" placeholder="Search templates...">
+          </div>
+
+          <!-- Document Templates -->
+          <div class="tmpl-nav-group">
+            <div class="tmpl-nav-group-label">
+              <span>Documents</span>
+              <span class="tmpl-nav-count">6</span>
+            </div>
+            <button class="tmpl-nav-item" data-type="lease" data-key="lease">
+              <span class="tmpl-nav-icon tmpl-icon-doc"></span>
+              <span class="tmpl-nav-text">Lease Agreement</span>
+            </button>
+            <button class="tmpl-nav-item" data-type="event" data-key="event">
+              <span class="tmpl-nav-icon tmpl-icon-doc"></span>
+              <span class="tmpl-nav-text">Event Agreement</span>
+            </button>
+            <button class="tmpl-nav-item" data-type="worktrade" data-key="worktrade">
+              <span class="tmpl-nav-icon tmpl-icon-doc"></span>
+              <span class="tmpl-nav-text">Work Trade Agreement</span>
+            </button>
+            <button class="tmpl-nav-item" data-type="renter_waiver" data-key="renter_waiver">
+              <span class="tmpl-nav-icon tmpl-icon-doc"></span>
+              <span class="tmpl-nav-text">Renter Waiver</span>
+            </button>
+            <button class="tmpl-nav-item" data-type="event_waiver" data-key="event_waiver">
+              <span class="tmpl-nav-icon tmpl-icon-doc"></span>
+              <span class="tmpl-nav-text">Event/Guest Waiver</span>
+            </button>
+            <button class="tmpl-nav-item" data-type="vehicle_rental" data-key="vehicle_rental">
+              <span class="tmpl-nav-icon tmpl-icon-doc"></span>
+              <span class="tmpl-nav-text">Vehicle Rental</span>
+            </button>
+          </div>
+
+          <!-- Email Templates (category groups populated by JS) -->
+          <div id="emailNavGroups" class="tmpl-nav-email-section">
+            <div class="tmpl-nav-group-label">
+              <span>Email Notifications</span>
+              <span id="emailTemplateCount" class="tmpl-nav-count">0</span>
+            </div>
+            <div id="emailNavItems" class="tmpl-nav-email-items">
+              <div class="text-muted" style="padding:0.5rem 0.75rem;font-size:0.8rem;">Loading...</div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- RIGHT: Editor Panel -->
+        <div class="tmpl-editor-panel" id="tmplEditorPanel">
+          <!-- Welcome / no selection state -->
+          <div id="tmplWelcome" class="tmpl-welcome">
+            <div class="tmpl-welcome-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <h2>Template Editor</h2>
+            <p class="text-muted">Select a template from the sidebar to view and edit it.</p>
+            <div class="tmpl-welcome-stats" id="tmplWelcomeStats"></div>
+          </div>
+
+          <!-- Lease Template Section -->
+          <div id="leaseTemplateSection" style="display:none;">
+            <div class="section">
+              <div class="section-header">
+                <h2>Lease Agreement Template</h2>
+                <div class="header-actions">
+                  <button type="button" id="loadDefaultTemplateBtn" class="btn-small">Load Default</button>
+                  <button type="button" id="saveTemplateBtn" class="btn-small btn-primary">Save Template</button>
+                </div>
+              </div>
+              <div class="section-body">
+                <p class="text-muted" style="margin-bottom: 1rem;">
+                  Edit the lease agreement template below. Use <code>{{placeholder}}</code> syntax for dynamic fields.
+                  The template uses Markdown formatting: <code># Header</code>, <code>**bold**</code>, <code>- bullet list</code>, <code>---</code> for horizontal rule.
+                </p>
+
+                <div class="template-editor-container">
+                  <div class="template-editor">
+                    <label for="templateName">Template Name</label>
+                    <input type="text" id="templateName" value="Standard Lease Agreement" style="margin-bottom: 1rem;">
+
+                    <label for="templateContent">Template Content</label>
+                    <textarea id="templateContent" class="template-textarea" rows="20" placeholder="Enter lease template content..."></textarea>
+                  </div>
+
+                  <div class="placeholder-reference">
+                    <h4>Available Placeholders</h4>
+                    <div id="placeholderList" class="placeholder-list"></div>
+                  </div>
+                </div>
+
+                <div class="template-actions" style="margin-top: 1rem;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="templateMakeActive" checked>
+                    Set as active template
+                  </label>
+                </div>
+
+                <div id="templateValidation" class="template-validation" style="display: none; margin-top: 1rem;"></div>
+              </div>
+            </div>
+
+            <!-- Lease Template History Section -->
+            <div class="section">
+              <div class="section-header">
+                <h2>Template History</h2>
+              </div>
+              <div class="section-body">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Version</th>
+                      <th>Created</th>
+                      <th>Active</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="templateHistoryBody">
+                    <tr><td colspan="5" class="text-muted">No templates saved yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- SignWell Configuration -->
+            <div class="section">
+              <div class="section-header">
+                <h2>SignWell Integration</h2>
+              </div>
+              <div class="section-body">
+                <p class="text-muted" style="margin-bottom: 1rem;">
+                  Configure SignWell for electronic signature collection. Get your API key from
+                  <a href="https://www.signwell.com/api/" target="_blank">signwell.com/api</a>.
+                </p>
+                <div class="form-group">
+                  <label for="signwellApiKey">API Key</label>
+                  <input type="password" id="signwellApiKey" placeholder="Enter SignWell API key...">
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="signwellTestMode" checked>
+                    Test Mode (documents won't be sent for real signatures)
+                  </label>
+                </div>
+                <button type="button" id="saveSignwellConfigBtn" class="btn-small btn-primary">Save SignWell Config</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Template Section -->
+          <div id="eventTemplateSection" style="display: none;">
+            <div class="section">
+              <div class="section-header">
+                <h2>Event Agreement Template</h2>
+                <div class="header-actions">
+                  <button type="button" id="loadDefaultEventTemplateBtn" class="btn-small">Load Default</button>
+                  <button type="button" id="saveEventTemplateBtn" class="btn-small btn-primary">Save Template</button>
+                </div>
+              </div>
+              <div class="section-body">
+                <p class="text-muted" style="margin-bottom: 1rem;">
+                  Edit the event hosting agreement template. Use <code>{{placeholder}}</code> syntax for dynamic fields.
+                </p>
+
+                <div class="template-editor-container">
+                  <div class="template-editor">
+                    <label for="eventTemplateName">Template Name</label>
+                    <input type="text" id="eventTemplateName" value="Standard Event Agreement" style="margin-bottom: 1rem;">
+
+                    <label for="eventTemplateContent">Template Content</label>
+                    <textarea id="eventTemplateContent" class="template-textarea" rows="20" placeholder="Enter event agreement template content..."></textarea>
+                  </div>
+
+                  <div class="placeholder-reference">
+                    <h4>Available Placeholders</h4>
+                    <div id="eventPlaceholderList" class="placeholder-list"></div>
+                  </div>
+                </div>
+
+                <div class="template-actions" style="margin-top: 1rem;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="eventTemplateMakeActive" checked>
+                    Set as active template
+                  </label>
+                </div>
+
+                <div id="eventTemplateValidation" class="template-validation" style="display: none; margin-top: 1rem;"></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <h2>Template History</h2>
+              </div>
+              <div class="section-body">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Version</th>
+                      <th>Created</th>
+                      <th>Active</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eventTemplateHistoryBody">
+                    <tr><td colspan="5" class="text-muted">No templates saved yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Work Trade Template Section -->
+          <div id="worktradeTemplateSection" style="display: none;">
+            <div class="section">
+              <div class="section-header">
+                <h2>Work Trade Agreement Template</h2>
+                <div class="header-actions">
+                  <button type="button" id="loadDefaultWorktradeTemplateBtn" class="btn-small">Load Default</button>
+                  <button type="button" id="saveWorktradeTemplateBtn" class="btn-small btn-primary">Save Template</button>
+                </div>
+              </div>
+              <div class="section-body">
+                <p class="text-muted" style="margin-bottom: 1rem;">
+                  Edit the work trade agreement template. Use <code>{{placeholder}}</code> syntax for dynamic fields.
+                </p>
+
+                <div class="template-editor-container">
+                  <div class="template-editor">
+                    <label for="worktradeTemplateName">Template Name</label>
+                    <input type="text" id="worktradeTemplateName" value="Standard Work Trade Agreement" style="margin-bottom: 1rem;">
+
+                    <label for="worktradeTemplateContent">Template Content</label>
+                    <textarea id="worktradeTemplateContent" class="template-textarea" rows="20" placeholder="Enter work trade agreement template content..."></textarea>
+                  </div>
+
+                  <div class="placeholder-reference">
+                    <h4>Available Placeholders</h4>
+                    <div id="worktradePlaceholderList" class="placeholder-list"></div>
+                  </div>
+                </div>
+
+                <div class="template-actions" style="margin-top: 1rem;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="worktradeMakeActive" checked>
+                    Set as active template
+                  </label>
+                </div>
+
+                <div id="worktradeTemplateValidation" class="template-validation" style="display: none; margin-top: 1rem;"></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <h2>Template History</h2>
+              </div>
+              <div class="section-body">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Version</th>
+                      <th>Created</th>
+                      <th>Active</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="worktradeTemplateHistoryBody">
+                    <tr><td colspan="5" class="text-muted">No templates saved yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Renter Waiver Template Section -->
+          <div id="renterWaiverTemplateSection" style="display: none;">
+            <div class="section">
+              <div class="section-header">
+                <h2>Renter Waiver Template</h2>
+                <div class="header-actions">
+                  <button type="button" id="loadDefaultRenterWaiverBtn" class="btn-small">Load Default</button>
+                  <button type="button" id="saveRenterWaiverBtn" class="btn-small btn-primary">Save Template</button>
+                </div>
+              </div>
+              <div class="section-body">
+                <p class="text-muted" style="margin-bottom: 1rem;">
+                  Edit the renter liability waiver template. This waiver is <strong>automatically appended to all lease agreements</strong> when generating PDFs.
+                  Use <code>{{placeholder}}</code> syntax for dynamic fields.
+                </p>
+
+                <div class="template-editor-container">
+                  <div class="template-editor">
+                    <label for="renterWaiverTemplateName">Template Name</label>
+                    <input type="text" id="renterWaiverTemplateName" value="Renter Liability Waiver" style="margin-bottom: 1rem;">
+
+                    <label for="renterWaiverTemplateContent">Template Content</label>
+                    <textarea id="renterWaiverTemplateContent" class="template-textarea" rows="20" placeholder="Enter renter waiver template content..."></textarea>
+                  </div>
+
+                  <div class="placeholder-reference">
+                    <h4>Available Placeholders</h4>
+                    <div id="renterWaiverPlaceholderList" class="placeholder-list"></div>
+                  </div>
+                </div>
+
+                <div class="template-actions" style="margin-top: 1rem;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="renterWaiverMakeActive" checked>
+                    Set as active template
+                  </label>
+                </div>
+
+                <div id="renterWaiverTemplateValidation" class="template-validation" style="display: none; margin-top: 1rem;"></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <h2>Template History</h2>
+              </div>
+              <div class="section-body">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Version</th>
+                      <th>Created</th>
+                      <th>Active</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="renterWaiverTemplateHistoryBody">
+                    <tr><td colspan="5" class="text-muted">No templates saved yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event/Guest Waiver Template Section -->
+          <div id="eventWaiverTemplateSection" style="display: none;">
+            <div class="section">
+              <div class="section-header">
+                <h2>Event/Guest Waiver Template</h2>
+                <div class="header-actions">
+                  <button type="button" id="loadDefaultEventWaiverBtn" class="btn-small">Load Default</button>
+                  <button type="button" id="saveEventWaiverBtn" class="btn-small btn-primary">Save Template</button>
+                </div>
+              </div>
+              <div class="section-body">
+                <p class="text-muted" style="margin-bottom: 1rem;">
+                  Edit the guest/event attendee liability waiver template. This waiver is signed independently by event guests and visitors.
+                  Use <code>{{placeholder}}</code> syntax for dynamic fields.
+                </p>
+
+                <div class="template-editor-container">
+                  <div class="template-editor">
+                    <label for="eventWaiverTemplateName">Template Name</label>
+                    <input type="text" id="eventWaiverTemplateName" value="Event/Guest Liability Waiver" style="margin-bottom: 1rem;">
+
+                    <label for="eventWaiverTemplateContent">Template Content</label>
+                    <textarea id="eventWaiverTemplateContent" class="template-textarea" rows="20" placeholder="Enter event/guest waiver template content..."></textarea>
+                  </div>
+
+                  <div class="placeholder-reference">
+                    <h4>Available Placeholders</h4>
+                    <div id="eventWaiverPlaceholderList" class="placeholder-list"></div>
+                  </div>
+                </div>
+
+                <div class="template-actions" style="margin-top: 1rem;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="eventWaiverMakeActive" checked>
+                    Set as active template
+                  </label>
+                </div>
+
+                <div id="eventWaiverTemplateValidation" class="template-validation" style="display: none; margin-top: 1rem;"></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <h2>Template History</h2>
+              </div>
+              <div class="section-body">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Version</th>
+                      <th>Created</th>
+                      <th>Active</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eventWaiverTemplateHistoryBody">
+                    <tr><td colspan="5" class="text-muted">No templates saved yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vehicle Rental Template Section -->
+          <div id="vehicleRentalTemplateSection" style="display: none;">
+            <div class="section">
+              <div class="section-header">
+                <h2>Vehicle Rental Agreement Template</h2>
+                <div class="header-actions">
+                  <button type="button" id="loadDefaultVehicleRentalBtn" class="btn-small">Load Default</button>
+                  <button type="button" id="saveVehicleRentalBtn" class="btn-small btn-primary">Save Template</button>
+                </div>
+              </div>
+              <div class="section-body">
+                <p class="text-muted" style="margin-bottom: 1rem;">
+                  Edit the vehicle rental agreement template. Use <code>{{placeholder}}</code> syntax for dynamic fields.
+                </p>
+
+                <div class="template-editor-container">
+                  <div class="template-editor">
+                    <label for="vehicleRentalTemplateName">Template Name</label>
+                    <input type="text" id="vehicleRentalTemplateName" value="Standard Vehicle Rental Agreement" style="margin-bottom: 1rem;">
+
+                    <label for="vehicleRentalTemplateContent">Template Content</label>
+                    <textarea id="vehicleRentalTemplateContent" class="template-textarea" rows="20" placeholder="Enter vehicle rental agreement template content..."></textarea>
+                  </div>
+
+                  <div class="placeholder-reference">
+                    <h4>Available Placeholders</h4>
+                    <div id="vehicleRentalPlaceholderList" class="placeholder-list"></div>
+                  </div>
+                </div>
+
+                <div class="template-actions" style="margin-top: 1rem;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="vehicleRentalMakeActive" checked>
+                    Set as active template
+                  </label>
+                </div>
+
+                <div id="vehicleRentalTemplateValidation" class="template-validation" style="display: none; margin-top: 1rem;"></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <h2>Template History</h2>
+              </div>
+              <div class="section-body">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Version</th>
+                      <th>Created</th>
+                      <th>Active</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vehicleRentalTemplateHistoryBody">
+                    <tr><td colspan="5" class="text-muted">No templates saved yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email Template Editor View -->
+          <div id="emailEditorView" style="display:none;">
+            <div class="section">
+              <div class="section-header">
+                <h2 id="emailEditorTitle">Edit Template</h2>
+                <div class="header-actions">
+                  <button type="button" id="emailPreviewBtn" class="btn-small">Preview</button>
+                  <button type="button" id="emailSaveBtn" class="btn-small btn-primary">Save Template</button>
+                </div>
+              </div>
+              <div class="section-body">
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label for="emailDescription">Description</label>
+                  <input type="text" id="emailDescription" placeholder="Short description of this email">
+                </div>
+
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label for="emailSubject">Subject Line</label>
+                  <input type="text" id="emailSubject" placeholder="Email subject with {{placeholders}}" style="font-family:monospace;">
+                </div>
+
+                <div class="template-editor-container">
+                  <div class="template-editor">
+                    <!-- Mode Toggle -->
+                    <div class="email-editor-mode-toggle">
+                      <button class="email-editor-mode-btn active" data-mode="visual">Visual</button>
+                      <button class="email-editor-mode-btn" data-mode="source">Source</button>
+                    </div>
+
+                    <!-- Visual Preview -->
+                    <div id="emailVisualContainer">
+                      <iframe id="emailVisualPreview" class="email-visual-preview" sandbox="allow-same-origin"></iframe>
+                    </div>
+
+                    <!-- Source Editor (hidden by default) -->
+                    <div id="emailSourceContainer" style="display:none;">
+                      <textarea id="emailSourceEditor" class="template-textarea" rows="22" placeholder="HTML email source..." style="font-family:monospace;font-size:0.85rem;"></textarea>
+                    </div>
+
+                    <!-- AI Edit Prompt -->
+                    <div class="ai-edit-area">
+                      <label class="ai-edit-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93L12 22"/><path d="M8 6a4 4 0 0 1 8 0"/><path d="M17 12H7"/></svg>
+                        AI Edit
+                      </label>
+                      <div class="ai-edit-input-row">
+                        <input type="text" id="aiEditPrompt" placeholder="Describe changes... e.g. 'Make the button green and larger'">
+                        <button type="button" id="aiEditApply" class="btn-small btn-primary">Apply</button>
+                      </div>
+                      <div id="aiEditStatus"></div>
+                      <button type="button" id="aiEditUndo" class="btn-small" style="display:none;margin-top:0.5rem;">Undo AI Edit</button>
+                    </div>
+                  </div>
+
+                  <div class="placeholder-reference">
+                    <h4>Available Placeholders</h4>
+                    <div id="emailPlaceholderList" class="placeholder-list"></div>
+                  </div>
+                </div>
+
+                <div id="emailTemplateValidation" class="template-validation" style="display:none;margin-top:1rem;"></div>
+              </div>
+            </div>
+
+            <!-- Version History -->
+            <div class="section">
+              <div class="section-header">
+                <h2>Version History</h2>
+              </div>
+              <div class="section-body">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Version</th>
+                      <th>Updated</th>
+                      <th>Active</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="emailVersionHistoryBody">
+                    <tr><td colspan="4" class="text-muted">No versions yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email Preview Modal -->
+      <div id="emailPreviewModal" class="modal-overlay" style="display:none;">
+        <div class="modal" style="max-width:700px;max-height:90vh;overflow:auto;">
+          <div class="modal-header">
+            <h3>Email Preview</h3>
+            <button type="button" class="modal-close" id="emailPreviewCloseBtn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p style="margin-bottom:0.5rem;"><strong>Subject:</strong> <span id="emailPreviewSubject"></span></p>
+            <div style="border:1px solid #ddd;border-radius:8px;overflow:hidden;margin-top:0.5rem;">
+              <iframe id="emailPreviewFrame" style="width:100%;height:500px;border:none;"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="templates.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.blink-poller</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Library/Developer/CommandLineTools/usr/bin/python3</string>
+        <string>/Users/alpaca/blink-poller/blink_snapshot.py</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/alpaca/blink-poller</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/alpaca/blink-poller/stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/alpaca/blink-poller/stderr.log</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/Library/Developer/CommandLineTools/usr/bin</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/alpaca/Library/Python/3.9/lib/python/site-packages</string>
+    </dict>
+</dict>
+</plist>

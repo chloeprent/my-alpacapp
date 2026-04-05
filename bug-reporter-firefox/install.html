@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>Install YOUR_APP_NAME Bug Reporter for Firefox</title>
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #faf8f5;
+      color: #333;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #5c4033;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 16px;
+      margin-bottom: 32px;
+    }
+    h2 {
+      color: #5c4033;
+      font-size: 20px;
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #e0dcd6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .step-number {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background: #b8860b;
+      color: #fff;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 28px;
+      font-weight: bold;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    .step h3 {
+      display: inline;
+      font-size: 16px;
+      color: #333;
+    }
+    .step p {
+      margin-top: 10px;
+      color: #555;
+    }
+    code {
+      background: #f0ece6;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+    .download-btn {
+      display: inline-block;
+      background: #b8860b;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      margin-top: 16px;
+    }
+    .download-btn:hover {
+      background: #9a7209;
+    }
+    .how-it-works {
+      background: #fff;
+      border: 1px solid #e0dcd6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+    .how-it-works ul {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+    .how-it-works li {
+      margin-bottom: 6px;
+      color: #555;
+    }
+    .note {
+      background: #fef9e7;
+      border: 1px solid #f5d76e;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-top: 24px;
+      font-size: 14px;
+    }
+    .note strong {
+      color: #b8860b;
+    }
+    .platform-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+    }
+    .platform-tab {
+      padding: 10px 20px;
+      background: #f0ece6;
+      border: 1px solid #e0dcd6;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-weight: 600;
+      color: #888;
+      font-size: 14px;
+    }
+    .platform-tab.active {
+      background: #fff;
+      color: #5c4033;
+      border-bottom: 1px solid #fff;
+      margin-bottom: -1px;
+      position: relative;
+      z-index: 1;
+    }
+    .platform-content {
+      display: none;
+      border: 1px solid #e0dcd6;
+      border-radius: 0 8px 8px 8px;
+      padding: 20px;
+      background: #fff;
+      margin-bottom: 24px;
+    }
+    .platform-content.active {
+      display: block;
+    }
+    .platform-content .step {
+      border: none;
+      padding: 12px 0;
+      margin-bottom: 0;
+      border-bottom: 1px solid #f0ece6;
+    }
+    .platform-content .step:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="aap-header aap-header--solid aap-header--dark" id="aap-header">
+    <div class="aap-header__inner">
+      <a href="/" class="aap-header__logo">
+        <img width="21" height="30" src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="aap-header__icon" data-light-src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-white-transparent.png" data-dark-src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png">
+        <img width="22" height="22" src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="aap-header__wordmark" data-light-src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-white-transparent.png" data-dark-src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png">
+        <span title="Site version" class="aap-header__version"></span>
+      </a>
+
+      <nav class="aap-nav" id="aap-nav">
+        <ul class="aap-nav__list">
+          <li><a href="/visiting/" class="aap-nav__link">Visiting</a></li>
+          <li><a href="/spaces/" class="aap-nav__link">Rentals</a></li>
+          <li><a href="/events/" class="aap-nav__link">Events</a></li>
+          <li><a href="/community/" class="aap-nav__link">Community</a></li>
+          <li><a href="/photos/" class="aap-nav__link">Photos</a></li>
+          <li><a href="/contact/" class="aap-nav__link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <button class="aap-menu-toggle" id="aap-menu-toggle" aria-label="Toggle menu">
+        <span class="aap-menu-toggle__bar"></span>
+        <span class="aap-menu-toggle__bar"></span>
+        <span class="aap-menu-toggle__bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation -->
+  <div class="aap-mobile-nav" id="aap-mobile-nav">
+    <button class="aap-mobile-nav__close" id="aap-mobile-nav-close" aria-label="Close menu">×</button>
+    <ul class="aap-mobile-nav__list">
+      <li class="aap-mobile-nav__item"><a href="/visiting/" class="aap-mobile-nav__link">Visiting</a></li>
+      <li class="aap-mobile-nav__item"><a href="/spaces/" class="aap-mobile-nav__link">Rentals</a></li>
+      <li class="aap-mobile-nav__item"><a href="/events/" class="aap-mobile-nav__link">Events</a></li>
+      <li class="aap-mobile-nav__item"><a href="/community/" class="aap-mobile-nav__link">Community</a></li>
+      <li class="aap-mobile-nav__item"><a href="/photos/" class="aap-mobile-nav__link">Photos</a></li>
+      <li class="aap-mobile-nav__item"><a href="/contact/" class="aap-mobile-nav__link">Contact</a></li>
+    </ul>
+  </div>
+
+  <div class="container" style="padding-top: 100px;">
+    <h1>YOUR_APP_NAME Bug Reporter</h1>
+    <p class="subtitle">Firefox extension for reporting bugs with annotated screenshots</p>
+
+    <h2>Installation</h2>
+
+    <div class="platform-tabs">
+      <div class="platform-tab active" data-platform="android">Android</div>
+      <div class="platform-tab" data-platform="desktop">Desktop</div>
+    </div>
+
+    <!-- Android Instructions -->
+    <div id="platform-android" class="platform-content active">
+      <div class="step">
+        <span class="step-number">1</span>
+        <h3>Install Firefox for Android</h3>
+        <p>Make sure you have <strong>Firefox for Android</strong> installed (not Firefox Focus or Firefox Lite).</p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <h3>Download the extension</h3>
+        <p>Tap the button below on your Android device to download the extension file.</p>
+        <a href="https://USERNAME.github.io/REPO/bug-reporter-firefox/your-project-bug-reporter.xpi" class="download-btn">Download for Firefox Android</a>
+        <p style="margin-top: 8px; font-size: 13px; color: #888;">If the download doesn't start, long-press the button and choose <strong>Save link</strong>.</p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <h3>Install the extension</h3>
+        <p>Firefox should prompt you to install the add-on. Tap <strong>Add</strong> when asked.</p>
+        <p style="margin-top: 8px; font-size: 13px; color: #888;">If Firefox doesn't prompt automatically, open Firefox and go to <code>about:addons</code>, tap the gear icon, then tap <strong>Install Add-on From File</strong> and select the downloaded file.</p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">4</span>
+        <h3>Grant permissions</h3>
+        <p>When prompted, tap <strong>Add</strong> to allow the extension to capture screenshots.</p>
+      </div>
+    </div>
+
+    <!-- Desktop Instructions -->
+    <div id="platform-desktop" class="platform-content">
+      <div class="step">
+        <span class="step-number">1</span>
+        <h3>Download the extension</h3>
+        <p>Download and unzip the extension folder to your computer.</p>
+        <a href="https://github.com/USERNAME/REPO/archive/refs/heads/main.zip" class="download-btn">Download from GitHub</a>
+        <p style="margin-top: 8px; font-size: 13px; color: #888;">After unzipping, the extension is in the <code>bug-reporter-firefox</code> folder.</p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <h3>Open Firefox debugging page</h3>
+        <p>Type <code>about:debugging#/runtime/this-firefox</code> in your Firefox address bar and press Enter.</p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <h3>Load the extension</h3>
+        <p>Click <strong>Load Temporary Add-on</strong>, then navigate to the <code>bug-reporter-firefox</code> folder and select the <code>manifest.json</code> file.</p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">4</span>
+        <h3>Find the extension</h3>
+        <p>The extension icon will appear in your toolbar. Click it to open the bug reporter.</p>
+      </div>
+    </div>
+
+    <h2>How to Use</h2>
+
+    <div class="step">
+      <span class="step-number">1</span>
+      <h3>Navigate to the page with the bug</h3>
+      <p>Go to the page where you see the issue.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-number">2</span>
+      <h3>Open the bug reporter</h3>
+      <p><strong>Android:</strong> Tap the three-dot menu (&#8942;), then tap <strong>YOUR_APP_NAME Bug Reporter</strong> in the Add-ons section.</p>
+      <p><strong>Desktop:</strong> Click the extension icon in the toolbar.</p>
+      <p style="margin-top: 6px;">Then tap/click <strong>Capture Screenshot</strong>.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-number">3</span>
+      <h3>Annotate the screenshot</h3>
+      <p>Use the tools to highlight the problem:</p>
+      <ul style="margin-top: 8px; padding-left: 20px;">
+        <li><strong>Draw</strong> &mdash; freehand drawing to circle/underline issues</li>
+        <li><strong>Arrow</strong> &mdash; point at specific elements</li>
+        <li><strong>Text</strong> &mdash; add labels or notes</li>
+        <li><strong>Rectangle</strong> &mdash; box around an area</li>
+      </ul>
+      <p>You can change the color, undo, or clear annotations. On mobile, use your finger to draw.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-number">4</span>
+      <h3>Describe the bug and submit</h3>
+      <p>Tap <strong>Next</strong>, fill in your name, email, and describe what's wrong. Then tap <strong>Submit Bug Report</strong>.</p>
+    </div>
+
+    <div class="how-it-works">
+      <h3>What happens after you submit?</h3>
+      <ul>
+        <li>You'll get a <strong>confirmation email</strong> that your report was received</li>
+        <li>Our automated system analyzes your screenshot and description</li>
+        <li>It attempts to fix the bug and deploy the fix automatically</li>
+        <li>You'll get a <strong>follow-up email</strong> with what was fixed (or if it needs human attention)</li>
+        <li>Small problems usually take <strong>2-5 minutes</strong></li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <strong>Note:</strong> This extension works on Firefox for Android and Firefox desktop. For Chrome, use the <a href="../bug-reporter-extension/install.html">Chrome version</a>. Your name and email are saved locally so you don't have to re-enter them each time.
+    </div>
+  </div>
+
+  <script src="/shared/site-components.js"></script>
+  <script src="/shared/version-info.js"></script>
+  <script>
+    // Platform tab switching
+    document.querySelectorAll('.platform-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.platform-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('platform-' + tab.dataset.platform).classList.add('active');
+      });
+    });
+
+    // Mobile menu
+    const menuToggle = document.getElementById('aap-menu-toggle');
+    const mobileNav = document.getElementById('aap-mobile-nav');
+    const mobileNavClose = document.getElementById('aap-mobile-nav-close');
+    if (menuToggle && mobileNav) {
+      menuToggle.addEventListener('click', () => { mobileNav.classList.add('aap-mobile-nav--open'); document.body.style.overflow = 'hidden'; });
+    }
+    if (mobileNavClose && mobileNav) {
+      mobileNavClose.addEventListener('click', () => { mobileNav.classList.remove('aap-mobile-nav--open'); document.body.style.overflow = ''; });
+    }
+  </script>
+</body>
+</html>

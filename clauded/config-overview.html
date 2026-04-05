@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Configuration Overview — Admin</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem(location.hostname+'-auth');if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}</style>
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+  <style>
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #faf9f6; color: #1a1a1a; padding-top: 52px; }
+    .config-container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .breadcrumb { font-size: 0.8rem; color: #888; margin-bottom: 1rem; }
+    .breadcrumb a { color: #888; text-decoration: none; }
+    .breadcrumb a:hover { color: #1a1a1a; }
+    .config-header { margin-bottom: 2rem; }
+    .config-header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .config-header p { color: #666; font-size: 0.9rem; line-height: 1.5; }
+
+    /* Section */
+    .config-section { margin-bottom: 2.5rem; }
+    .config-section h2 {
+      font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;
+      padding-bottom: 0.5rem; border-bottom: 2px solid #e8e5e0;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-badge {
+      font-size: 0.65rem; font-weight: 600; padding: 0.15rem 0.45rem;
+      border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .badge-auto { background: #e8f0e8; color: #3a6b3a; }
+    .badge-ondemand { background: #e8e8f0; color: #3a3a6b; }
+    .badge-memory { background: #f0e8f0; color: #6b3a6b; }
+    .badge-settings { background: #f0ede8; color: #8a7a5a; }
+
+    /* File card */
+    .file-card {
+      background: #fff;
+      border: 1px solid #e8e5e0;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      transition: border-color 0.15s;
+    }
+    .file-card:hover { border-color: #c8c4bc; }
+    .file-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem; flex-wrap: wrap;
+    }
+    .file-card-header h3 {
+      font-size: 0.95rem; font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #1a1a1a;
+    }
+    .file-card-meta {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;
+    }
+    .meta-pill {
+      font-size: 0.65rem; font-weight: 500; padding: 0.15rem 0.45rem;
+      border-radius: 12px; white-space: nowrap;
+    }
+    .pill-size { background: #f0ede8; color: #666; }
+    .pill-lines { background: #e8e8f0; color: #3a3a6b; }
+    .pill-context { background: #e8f0e8; color: #3a6b3a; }
+    .pill-no-context { background: #f0e8e8; color: #6b3a3a; }
+    .file-card-body { margin-top: 0.5rem; font-size: 0.84rem; color: #555; line-height: 1.55; }
+    .file-card-pointers {
+      margin-top: 0.5rem; font-size: 0.78rem; color: #888; line-height: 1.5;
+    }
+    .file-card-pointers strong { color: #666; }
+
+    /* Context budget */
+    .context-budget {
+      background: #fff;
+      border: 1px solid #e8e5e0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .context-budget h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .context-budget .subtitle { font-size: 0.84rem; color: #666; margin-bottom: 1.25rem; }
+    .budget-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .budget-stat {
+      text-align: center;
+      padding: 0.75rem 0.5rem;
+      background: #faf8f5;
+      border-radius: 8px;
+    }
+    .budget-stat .val { font-size: 1.4rem; font-weight: 700; }
+    .budget-stat .lbl { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.15rem; }
+    .context-note { font-size: 0.78rem; color: #999; margin-top: 1rem; line-height: 1.5; }
+    .context-explanation {
+      font-size: 0.84rem; color: #555; line-height: 1.65;
+      background: #faf8f5; border-radius: 8px; padding: 1rem 1.25rem;
+    }
+    .context-explanation code { font-size: 0.8rem; background: #eee; padding: 0.1rem 0.35rem; border-radius: 3px; }
+
+    /* Diagram */
+    .diagram-section { margin-top: 3rem; }
+    .diagram-section h2 { border-bottom: 2px solid #e8e5e0; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+    .diagram-canvas {
+      background: #fff;
+      border: 1px solid #e8e5e0;
+      border-radius: 12px;
+      padding: 2rem;
+      overflow-x: auto;
+    }
+    .diagram-canvas svg { width: 100%; height: auto; max-width: 860px; margin: 0 auto; display: block; }
+
+    @media (max-width: 600px) {
+      .config-container { padding: 1.5rem 1rem; }
+      .file-card-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="config-container">
+      <div class="breadcrumb"><a href="/clauded/">Claude Dev</a> &rsaquo; Configuration Overview</div>
+      <div class="config-header">
+        <h1>Configuration Overview</h1>
+        <p>All environment, configuration, and documentation files that shape how Claude Code understands and operates within this project. Files are grouped by loading behavior.</p>
+      </div>
+
+      <!-- ====== CONTEXT BUDGET ====== -->
+      <div class="context-budget">
+        <h2>Context Budget</h2>
+        <p class="subtitle">How much configuration is loaded into each Claude Code conversation</p>
+
+        <div class="budget-stats">
+          <div class="budget-stat">
+            <div class="val">~5&ndash;15 KB</div>
+            <div class="lbl">Always Loaded</div>
+          </div>
+          <div class="budget-stat">
+            <div class="val">~50&ndash;200 KB</div>
+            <div class="lbl">All Docs Total</div>
+          </div>
+          <div class="budget-stat">
+            <div class="val">varies</div>
+            <div class="lbl">Config Files</div>
+          </div>
+        </div>
+
+        <div class="context-explanation">
+          <code>CLAUDE.md</code> is always loaded (~30 lines). On-demand docs are loaded only when the task matches their trigger. This saves thousands of tokens per conversation.
+          <br><br>
+          For example, a database task might add <code>SCHEMA.md</code> and <code>CREDENTIALS.md</code>, while a styling task would load <code>PATTERNS.md</code> instead. The full doc set is rarely loaded at once.
+        </div>
+
+        <p class="context-note">
+          Actual sizes depend on your project. A small project might use 50 KB total across all docs; a large one with many integrations could reach 200 KB+. The on-demand system ensures only relevant context is loaded per conversation.
+        </p>
+      </div>
+
+      <!-- ====== ALWAYS LOADED ====== -->
+      <div class="config-section">
+        <h2><span class="section-badge badge-auto">Auto-loaded</span> Always in Context</h2>
+        <p style="font-size:0.84rem;color:#666;margin-bottom:1rem;">These files are automatically loaded into every Claude Code conversation. They define the core rules and behaviors.</p>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>CLAUDE.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-context">Always loaded</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Project directives</strong> — the root of the configuration tree. Contains mandatory behaviors, code guards, and pointers to on-demand docs. Defines naming conventions, UI patterns, push workflow, and all rules Claude Code must follow.
+          </div>
+          <div class="file-card-pointers">
+            <strong>Points to:</strong> docs/CREDENTIALS.md, docs/SCHEMA.md, docs/PATTERNS.md, docs/KEY-FILES.md, docs/DEPLOY.md, docs/INTEGRATIONS.md, docs/CHANGELOG.md
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>CLAUDE.local.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-context">Always loaded</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Operator directives</strong> — private, not checked into git. Contains DB access shortcuts, push workflow overrides, live URLs, and any operator-specific instructions.
+          </div>
+          <div class="file-card-pointers">
+            <strong>Points to:</strong> docs/CREDENTIALS.md (for DB access), version.json
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>version.json</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-context">Always loaded</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>CI-generated release metadata</strong> — updated on every push to main. Contains the current version string, Git SHA, and commit messages. Read after every push to report the deployed version.
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== ON-DEMAND DOCS ====== -->
+      <div class="config-section">
+        <h2><span class="section-badge badge-ondemand">On-demand</span> Documentation Files</h2>
+        <p style="font-size:0.84rem;color:#666;margin-bottom:1rem;">Loaded into context only when the task matches specific triggers defined in CLAUDE.md. Keeps context lean for simple tasks.</p>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>docs/CREDENTIALS.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-no-context">On-demand</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Secrets &amp; access keys</strong> — gitignored. Contains Supabase project keys, API tokens, SSH credentials, and any other secrets Claude Code needs. Loaded when running SQL, deploying functions, SSH-ing, or making API calls.
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>docs/SCHEMA.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-no-context">On-demand</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Database schema</strong> — table definitions for all enabled features. Covers core tables, relationships, and column types. Loaded when writing queries, modifying tables, or debugging data.
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>docs/PATTERNS.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-no-context">On-demand</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>UI conventions</strong> — Tailwind CSS design tokens, Supabase query patterns, and reusable component snippets. Loaded when writing UI code, styling with Tailwind, or during code review.
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>docs/KEY-FILES.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-no-context">On-demand</span>
+              <span class="meta-pill pill-size">4+ features</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>File directory</strong> — organized listing of project files by module. Only generated for projects with 4 or more features. Helps Claude Code navigate large codebases without scanning the filesystem.
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>docs/DEPLOY.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-no-context">On-demand</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Deployment workflow</strong> — push steps, version format, live URLs, and post-deploy verification. Loaded when pushing, deploying, or answering version questions.
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>docs/INTEGRATIONS.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-no-context">On-demand</span>
+              <span class="meta-pill pill-size">If services configured</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>External APIs</strong> — only generated if external services are configured. Contains vendor details, cost tiers, API usage logging requirements, and integration setup instructions.
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>docs/CHANGELOG.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-no-context">On-demand</span>
+              <span class="meta-pill pill-size">6+ features</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Recent changes</strong> — only generated for projects with 6 or more features. Chronological log of significant changes, useful for understanding migration context or recent architectural decisions.
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== CLAUDE SETTINGS ====== -->
+      <div class="config-section">
+        <h2><span class="section-badge badge-settings">Settings</span> Claude Code Configuration</h2>
+        <p style="font-size:0.84rem;color:#666;margin-bottom:1rem;">JSON configuration files in .claude/ that control Claude Code's runtime behavior.</p>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>.claude/settings.json</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-context">Always loaded</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Environment settings</strong> — enables TypeScript Language Server Protocol support (<code>ENABLE_LSP_TOOL=1</code>) for better code intelligence in Claude Code.
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>.claude/settings.local.json</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-context">Always loaded</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Local permissions</strong> — private, not checked into git. Contains user-specific Claude Code preferences, permission rules, and MCP server configurations.
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>.claude/launch.json</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-context">Always loaded</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Dev server configurations</strong> — defines local development servers for Claude Code's preview tools. Each entry specifies the command, port, and working directory for a dev server.
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== MEMORY ====== -->
+      <div class="config-section">
+        <h2><span class="section-badge badge-memory">Memory</span> Persistent Memory Files</h2>
+        <p style="font-size:0.84rem;color:#666;margin-bottom:1rem;">Claude Code's persistent memory system — stored in <code>~/.claude/projects/</code>, indexed by MEMORY.md. These survive across conversations.</p>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>MEMORY.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-context">Always loaded (first 200 lines)</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Memory index</strong> — always loaded into context. Contains the master index of all memory files, data lookup routing tables, quick query templates, and important gotchas discovered across sessions.
+          </div>
+          <div class="file-card-pointers">
+            <strong>Points to:</strong> memory/*.md (session summaries, user preferences, etc.)
+          </div>
+        </div>
+
+        <div class="file-card">
+          <div class="file-card-header">
+            <h3>memory/*.md</h3>
+            <div class="file-card-meta">
+              <span class="meta-pill pill-no-context">On-demand</span>
+            </div>
+          </div>
+          <div class="file-card-body">
+            <strong>Individual memory files</strong> — session summaries, service access details, infrastructure notes, user preferences, and other persistent knowledge. Loaded when referenced by MEMORY.md or when context is needed from a prior session.
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== DEPENDENCY DIAGRAM ====== -->
+      <div class="config-section diagram-section">
+        <h2>File Dependency Diagram</h2>
+        <p style="font-size:0.84rem;color:#666;margin-bottom:1.5rem;">How configuration files reference and depend on each other. Green = always loaded, blue = on-demand, purple = memory, gold = settings.</p>
+
+        <div class="diagram-canvas">
+          <svg viewBox="0 0 860 540" xmlns="http://www.w3.org/2000/svg" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+            <!-- Defs for arrowheads -->
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6 Z" fill="#999"/>
+              </marker>
+              <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L8,3 L0,6 Z" fill="#6b8e5a"/>
+              </marker>
+            </defs>
+
+            <!-- Legend -->
+            <rect x="10" y="10" width="12" height="12" rx="2" fill="#e8f0e8" stroke="#6b8e5a"/>
+            <text x="28" y="20" font-size="11" fill="#666">Always loaded</text>
+            <rect x="140" y="10" width="12" height="12" rx="2" fill="#e8e8f0" stroke="#5a5a8e"/>
+            <text x="158" y="20" font-size="11" fill="#666">On-demand</text>
+            <rect x="250" y="10" width="12" height="12" rx="2" fill="#f0e8f0" stroke="#8e5a8e"/>
+            <text x="268" y="20" font-size="11" fill="#666">Memory</text>
+            <rect x="330" y="10" width="12" height="12" rx="2" fill="#f0ede8" stroke="#8e7a5a"/>
+            <text x="348" y="20" font-size="11" fill="#666">Settings</text>
+
+            <!-- CLAUDE.md (root node) -->
+            <rect x="320" y="55" width="220" height="50" rx="8" fill="#e8f0e8" stroke="#6b8e5a" stroke-width="2"/>
+            <text x="430" y="77" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1a1a">CLAUDE.md</text>
+            <text x="430" y="92" text-anchor="middle" font-size="10" fill="#666">Project directives (root)</text>
+
+            <!-- Arrows from CLAUDE.md to on-demand docs -->
+            <line x1="345" y1="105" x2="100" y2="165" stroke="#999" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="375" y1="105" x2="270" y2="165" stroke="#999" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="430" y1="105" x2="430" y2="165" stroke="#999" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="485" y1="105" x2="590" y2="165" stroke="#999" stroke-width="1.5" marker-end="url(#arrow)"/>
+            <line x1="515" y1="105" x2="750" y2="165" stroke="#999" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <!-- On-demand docs row 1 -->
+            <rect x="20" y="165" width="175" height="45" rx="6" fill="#e8e8f0" stroke="#5a5a8e"/>
+            <text x="107" y="185" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">docs/CREDENTIALS.md</text>
+            <text x="107" y="199" text-anchor="middle" font-size="9" fill="#666">Secrets &amp; access keys</text>
+
+            <rect x="205" y="165" width="140" height="45" rx="6" fill="#e8e8f0" stroke="#5a5a8e"/>
+            <text x="275" y="185" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">docs/SCHEMA.md</text>
+            <text x="275" y="199" text-anchor="middle" font-size="9" fill="#666">Database tables</text>
+
+            <rect x="355" y="165" width="150" height="45" rx="6" fill="#e8e8f0" stroke="#5a5a8e"/>
+            <text x="430" y="185" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">docs/PATTERNS.md</text>
+            <text x="430" y="199" text-anchor="middle" font-size="9" fill="#666">UI conventions</text>
+
+            <rect x="515" y="165" width="155" height="45" rx="6" fill="#e8e8f0" stroke="#5a5a8e"/>
+            <text x="592" y="185" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">docs/KEY-FILES.md</text>
+            <text x="592" y="199" text-anchor="middle" font-size="9" fill="#666">File directory</text>
+
+            <rect x="680" y="165" width="150" height="45" rx="6" fill="#e8e8f0" stroke="#5a5a8e"/>
+            <text x="755" y="185" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">docs/DEPLOY.md</text>
+            <text x="755" y="199" text-anchor="middle" font-size="9" fill="#666">Push workflow</text>
+
+            <!-- On-demand docs row 2 -->
+            <line x1="370" y1="105" x2="140" y2="255" stroke="#999" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+            <line x1="460" y1="105" x2="400" y2="255" stroke="#999" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+
+            <rect x="40" y="255" width="190" height="45" rx="6" fill="#e8e8f0" stroke="#5a5a8e"/>
+            <text x="135" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">docs/INTEGRATIONS.md</text>
+            <text x="135" y="289" text-anchor="middle" font-size="9" fill="#666">External APIs</text>
+
+            <rect x="260" y="255" width="180" height="45" rx="6" fill="#e8e8f0" stroke="#5a5a8e"/>
+            <text x="350" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">docs/CHANGELOG.md</text>
+            <text x="350" y="289" text-anchor="middle" font-size="9" fill="#666">Recent changes log</text>
+
+            <!-- CLAUDE.local.md -->
+            <rect x="30" y="350" width="220" height="50" rx="8" fill="#e8f0e8" stroke="#6b8e5a" stroke-width="2"/>
+            <text x="140" y="372" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1a1a">CLAUDE.local.md</text>
+            <text x="140" y="387" text-anchor="middle" font-size="10" fill="#666">Operator directives (private)</text>
+
+            <!-- Arrow from CLAUDE.local.md to CREDENTIALS -->
+            <line x1="140" y1="350" x2="107" y2="210" stroke="#6b8e5a" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow-green)"/>
+
+            <!-- version.json -->
+            <rect x="280" y="350" width="180" height="50" rx="8" fill="#e8f0e8" stroke="#6b8e5a" stroke-width="2"/>
+            <text x="370" y="372" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1a1a">version.json</text>
+            <text x="370" y="387" text-anchor="middle" font-size="10" fill="#666">CI release metadata</text>
+
+            <!-- Arrow from CLAUDE.local.md to version.json -->
+            <line x1="250" y1="375" x2="280" y2="375" stroke="#6b8e5a" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+            <!-- Settings files -->
+            <rect x="520" y="340" width="200" height="45" rx="6" fill="#f0ede8" stroke="#8e7a5a"/>
+            <text x="620" y="360" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">.claude/settings.json</text>
+            <text x="620" y="374" text-anchor="middle" font-size="9" fill="#666">LSP env var</text>
+
+            <rect x="520" y="400" width="200" height="45" rx="6" fill="#f0ede8" stroke="#8e7a5a"/>
+            <text x="620" y="420" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a1a">.claude/launch.json</text>
+            <text x="620" y="434" text-anchor="middle" font-size="9" fill="#666">Dev server configs</text>
+
+            <!-- Memory section -->
+            <rect x="30" y="450" width="200" height="50" rx="8" fill="#f0e8f0" stroke="#8e5a8e" stroke-width="2"/>
+            <text x="130" y="472" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a1a1a">MEMORY.md</text>
+            <text x="130" y="487" text-anchor="middle" font-size="10" fill="#666">Memory index (always loaded)</text>
+
+            <!-- Memory sub-files -->
+            <line x1="230" y1="475" x2="310" y2="475" stroke="#999" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <rect x="310" y="455" width="160" height="40" rx="6" fill="#f0e8f0" stroke="#8e5a8e"/>
+            <text x="390" y="475" text-anchor="middle" font-size="10" font-weight="600" fill="#1a1a1a">memory/*.md</text>
+            <text x="390" y="488" text-anchor="middle" font-size="9" fill="#666">Sessions, preferences, etc.</text>
+
+            <!-- Cross-reference: DEPLOY.md references version.json -->
+            <line x1="755" y1="210" x2="460" y2="355" stroke="#999" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
+            <text x="620" y="288" font-size="9" fill="#999" transform="rotate(-28,620,288)">references</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/shared/instant-chrome.js"></script>
+  <script type="module" src="/shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module">
+    import { initAdminPage } from '/shared/admin-shell.js';
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initAdminPage({
+        activeTab: null,
+        requiredRole: 'admin',
+        section: 'admin',
+        onReady: () => {},
+      });
+    });
+  </script>
+</body>
+</html>

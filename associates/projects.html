@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Projects - AlpacAPPs</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../spaces/styles.css?v=5">
+  <link rel="stylesheet" href="../spaces/admin/styles.css?v=5">
+  <link rel="stylesheet" href="../spaces/admin/manage-shared.css?v=5">
+  <style>
+    :root {
+      --p1: #ef4444; --p1-bg: #fef2f2;
+      --p2: #f59e0b; --p2-bg: #fffbeb;
+      --p3: #3b82f6; --p3-bg: #eff6ff;
+      --p4: #6b7280; --p4-bg: #f9fafb;
+    }
+
+    .app-container { max-width: 700px; margin: 0 auto; padding: 1rem; }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .stat-chip {
+      display: flex; align-items: center; gap: 0.35rem;
+      padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+      background: var(--bg-card); border: 1px solid var(--border);
+    }
+    .stat-chip .num { font-size: 1rem; }
+    .stat-chip.open .num { color: #2563eb; }
+    .stat-chip.in-progress .num { color: #d97706; }
+    .stat-chip.done .num { color: #16a34a; }
+    .stat-chip.on-hold .num { color: #9d174d; }
+
+    /* Filters */
+    .filter-bar {
+      display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center;
+    }
+    .filter-bar select, .filter-bar input {
+      padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.85rem; background: var(--bg-card); flex: 1; min-width: 100px;
+    }
+    .filter-bar .btn-my-tasks {
+      padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+      border: 1px solid var(--accent); color: var(--accent); background: transparent;
+      cursor: pointer; white-space: nowrap;
+    }
+    .filter-bar .btn-my-tasks.active {
+      background: var(--accent); color: #fff;
+    }
+
+    /* Task cards */
+    .task-group { margin-bottom: 1.5rem; }
+    .task-group-header {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); margin-bottom: 0.5rem; padding-left: 0.25rem;
+    }
+
+    .task-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.75rem 1rem; margin-bottom: 0.5rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: box-shadow 0.15s;
+    }
+    .task-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .task-card.done { opacity: 0.6; }
+    .task-card.on-hold { border-left: 3px solid #9d174d; opacity: 0.7; background: #fdf2f8; }
+
+    .task-card-top { display: flex; align-items: flex-start; gap: 0.5rem; }
+    .task-row-num {
+      min-width: 20px; text-align: right; font-size: 0.7rem; font-weight: 600;
+      color: var(--text-muted); opacity: 0.5; margin-top: 4px; flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .task-canon-id {
+      color: var(--text-muted); font-weight: 500; font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .task-priority {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 6px; font-size: 0.7rem; font-weight: 800;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .task-priority.p1 { background: var(--p1-bg); color: var(--p1); }
+    .task-priority.p2 { background: var(--p2-bg); color: var(--p2); }
+    .task-priority.p3 { background: var(--p3-bg); color: var(--p3); }
+    .task-priority.p4 { background: var(--p4-bg); color: var(--p4); }
+    .task-priority.pnone { background: #f3f4f6; color: #9ca3af; }
+
+    .task-card-body { flex: 1; min-width: 0; }
+    .task-title { font-size: 0.95rem; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .task-card.done .task-title { text-decoration: line-through; color: var(--text-muted); }
+
+    .task-meta {
+      display: flex; align-items: center; gap: 0.5rem; margin-top: 0.3rem;
+      font-size: 0.78rem; color: var(--text-muted); flex-wrap: wrap;
+    }
+    .task-location { display: flex; align-items: center; gap: 0.2rem; }
+
+    .task-assignee {
+      padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.72rem; font-weight: 600;
+      background: #e0e7ff; color: #3730a3; white-space: nowrap;
+    }
+
+    .task-notes {
+      margin-top: 0.4rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;
+    }
+    .task-completed-date { font-size: 0.75rem; color: #16a34a; margin-top: 0.2rem; }
+
+    .task-actions {
+      display: flex; gap: 0.4rem; margin-top: 0.5rem;
+    }
+    .task-actions button {
+      padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .task-actions button:hover { background: var(--border); }
+    .task-actions .btn-start { border-color: #d97706; color: #d97706; }
+    .task-actions .btn-start:hover { background: #fffbeb; }
+    .task-actions .btn-done { border-color: #16a34a; color: #16a34a; }
+    .task-actions .btn-done:hover { background: #f0fdf4; }
+    .task-actions .btn-hold { border-color: #9d174d; color: #9d174d; }
+    .task-actions .btn-hold:hover { background: #fce7f3; }
+    .task-actions .btn-reopen { border-color: #6b7280; color: #6b7280; }
+
+    .empty-state {
+      text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.95rem;
+    }
+
+    .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
+
+    /* Edit icon (top-right of card) */
+    .task-card { position: relative; }
+    .task-edit-icon {
+      position: absolute; top: 0.5rem; right: 0.5rem;
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      color: var(--text-muted); opacity: 0.4; transition: opacity 0.15s, background 0.15s;
+    }
+    .task-edit-icon:hover { opacity: 1; background: rgba(0,0,0,0.05); }
+    .task-edit-icon svg { width: 15px; height: 15px; }
+
+    /* Task description on cards */
+    .task-description {
+      margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;
+      font-style: italic;
+    }
+
+    /* Task photo thumbnails on cards */
+    .task-card-photos {
+      display: flex; gap: 0.3rem; margin-top: 0.4rem; flex-wrap: wrap;
+    }
+    .task-card-photos img {
+      width: 40px; height: 40px; object-fit: cover; border-radius: 4px;
+      border: 1px solid var(--border); cursor: pointer;
+    }
+
+    /* Photo grid in modal */
+    .task-photo-grid {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;
+    }
+    .task-photo-thumb {
+      position: relative; width: 64px; height: 64px; border-radius: 6px; overflow: hidden;
+      border: 1px solid var(--border); cursor: pointer;
+    }
+    .task-photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .task-photo-thumb .photo-remove {
+      position: absolute; top: 2px; right: 2px; width: 18px; height: 18px;
+      background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%;
+      font-size: 0.65rem; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; line-height: 1;
+    }
+    .photo-upload-row { display: flex; gap: 0.5rem; }
+    .btn-upload-photo {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.35rem 0.75rem; border: 1px dashed var(--border); border-radius: 6px;
+      font-size: 0.8rem; color: var(--text-muted); cursor: pointer;
+    }
+    .btn-upload-photo:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Simple lightbox */
+    .simple-lightbox {
+      position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .simple-lightbox.hidden { display: none; }
+    .simple-lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+
+    /* Add project button */
+    .btn-add-project {
+      margin-left: auto;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent, #d4883a); color: #fff;
+      border: none; font-size: 1.3rem; font-weight: 700; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .btn-add-project:hover { opacity: 0.85; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-card {
+      background: var(--bg-card, #fff); border-radius: 12px; width: 100%; max-width: 480px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15); overflow: hidden;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+    }
+    .modal-header h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+    .modal-close {
+      background: none; border: none; font-size: 1.4rem; cursor: pointer;
+      color: var(--text-muted); padding: 0 0.25rem; line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    #addProjectForm { padding: 1rem; }
+    .form-group { margin-bottom: 0.75rem; }
+    .form-group label {
+      display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .form-group .required { color: #ef4444; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 0.5rem 0.6rem; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.9rem; background: var(--bg); font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none; border-color: var(--accent, #d4883a);
+    }
+    .form-row { display: flex; gap: 0.75rem; }
+    .form-row .form-group { flex: 1; }
+    .form-actions {
+      display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem;
+      padding-top: 0.75rem; border-top: 1px solid var(--border);
+    }
+    .form-actions button {
+      padding: 0.5rem 1.2rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; border: 1px solid var(--border);
+    }
+    .btn-cancel { background: var(--bg); color: var(--text); }
+    .btn-cancel:hover { background: var(--border); }
+    .btn-submit { background: var(--accent, #d4883a); color: #fff; border-color: transparent; }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+  <script type="module" src="../shared/version-info.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/site.css">
+  <link rel="stylesheet" href="../styles/tailwind.out.css">
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main app content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Associate</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs" id="tabNav"></div>
+
+    <div class="app-container">
+      <!-- Stats -->
+      <div class="stats-bar" id="statsBar">
+        <div class="stat-chip open"><span class="num" id="statOpen">0</span> Open</div>
+        <div class="stat-chip in-progress"><span class="num" id="statInProgress">0</span> In Progress</div>
+        <div class="stat-chip on-hold"><span class="num" id="statOnHold">0</span> On Hold</div>
+        <div class="stat-chip done"><span class="num" id="statDone">0</span> Done</div>
+        <button class="btn-add-project" id="btnAddProject" title="Add New Project Task">+</button>
+      </div>
+
+      <!-- Search -->
+      <div class="filter-bar" style="margin-bottom:0.5rem">
+        <input type="text" id="searchInput" placeholder="Search project tasks..." style="flex:2">
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <button class="btn-my-tasks" id="btnMyTasks">My Tasks</button>
+        <select id="filterAssignee">
+          <option value="">All People</option>
+        </select>
+        <select id="filterStatus">
+          <option value="">Active (not Done)</option>
+          <option value="open">Open</option>
+          <option value="in_progress">In Progress</option>
+          <option value="on_hold">On Hold</option>
+          <option value="done">Done</option>
+          <option value="all">All</option>
+        </select>
+        <select id="filterPriority">
+          <option value="">All Priorities</option>
+          <option value="1">P1 - Urgent</option>
+          <option value="2">P2 - High</option>
+          <option value="3">P3 - Medium</option>
+          <option value="4">P4 - Low</option>
+        </select>
+      </div>
+
+      <!-- Task list -->
+      <div id="taskList">
+        <div class="loading">Loading tasks...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Project Task Modal -->
+  <div class="modal-overlay hidden" id="addProjectModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">New Project Task</h3>
+        <button class="modal-close" id="btnCloseModal">&times;</button>
+      </div>
+      <form id="addProjectForm">
+        <input type="hidden" id="editTaskId">
+        <div class="form-group">
+          <label for="newTitle">Title <span class="required">*</span></label>
+          <input type="text" id="newTitle" required placeholder="What needs to be done?">
+        </div>
+        <div class="form-group">
+          <label for="newNotes">Notes</label>
+          <textarea id="newNotes" rows="2" placeholder="Short summary..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="newDescription">Description</label>
+          <textarea id="newDescription" rows="4" placeholder="Detailed description, steps, context..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="newPriority">Priority</label>
+            <select id="newPriority">
+              <option value="">No Priority</option>
+              <option value="1">P1 - Urgent</option>
+              <option value="2">P2 - High</option>
+              <option value="3">P3 - Medium</option>
+              <option value="4">P4 - Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newAssignee">Assign To</label>
+            <select id="newAssignee">
+              <option value="">Unassigned</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="newSpace">Location</label>
+            <select id="newSpace">
+              <option value="">No Location</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newLocationLabel">Location Note</label>
+            <input type="text" id="newLocationLabel" placeholder="e.g. Attic, Shed...">
+          </div>
+        </div>
+        <div class="form-group hidden" id="statusGroup">
+          <label for="newStatus">Status</label>
+          <select id="newStatus">
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="on_hold">On Hold</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+
+        <!-- Photos -->
+        <div class="form-group" id="photosSection">
+          <label>Photos</label>
+          <div id="taskPhotos" class="task-photo-grid"></div>
+          <div class="photo-upload-row">
+            <label class="btn-upload-photo" for="photoInput">
+              <span>+ Add Photo</span>
+            </label>
+            <input type="file" id="photoInput" accept="image/*" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0" multiple>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="btnCancelModal">Cancel</button>
+          <button type="submit" class="btn-submit" id="btnSubmitProject">Create Project Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Simple image lightbox -->
+  <div class="simple-lightbox hidden" id="simpleLightbox">
+    <img id="lightboxImg" src="" alt="Full size">
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../shared/instant-chrome.js"></script>
+
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="projects.js"></script>
+</body>
+</html>

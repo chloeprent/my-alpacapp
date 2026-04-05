@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Pay - YOUR_PROPERTY_NAME</title>
+
+  <!-- Shared site styles (nav, footer) -->
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+
+  <style>
+    :root {
+      --bg: #faf9f6;
+      --bg-muted: #f2f0e8;
+      --text: #2a1f23;
+      --text-muted: #7d6f74;
+      --accent: #d4883a;
+      --accent-hover: #be7830;
+      --border: #e6e2d9;
+      --dark: #1c1618;
+      --card-bg: #fff;
+      --radius: 8px;
+      --radius-lg: 16px;
+      --shadow: 0 2px 8px rgba(42,31,35,0.06), 0 1px 2px rgba(42,31,35,0.04);
+      --shadow-lg: 0 8px 24px rgba(42,31,35,0.08), 0 2px 6px rgba(42,31,35,0.04);
+    }
+    body {
+      background: var(--bg);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--text);
+      margin: 0;
+    }
+
+    /* Container */
+    .pay-wrap {
+      max-width: 580px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    /* Main card */
+    .pay-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Header — brand dark */
+    .pay-card__header {
+      background: var(--dark);
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .pay-card__header-icon {
+      height: 40px;
+      width: auto;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+    .pay-card__header-text h1 {
+      color: #faf9f6;
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .pay-card__header-text p {
+      color: rgba(250,249,246,0.6);
+      margin: 3px 0 0;
+      font-size: 13px;
+      font-weight: 400;
+    }
+
+    /* Body */
+    .pay-card__body { padding: 24px 28px; }
+
+    /* Amount & description inputs */
+    .pay-field { margin-bottom: 16px; }
+    .pay-field__label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .pay-field__input {
+      width: 100%;
+      font-size: 16px;
+      font-family: inherit;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+      color: var(--text);
+      background: var(--card-bg);
+    }
+    .pay-field__input:focus { border-color: var(--accent); }
+    .pay-field__input--amount {
+      font-size: 24px;
+      font-weight: 700;
+      padding-left: 30px;
+    }
+    .pay-field__dollar {
+      position: relative;
+    }
+    .pay-field__dollar::before {
+      content: '$';
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      pointer-events: none;
+    }
+
+    /* Preset summary — amber callout */
+    .pay-summary {
+      background: var(--bg-muted);
+      border-left: 4px solid var(--accent);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .pay-summary__label {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 4px;
+    }
+    .pay-summary__amount {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .pay-summary__desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Error */
+    .pay-error {
+      background: #f5e6e9;
+      color: #8f3d4b;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      margin-bottom: 14px;
+      display: none;
+      border: 1px solid #e5ccd2;
+    }
+    .pay-error.visible { display: block; }
+
+    /* ── Payment methods (HARDCODED, always visible) ── */
+    .pay-methods {
+      background: var(--bg-muted);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+    .pay-methods__title {
+      margin: 0 0 10px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .pay-methods__row {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    .pay-methods__row:last-child { border-bottom: none; }
+    .pay-methods__badge {
+      display: inline-block;
+      color: white;
+      padding: 3px 0;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      width: 56px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .pay-methods__handle {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+      text-decoration: none;
+    }
+    a.pay-methods__handle { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    a.pay-methods__handle:hover { text-decoration-thickness: 2px; }
+    .pay-methods__note {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .pay-methods__qr-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 0;
+    }
+    .pay-methods__qr-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .pay-methods__qr-wrap {
+      display: none;
+      padding: 12px 0 4px;
+      text-align: center;
+    }
+    .pay-methods__qr-wrap.visible { display: block; }
+    .pay-methods__qr-wrap img {
+      width: 160px;
+      height: 160px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+    .pay-methods__qr-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .pay-methods__free {
+      margin-left: auto;
+      background: #e8f5e0;
+      color: #54a326;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .pay-memo {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 0 0 16px;
+    }
+
+    /* ── Divider ── */
+    .pay-divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .pay-divider::before, .pay-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+    }
+    .pay-divider span { padding: 0 14px; }
+
+    /* ── Stripe ACH ── */
+    #payment-element {
+      margin-bottom: 14px;
+    }
+
+    /* CTA button — amber accent */
+    .pay-btn {
+      display: block;
+      width: 100%;
+      background: var(--accent);
+      color: white;
+      padding: 14px;
+      text-decoration: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      font-family: inherit;
+      box-shadow: 0 2px 8px rgba(212,136,58,0.25);
+    }
+    .pay-btn:hover { background: var(--accent-hover); box-shadow: 0 4px 12px rgba(212,136,58,0.35); }
+    .pay-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+    .pay-btn__sub {
+      display: block;
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Fee breakdown */
+    .pay-fee-breakdown {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+    .pay-fee-breakdown__row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      color: var(--text-muted);
+    }
+    .pay-fee-breakdown__total {
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+      padding-top: 8px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Success */
+    .pay-success {
+      text-align: center;
+      padding: 32px 16px;
+      display: none;
+    }
+    .pay-success.visible { display: block; }
+    .pay-success__check {
+      width: 56px;
+      height: 56px;
+      background: #e8f5e0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .pay-success__check svg { width: 28px; height: 28px; color: #54a326; }
+    .pay-success h2 { color: #54a326; margin-bottom: 8px; font-size: 20px; }
+    .pay-success p { color: var(--text-muted); font-size: 15px; }
+
+    /* Card footer */
+    .pay-card__footer {
+      background: var(--bg-muted);
+      padding: 14px 28px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    .pay-card__footer p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .pay-card__footer p + p {
+      margin-top: 3px;
+      font-size: 11px;
+      opacity: 0.7;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .pay-wrap { margin: 1rem auto; }
+      .pay-card__body { padding: 18px 16px; }
+      .pay-card__header { padding: 18px 16px; }
+      .pay-card__footer { padding: 12px 16px; }
+      .pay-summary__amount { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Standard site header -->
+  <span data-site-version style="display:none;">v260405.02 4:44p</span>
+  <div id="siteHeader"></div>
+
+  <!-- Pay page -->
+  <div class="pay-wrap">
+    <div class="pay-card">
+      <div class="pay-card__header">
+        <img
+          src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-white-transparent.png"
+          alt="YOUR_PROPERTY_NAME"
+          class="pay-card__header-icon"
+        >
+        <div class="pay-card__header-text">
+          <h1>Make a Payment</h1>
+          <p>YOUR_PROPERTY_NAME</p>
+        </div>
+      </div>
+
+      <div class="pay-card__body">
+        <!-- Success -->
+        <div class="pay-success" id="successState">
+          <div class="pay-success__check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <h2>Payment Received!</h2>
+          <p id="successMessage">Thank you for your payment. A confirmation email will be sent shortly.</p>
+        </div>
+
+        <!-- Form -->
+        <div id="paymentForm">
+          <!-- ═══════ PAYMENT METHODS — hardcoded so they always show ═══════ -->
+          <div class="pay-methods" id="methodsSection">
+            <p class="pay-methods__title">Payment Methods</p>
+
+            <div class="pay-methods__row" data-method="zelle">
+              <span class="pay-methods__badge" style="background:#6c1cd3;">Zelle</span>
+              <span class="pay-methods__handle">rahulioson@gmail.com</span>
+              <span class="pay-methods__free">No fee</span>
+            </div>
+
+            <div class="pay-methods__row" data-method="venmo">
+              <span class="pay-methods__badge" style="background:#3d95ce;">Venmo</span>
+              <a class="pay-methods__handle" href="https://venmo.com/rahuliox" target="_blank" rel="noopener">@rahuliox</a>
+              <span class="pay-methods__note">Last 4: 7096</span>
+              <button class="pay-methods__qr-toggle" onclick="toggleQR('venmo-qr')" title="Show QR code"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="5" y="5" width="2" height="2"/><rect x="17" y="5" width="2" height="2"/><rect x="5" y="17" width="2" height="2"/><path d="M14 14h2v2h-2zm4 0h2v2h-2zm-4 4h2v2h-2zm4 4h2v-2h-2zm0-4h2v2h-2z"/></svg></button>
+              <span class="pay-methods__free">No fee</span>
+            </div>
+            <div class="pay-methods__qr-wrap" id="venmo-qr">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fvenmo.com%2Frahuliox" alt="Venmo QR Code">
+              <div class="pay-methods__qr-label">Scan to pay via Venmo</div>
+            </div>
+
+            <div class="pay-methods__row" data-method="cashapp">
+              <span class="pay-methods__badge" style="background:#00D632;">Cash App</span>
+              <a class="pay-methods__handle" href="https://cash.app/$rahuliox" target="_blank" rel="noopener">$rahuliox</a>
+              <button class="pay-methods__qr-toggle" onclick="toggleQR('cashapp-qr')" title="Show QR code"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="5" y="5" width="2" height="2"/><rect x="17" y="5" width="2" height="2"/><rect x="5" y="17" width="2" height="2"/><path d="M14 14h2v2h-2zm4 0h2v2h-2zm-4 4h2v2h-2zm4 4h2v-2h-2zm0-4h2v2h-2z"/></svg></button>
+              <span class="pay-methods__free">No fee</span>
+            </div>
+            <div class="pay-methods__qr-wrap" id="cashapp-qr">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fcash.app%2F%24rahuliox" alt="Cash App QR Code">
+              <div class="pay-methods__qr-label">Scan to pay via Cash App</div>
+            </div>
+
+            <div class="pay-methods__row" data-method="paypal">
+              <span class="pay-methods__badge" style="background:#003087;">PayPal</span>
+              <span class="pay-methods__handle">rahulioson@gmail.com</span>
+              <span class="pay-methods__note">Friends &amp; Family only</span>
+              <span class="pay-methods__free">Free (F&amp;F)</span>
+            </div>
+          </div>
+
+          <p class="pay-memo">Include your name and what the payment is for in the memo.</p>
+
+          <!-- Stripe ACH divider -->
+          <div class="pay-divider"><span>or pay online via bank transfer</span></div>
+
+          <!-- Preset summary -->
+          <div class="pay-summary" id="presetSummary" style="display:none;">
+            <div class="pay-summary__label">Amount Due</div>
+            <div class="pay-summary__amount" id="summaryAmount"></div>
+            <div class="pay-summary__desc" id="summaryDesc"></div>
+          </div>
+
+          <!-- Amount -->
+          <div class="pay-field" id="amountGroup">
+            <label class="pay-field__label" for="payAmount">Payment Amount</label>
+            <div class="pay-field__dollar">
+              <input type="number" id="payAmount" class="pay-field__input pay-field__input--amount" placeholder="0.00" min="0.50" step="0.01">
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="pay-field" id="descGroup">
+            <label class="pay-field__label" for="payDesc">What is this payment for?</label>
+            <input type="text" id="payDesc" class="pay-field__input" placeholder="e.g. February rent, security deposit">
+          </div>
+
+          <!-- Error -->
+          <div class="pay-error" id="payError"></div>
+
+          <div id="stripeSection">
+            <div id="feeBreakdown" class="pay-fee-breakdown" style="display:none;">
+              <div class="pay-fee-breakdown__row"><span>Payment</span><span id="feeBase"></span></div>
+              <div class="pay-fee-breakdown__row"><span>Processing fee (0.8%, max $5)</span><span id="feeAmount"></span></div>
+              <div class="pay-fee-breakdown__row pay-fee-breakdown__total"><span>Total charge</span><span id="feeTotal"></span></div>
+            </div>
+            <div id="payment-element"></div>
+            <button class="pay-btn" id="payBtn" disabled>
+              Pay via Bank Transfer
+            </button>
+            <span class="pay-btn__sub">Secure payment via Stripe &bull; 0.8% processing fee, max $5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pay-card__footer">
+        <p>123 Main Stive, Your City, TX 00000</p>
+        <p>YOUR_APP_NAME &bull; YOUR_PROPERTY_NAME</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standard site footer -->
+  <footer class="aap-footer">
+    <div class="aap-footer__content">
+      <div class="aap-footer__logo">
+        <img width="21" height="30" src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-white-transparent.png" alt="YOUR_PROPERTY_NAME Austin" class="aap-footer__icon">
+        <img width="22" height="22" src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-white-transparent.png" alt="YOUR_PROPERTY_NAME Austin" class="aap-footer__wordmark">
+      </div>
+      <div class="aap-footer__social">
+        <a href="https://www.facebook.com/yourorg" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+        <a href="https://instagram.com/yourorgatx" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1" fill="currentColor"/></svg>
+        </a>
+      </div>
+      <p class="aap-footer__copyright">&copy; 2025 Austin YOUR_PROPERTY_NAME. All rights reserved.<br>123 Main Stive, Your City, TX 00000</p>
+    </div>
+  </footer>
+
+  <!-- Supabase + Stripe -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1" integrity="sha384-nBSomYN4UWX4we7Pw5GsQDkjtwLh2Wde+3szWl5Lzf0zuN9XncHIZLNoucos4C7f" crossorigin="anonymous"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+
+  <!-- Site nav -->
+  <script type="module">
+    import { initPublicPage } from '../shared/public-shell.js';
+    initPublicPage({ transparent: false, light: false, activePage: '' });
+  </script>
+
+  <script>
+    var SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    var SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+    var sb = null;
+    var params = new URLSearchParams(window.location.search);
+    var presetAmount = params.get('amount');
+    var presetDesc = params.get('description') || params.get('desc') || '';
+    var presetPersonId = params.get('person_id') || '';
+    var presetPersonName = params.get('person_name') || params.get('name') || '';
+    var presetEmail = params.get('email') || '';
+    var presetPaymentType = params.get('payment_type') || 'rent';
+    var presetRefType = params.get('reference_type') || 'assignment';
+    var presetRefId = params.get('reference_id') || '';
+
+    var payAmountInput = null;
+    var payDescInput = null;
+    var payBtn = null;
+    var payError = null;
+
+    var stripe = null;
+    var elements = null;
+    var paymentElement = null;
+    var clientSecret = null;
+    var paymentRecordId = null;
+
+    function init() {
+      payAmountInput = document.getElementById('payAmount');
+      payDescInput = document.getElementById('payDesc');
+      payBtn = document.getElementById('payBtn');
+      payError = document.getElementById('payError');
+
+      // Init Supabase client
+      try {
+        if (window.supabase && window.supabase.createClient) {
+          sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+      } catch (e) {
+        console.warn('Supabase client init failed:', e);
+      }
+
+      // Handle preset amount from URL params
+      if (presetAmount) {
+        var amt = parseFloat(presetAmount);
+        if (!isNaN(amt) && amt > 0) {
+          document.getElementById('presetSummary').style.display = 'block';
+          document.getElementById('summaryAmount').textContent = '$' + amt.toFixed(2);
+          if (presetDesc) document.getElementById('summaryDesc').textContent = presetDesc;
+          document.getElementById('amountGroup').style.display = 'none';
+          payAmountInput.value = amt;
+        }
+      }
+      if (presetDesc) {
+        payDescInput.value = presetDesc;
+        if (presetAmount) document.getElementById('descGroup').style.display = 'none';
+      }
+
+      // Progressively enhance payment methods from DB (hardcoded ones already visible)
+      refreshPaymentMethodsFromDB();
+
+      // Init Stripe
+      initStripe();
+
+      updatePayBtnText();
+      payAmountInput.addEventListener('input', function() {
+        updatePayBtnText();
+        if (clientSecret) { clientSecret = null; paymentRecordId = null; }
+      });
+    }
+
+    function getAmount() { return parseFloat(payAmountInput.value) || 0; }
+
+    function calcFee(amount) {
+      return Math.min(Math.round(amount * 0.008 * 100) / 100, 5.00);
+    }
+
+    function updatePayBtnText() {
+      var amt = getAmount();
+      var fee = calcFee(amt);
+      var total = amt + fee;
+      var breakdown = document.getElementById('feeBreakdown');
+      if (amt > 0) {
+        payBtn.textContent = 'Pay $' + total.toFixed(2) + ' via Bank Transfer';
+        document.getElementById('feeBase').textContent = '$' + amt.toFixed(2);
+        document.getElementById('feeAmount').textContent = '+$' + fee.toFixed(2);
+        document.getElementById('feeTotal').textContent = '$' + total.toFixed(2);
+        breakdown.style.display = '';
+      } else {
+        payBtn.textContent = 'Pay via Bank Transfer';
+        breakdown.style.display = 'none';
+      }
+    }
+
+    // Toggle QR code visibility
+    function toggleQR(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.toggle('visible');
+    }
+
+    // Progressive enhancement: update hardcoded methods with fresh DB data
+    // Links for payment methods
+    var METHOD_LINKS = {
+      venmo: 'https://venmo.com/rahuliox',
+      cashapp: 'https://cash.app/$rahuliox'
+    };
+
+    var METHOD_QR_LABELS = {
+      venmo: 'Scan to pay via Venmo',
+      cashapp: 'Scan to pay via Cash App',
+      paypal: 'Scan to pay via PayPal \u2022 select Friends & Family'
+    };
+
+    function refreshPaymentMethodsFromDB() {
+      if (!sb) return;
+      sb.from('payment_methods')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order')
+        .then(function(result) {
+          var methods = result.data;
+          if (!methods || methods.length === 0) return;
+
+          var BADGE_COLORS = {
+            zelle: '#6c1cd3',
+            venmo: '#3d95ce',
+            cashapp: '#00D632',
+            paypal: '#003087',
+            bank_ach: '#333',
+            cash: '#2e7d32',
+            check: '#555'
+          };
+
+          var container = document.getElementById('methodsSection');
+
+          // Remove old hardcoded rows and QR wraps
+          var existingRows = container.querySelectorAll('.pay-methods__row, .pay-methods__qr-wrap');
+          for (var r = 0; r < existingRows.length; r++) {
+            existingRows[r].remove();
+          }
+
+          // Build fresh rows from DB — compact single-line format
+          var fragment = document.createDocumentFragment();
+          for (var i = 0; i < methods.length; i++) {
+            var m = methods[i];
+            var bg = BADGE_COLORS[m.method_type] || '#888';
+            var freeLabel = m.method_type === 'paypal' ? 'Free (F&F)' : 'No fee';
+            var link = METHOD_LINKS[m.method_type];
+            var qrId = m.method_type + '-qr';
+
+            var row = document.createElement('div');
+            row.className = 'pay-methods__row';
+            row.setAttribute('data-method', m.method_type);
+
+            var html = '<span class="pay-methods__badge" style="background:' + bg + ';">' + m.name + '</span>';
+
+            // Handle/identifier — make it a link if we have one
+            var displayId = m.account_identifier || '';
+            if (m.method_type === 'paypal' && !displayId) displayId = 'rahulioson@gmail.com';
+            if (displayId) {
+              if (link) {
+                html += '<a class="pay-methods__handle" href="' + link + '" target="_blank" rel="noopener">' + displayId + '</a>';
+              } else {
+                html += '<span class="pay-methods__handle">' + displayId + '</span>';
+              }
+            }
+
+            // Short note
+            if (m.method_type === 'venmo') {
+              html += '<span class="pay-methods__note">Last 4: 7096</span>';
+            } else if (m.method_type === 'paypal') {
+              html += '<span class="pay-methods__note">Friends &amp; Family only</span>';
+            }
+
+            // QR toggle for methods with links
+            if (link) {
+              html += '<button class="pay-methods__qr-toggle" onclick="toggleQR(\'' + qrId + '\')" title="Show QR code"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="5" y="5" width="2" height="2"/><rect x="17" y="5" width="2" height="2"/><rect x="5" y="17" width="2" height="2"/><path d="M14 14h2v2h-2zm4 0h2v2h-2zm-4 4h2v2h-2zm4 4h2v-2h-2zm0-4h2v2h-2z"/></svg></button>';
+            }
+
+            html += '<span class="pay-methods__free">' + freeLabel + '</span>';
+
+            row.innerHTML = html;
+            fragment.appendChild(row);
+
+            // QR code container
+            if (link) {
+              var qrWrap = document.createElement('div');
+              qrWrap.className = 'pay-methods__qr-wrap';
+              qrWrap.id = qrId;
+              var encodedUrl = encodeURIComponent(link);
+              qrWrap.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodedUrl + '" alt="' + m.name + ' QR Code">'
+                + '<div class="pay-methods__qr-label">' + (METHOD_QR_LABELS[m.method_type] || 'Scan to pay') + '</div>';
+              fragment.appendChild(qrWrap);
+            }
+          }
+          container.appendChild(fragment);
+        })
+        .catch(function(err) {
+          console.warn('Could not refresh payment methods from DB:', err);
+          // Hardcoded methods still visible — no problem
+        });
+    }
+
+    // Stripe ACH
+    function initStripe() {
+      if (!sb) {
+        document.getElementById('stripeSection').innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:16px;font-size:14px;">Online bank transfer is currently unavailable.</p>';
+        return;
+      }
+
+      sb.from('stripe_config')
+        .select('publishable_key, sandbox_publishable_key, test_mode, is_active')
+        .single()
+        .then(function(result) {
+          var config = result.data;
+          if (!config || !config.is_active) {
+            document.getElementById('stripeSection').innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:16px;font-size:14px;">Online bank transfer is not currently available.</p>';
+            return;
+          }
+
+          var pk = config.test_mode ? config.sandbox_publishable_key : config.publishable_key;
+          if (!pk) {
+            document.getElementById('stripeSection').innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:16px;font-size:14px;">Online bank transfer is not currently available.</p>';
+            return;
+          }
+
+          stripe = Stripe(pk);
+
+          if (presetAmount && getAmount() >= 0.50) {
+            createPaymentIntentAndMount();
+          } else {
+            payBtn.disabled = false;
+            payBtn.addEventListener('click', handlePay);
+          }
+        })
+        .catch(function(err) {
+          console.error('Stripe config error:', err);
+        });
+    }
+
+    function createPaymentIntentAndMount() {
+      var amount = getAmount();
+      if (amount < 0.50) { showError('Minimum payment amount is $0.50'); return; }
+
+      var fee = calcFee(amount);
+      var totalAmount = amount + fee;
+
+      showError('');
+      payBtn.disabled = true;
+      payBtn.innerHTML = '<span class="spinner"></span> Preparing...';
+
+      fetch(SUPABASE_URL + '/functions/v1/process-stripe-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({
+          amount: Math.round(totalAmount * 100),
+          original_amount: Math.round(amount * 100),
+          fee_amount: Math.round(fee * 100),
+          payment_type: presetPaymentType || 'rent',
+          reference_type: presetRefType || 'direct_payment',
+          reference_id: presetRefId || crypto.randomUUID(),
+          description: payDescInput.value || presetDesc || 'Payment',
+          person_id: presetPersonId || null,
+          person_name: presetPersonName || null,
+          buyer_email: presetEmail || null,
+        }),
+      })
+      .then(function(res) { return res.json().then(function(d) { return { ok: res.ok, data: d }; }); })
+      .then(function(result) {
+        if (!result.ok || !result.data.success) throw new Error(result.data.error || 'Failed to create payment');
+
+        clientSecret = result.data.clientSecret;
+        paymentRecordId = result.data.paymentRecordId;
+
+        elements = stripe.elements({
+          clientSecret: clientSecret,
+          appearance: {
+            theme: 'stripe',
+            variables: {
+              colorPrimary: '#d4883a',
+              borderRadius: '8px',
+              fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            },
+          },
+        });
+        paymentElement = elements.create('payment', { layout: 'tabs' });
+        paymentElement.mount('#payment-element');
+
+        paymentElement.on('ready', function() {
+          payBtn.disabled = false;
+          updatePayBtnText();
+          payBtn.onclick = handlePay;
+        });
+
+        paymentElement.on('change', function(event) {
+          showError(event.error ? event.error.message : '');
+        });
+      })
+      .catch(function(err) {
+        console.error('PaymentIntent error:', err);
+        showError(err.message || 'Error preparing payment.');
+        payBtn.disabled = false;
+        updatePayBtnText();
+      });
+    }
+
+    function handlePay(e) {
+      if (e) e.preventDefault();
+      var amount = getAmount();
+      if (amount < 0.50) { showError('Please enter an amount of at least $0.50'); return; }
+
+      if (!clientSecret) {
+        createPaymentIntentAndMount();
+        return;
+      }
+
+      payBtn.disabled = true;
+      payBtn.innerHTML = '<span class="spinner"></span> Processing...';
+      showError('');
+
+      stripe.confirmPayment({
+        elements: elements,
+        confirmParams: {
+          return_url: window.location.href + '?success=true',
+          receipt_email: presetEmail || undefined,
+        },
+        redirect: 'if_required',
+      })
+      .then(function(result) {
+        if (result.error) {
+          showError(result.error.message);
+          payBtn.disabled = false;
+          updatePayBtnText();
+        } else {
+          showSuccess();
+        }
+      })
+      .catch(function(err) {
+        showError(err.message || 'Payment failed. Please try again.');
+        payBtn.disabled = false;
+        updatePayBtnText();
+      });
+    }
+
+    function showError(msg) {
+      payError.textContent = msg || '';
+      payError.classList.toggle('visible', !!msg);
+    }
+
+    function showSuccess() {
+      document.getElementById('paymentForm').style.display = 'none';
+      document.getElementById('successState').classList.add('visible');
+      var amt = getAmount();
+      var fee = calcFee(amt);
+      var total = amt + fee;
+      document.getElementById('successMessage').textContent = 'Your payment of $' + total.toFixed(2) + ' ($' + amt.toFixed(2) + ' + $' + fee.toFixed(2) + ' processing fee) has been received. A confirmation email will be sent shortly.';
+      document.title = 'Payment Received - YOUR_PROPERTY_NAME';
+    }
+
+    // Check if returning from redirect
+    if (params.get('success') === 'true' || params.get('redirect_status') === 'succeeded') {
+      document.addEventListener('DOMContentLoaded', function() {
+        // If a redirect URL was specified, go there after a brief delay
+        var redirectUrl = params.get('redirect');
+        if (redirectUrl) {
+          document.getElementById('paymentForm').style.display = 'none';
+          document.getElementById('successState').classList.add('visible');
+          document.getElementById('successMessage').textContent = 'Payment received! Redirecting...';
+          document.title = 'Payment Received - YOUR_PROPERTY_NAME';
+          setTimeout(function() { window.location.href = decodeURIComponent(redirectUrl); }, 2000);
+          return;
+        }
+        document.getElementById('paymentForm').style.display = 'none';
+        document.getElementById('successState').classList.add('visible');
+        document.getElementById('successMessage').textContent = 'Your payment has been received. A confirmation email will be sent shortly.';
+        document.title = 'Payment Received - YOUR_PROPERTY_NAME';
+      });
+    } else {
+      document.addEventListener('DOMContentLoaded', init);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <title>W-9 Tax Form - YOUR_PROPERTY_NAME</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.99.1" integrity="sha384-nBSomYN4UWX4we7Pw5GsQDkjtwLh2Wde+3szWl5Lzf0zuN9XncHIZLNoucos4C7f" crossorigin="anonymous"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: #f5f5f0;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+      color: #2d3024;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .irs-notice {
+      background: #fef3c7;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: #92400e;
+      line-height: 1.5;
+    }
+
+    .privacy-notice {
+      background: #e5f4f1;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: #065f46;
+      line-height: 1.5;
+    }
+
+    /* Form styles */
+    .form-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #eee;
+    }
+    .form-section:last-of-type { border-bottom: none; }
+
+    .section-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2d3024;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 0.25rem;
+    }
+    label .required { color: #c0392b; }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: white;
+    }
+    input[type="text"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #3d8b7a;
+      box-shadow: 0 0 0 3px rgba(61, 139, 122, 0.1);
+    }
+    input[type="text"]::placeholder { color: #aaa; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .field-row-3 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .field-hint {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 0.2rem;
+    }
+
+    /* Tax classification radio group */
+    .tax-class-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .tax-class-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .tax-class-option:hover { border-color: #3d8b7a; background: #f0faf7; }
+    .tax-class-option.selected {
+      border-color: #3d8b7a;
+      background: #e5f4f1;
+    }
+    .tax-class-option input[type="radio"] { margin: 0; }
+
+    /* TIN type toggle */
+    .tin-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .tin-toggle-btn {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .tin-toggle-btn:hover { border-color: #3d8b7a; }
+    .tin-toggle-btn.active {
+      border-color: #3d8b7a;
+      background: #e5f4f1;
+      color: #2d7a6a;
+    }
+
+    /* Certification checkbox */
+    .certification {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 1rem;
+    }
+    .certification-text {
+      font-size: 0.83rem;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 0.75rem;
+    }
+    .certification-text ol {
+      padding-left: 1.25rem;
+      margin: 0.5rem 0;
+    }
+    .certification-text li { margin-bottom: 0.25rem; }
+    .cert-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .cert-check input[type="checkbox"] {
+      margin-top: 0.15rem;
+      accent-color: #3d8b7a;
+    }
+    .cert-check label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 0.85rem;
+      background: #3d8b7a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 1rem;
+    }
+    .btn-submit:hover { background: #2d7a6a; }
+    .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+    /* States */
+    .loading { display: none; text-align: center; padding: 2rem; }
+    .loading.visible { display: block; }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #eee;
+      border-top: 3px solid #3d8b7a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: #666; font-size: 0.95rem; }
+
+    .result { display: none; text-align: center; padding: 2rem; }
+    .result.visible { display: block; }
+    .result .icon { font-size: 3.5rem; margin-bottom: 0.75rem; }
+    .result h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .result-success h2 { color: #3d8b7a; }
+    .result > p { color: #666; margin-bottom: 1rem; max-width: 450px; margin-left: auto; margin-right: auto; font-size: 0.95rem; line-height: 1.5; }
+
+    .whats-next {
+      background: #e5f4f1;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+    .whats-next h3 { font-size: 0.9rem; font-weight: 600; color: #3d8b7a; margin-bottom: 0.75rem; text-align: center; }
+    .whats-next ol { margin: 0; padding-left: 1.25rem; }
+    .whats-next li { font-size: 0.85rem; margin-bottom: 0.5rem; color: #333; }
+    .whats-next li:last-child { margin-bottom: 0; }
+
+    .error-state { text-align: center; padding: 2rem; }
+    .error-state .error-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .error-state h2 { font-size: 1.2rem; margin-bottom: 0.5rem; color: #c0392b; }
+    .error-state p { color: #666; font-size: 0.95rem; }
+
+    .error-msg {
+      display: none;
+      background: #fef2f2;
+      color: #c0392b;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .error-msg.visible { display: block; }
+
+    .questions-contact {
+      font-size: 0.85rem;
+      color: #666;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    .questions-contact a { color: #3d8b7a; text-decoration: none; }
+    .questions-contact a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .container { margin: 1rem auto; }
+      .card { padding: 1.5rem; }
+      .tax-class-grid { grid-template-columns: 1fr; }
+      .field-row { grid-template-columns: 1fr; }
+      .field-row-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+</head>
+<body>
+  <span data-site-version style="display:none;">v260405.02 4:44p</span>
+  <div id="siteHeader"></div>
+
+  <div class="container">
+    <div class="card">
+      <!-- Loading state while validating token -->
+      <div id="validatingState" class="loading visible">
+        <div class="spinner"></div>
+        <p class="loading-text">Validating your link...</p>
+      </div>
+
+      <!-- Error state (invalid/expired token) -->
+      <div id="errorState" class="error-state" style="display: none;">
+        <div class="error-icon">&#128683;</div>
+        <h2 id="errorTitle">Invalid Link</h2>
+        <p id="errorMessage">This link is no longer valid. Please contact us for a new link.</p>
+      </div>
+
+      <!-- W-9 Form -->
+      <div id="w9Form" style="display: none;">
+        <h1>W-9 Tax Form</h1>
+        <p class="subtitle">
+          Hi <strong id="personName"></strong>, please complete this form for tax reporting purposes. This is equivalent to IRS Form W-9 (Request for Taxpayer Identification Number and Certification).
+        </p>
+
+        <div class="irs-notice">
+          <strong>Why is this needed?</strong> The IRS requires us to collect a W-9 from anyone we pay $600 or more in a calendar year. This information is used to prepare your 1099-NEC form.
+        </div>
+
+        <div class="privacy-notice">
+          Your tax information is encrypted with AES-256 encryption and stored securely. Only the last 4 digits of your SSN/EIN are visible to administrators.
+        </div>
+
+        <div id="errorMsg" class="error-msg"></div>
+
+        <!-- Section 1: Taxpayer Information -->
+        <div class="form-section">
+          <div class="section-title">Taxpayer Information</div>
+
+          <div class="field">
+            <label for="legalName">Legal Name <span class="required">*</span></label>
+            <input type="text" id="legalName" placeholder="As shown on your income tax return" autocomplete="name">
+          </div>
+
+          <div class="field">
+            <label for="businessName">Business Name / DBA</label>
+            <input type="text" id="businessName" placeholder="If different from above (optional)">
+          </div>
+        </div>
+
+        <!-- Section 2: Tax Classification -->
+        <div class="form-section">
+          <div class="section-title">Federal Tax Classification <span class="required">*</span></div>
+
+          <div class="tax-class-grid" id="taxClassGrid">
+            <label class="tax-class-option" data-value="individual">
+              <input type="radio" name="taxClass" value="individual"> Individual / Sole Proprietor
+            </label>
+            <label class="tax-class-option" data-value="c_corp">
+              <input type="radio" name="taxClass" value="c_corp"> C Corporation
+            </label>
+            <label class="tax-class-option" data-value="s_corp">
+              <input type="radio" name="taxClass" value="s_corp"> S Corporation
+            </label>
+            <label class="tax-class-option" data-value="partnership">
+              <input type="radio" name="taxClass" value="partnership"> Partnership
+            </label>
+            <label class="tax-class-option" data-value="trust_estate">
+              <input type="radio" name="taxClass" value="trust_estate"> Trust / Estate
+            </label>
+            <label class="tax-class-option" data-value="llc_c">
+              <input type="radio" name="taxClass" value="llc_c"> LLC (C Corp)
+            </label>
+            <label class="tax-class-option" data-value="llc_s">
+              <input type="radio" name="taxClass" value="llc_s"> LLC (S Corp)
+            </label>
+            <label class="tax-class-option" data-value="llc_p">
+              <input type="radio" name="taxClass" value="llc_p"> LLC (Partnership)
+            </label>
+            <label class="tax-class-option" data-value="other">
+              <input type="radio" name="taxClass" value="other"> Other
+            </label>
+          </div>
+
+          <div class="field" id="otherClassField" style="display: none; margin-top: 0.75rem;">
+            <label for="taxClassOther">Describe <span class="required">*</span></label>
+            <input type="text" id="taxClassOther" placeholder="Describe your tax classification">
+          </div>
+        </div>
+
+        <!-- Section 3: Address -->
+        <div class="form-section">
+          <div class="section-title">Address</div>
+
+          <div class="field">
+            <label for="addressStreet">Street Address <span class="required">*</span></label>
+            <input type="text" id="addressStreet" placeholder="123 Main St, Apt 4B" autocomplete="street-address">
+          </div>
+
+          <div class="field-row-3">
+            <div class="field">
+              <label for="addressCity">City <span class="required">*</span></label>
+              <input type="text" id="addressCity" placeholder="Austin" autocomplete="address-level2">
+            </div>
+            <div class="field">
+              <label for="addressState">State <span class="required">*</span></label>
+              <select id="addressState" autocomplete="address-level1">
+                <option value="">--</option>
+                <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option>
+                <option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option>
+                <option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option>
+                <option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option>
+                <option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option>
+                <option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option>
+                <option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option>
+                <option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option>
+                <option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option>
+                <option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option>
+                <option value="NM">NM</option><option value="NY">NY</option><option value="NC">NC</option>
+                <option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option>
+                <option value="OR">OR</option><option value="PA">PA</option><option value="RI">RI</option>
+                <option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option>
+                <option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option>
+                <option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option>
+                <option value="WI">WI</option><option value="WY">WY</option><option value="DC">DC</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="addressZip">ZIP <span class="required">*</span></label>
+              <input type="text" id="addressZip" placeholder="78701" maxlength="10" autocomplete="postal-code">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Taxpayer Identification Number -->
+        <div class="form-section">
+          <div class="section-title">Taxpayer Identification Number (TIN)</div>
+
+          <div class="tin-toggle">
+            <button type="button" class="tin-toggle-btn active" data-tin="ssn">Social Security Number (SSN)</button>
+            <button type="button" class="tin-toggle-btn" data-tin="ein">Employer ID Number (EIN)</button>
+          </div>
+
+          <div class="field">
+            <label for="tinValue" id="tinLabel">Social Security Number <span class="required">*</span></label>
+            <input type="text" id="tinValue" placeholder="XXX-XX-XXXX" maxlength="11" autocomplete="off" inputmode="numeric">
+            <div class="field-hint">Enter digits only. This will be encrypted immediately.</div>
+          </div>
+        </div>
+
+        <!-- Section 5: Exemptions (Optional) -->
+        <div class="form-section">
+          <div class="section-title">Exemptions (if applicable)</div>
+          <div class="field-row">
+            <div class="field">
+              <label for="exemptPayee">Exempt Payee Code</label>
+              <input type="text" id="exemptPayee" placeholder="Optional">
+            </div>
+            <div class="field">
+              <label for="fatcaCode">FATCA Exemption Code</label>
+              <input type="text" id="fatcaCode" placeholder="Optional">
+            </div>
+          </div>
+          <div class="field-hint">Most individuals can leave these blank.</div>
+        </div>
+
+        <!-- Section 6: Certification -->
+        <div class="form-section">
+          <div class="certification">
+            <div class="section-title">Certification</div>
+            <div class="certification-text">
+              Under penalties of perjury, I certify that:
+              <ol>
+                <li>The number shown on this form is my correct taxpayer identification number, and</li>
+                <li>I am not subject to backup withholding because: (a) I am exempt from backup withholding, or (b) I have not been notified by the IRS that I am subject to backup withholding as a result of a failure to report all interest or dividends, or (c) the IRS has notified me that I am no longer subject to backup withholding, and</li>
+                <li>I am a U.S. citizen or other U.S. person.</li>
+              </ol>
+            </div>
+            <div class="cert-check">
+              <input type="checkbox" id="certAgree">
+              <label for="certAgree">I agree to the above certification <span class="required">*</span></label>
+            </div>
+          </div>
+        </div>
+
+        <button id="submitBtn" class="btn-submit" disabled>Submit W-9 Form</button>
+      </div>
+
+      <!-- Processing state -->
+      <div id="processingState" class="loading">
+        <div class="spinner"></div>
+        <p class="loading-text">Submitting your W-9 form...</p>
+      </div>
+
+      <!-- Success result -->
+      <div id="successResult" class="result result-success">
+        <div class="icon">&#129433;</div>
+        <h2>W-9 Submitted!</h2>
+        <p>Your W-9 tax form has been submitted and encrypted securely. Thank you!</p>
+
+        <div class="whats-next">
+          <h3>What Happens Next</h3>
+          <ol>
+            <li>Your W-9 information is now securely on file</li>
+            <li>This will be used to prepare your 1099-NEC form at year-end (if applicable)</li>
+            <li>No further action is needed on your end</li>
+          </ol>
+        </div>
+
+        <p class="questions-contact">Questions? Email us at <a href="mailto:pai@YOUR_DOMAIN">pai@YOUR_DOMAIN</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    const W9_SUBMIT_URL = `${SUPABASE_URL}/functions/v1/w9-submit`;
+
+    let tokenValue = null;
+    let tinType = 'ssn';
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // UI elements
+    const validatingState = document.getElementById('validatingState');
+    const errorState = document.getElementById('errorState');
+    const w9Form = document.getElementById('w9Form');
+    const processingState = document.getElementById('processingState');
+    const successResult = document.getElementById('successResult');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    function showState(state) {
+      [validatingState, errorState, w9Form, processingState, successResult]
+        .forEach(el => { el.style.display = 'none'; el.classList.remove('visible'); });
+      state.style.display = 'block';
+      if (state.classList.contains('loading') || state.classList.contains('result')) {
+        state.classList.add('visible');
+      }
+    }
+
+    function showError(title, message) {
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = message;
+      showState(errorState);
+    }
+
+    // ── Token validation ──────────────────────────────────────
+    async function validateToken() {
+      const params = new URLSearchParams(window.location.search);
+      tokenValue = params.get('token');
+
+      if (!tokenValue) {
+        showError('Missing Link', 'No token found. Please use the link from your email.');
+        return;
+      }
+
+      try {
+        const { data: token, error } = await sb
+          .from('upload_tokens')
+          .select('*, app_user:app_user_id(first_name, last_name)')
+          .eq('token', tokenValue)
+          .single();
+
+        if (error || !token) {
+          showError('Invalid Link', 'This link is not valid. Please contact us for a new link.');
+          return;
+        }
+
+        if (token.is_used) {
+          showError('Already Submitted', 'This W-9 form has already been submitted. If you need to update your information, please request a new link.');
+          return;
+        }
+
+        if (new Date(token.expires_at) < new Date()) {
+          showError('Link Expired', 'This link has expired. Please contact us for a new link.');
+          return;
+        }
+
+        if (token.token_type !== 'w9_submission') {
+          showError('Invalid Link', 'This link is not valid for W-9 submission.');
+          return;
+        }
+
+        // Show form with person name
+        const person = token.app_user;
+        if (person) {
+          document.getElementById('personName').textContent = person.first_name || 'there';
+          // Pre-fill legal name
+          const fullName = `${person.first_name || ''} ${person.last_name || ''}`.trim();
+          if (fullName) document.getElementById('legalName').value = fullName;
+        }
+        showState(w9Form);
+
+      } catch (err) {
+        console.error('Token validation error:', err);
+        showError('Something Went Wrong', 'Unable to validate your link. Please try again later.');
+      }
+    }
+
+    // ── Tax classification selection ──────────────────────────
+    document.querySelectorAll('#taxClassGrid .tax-class-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#taxClassGrid .tax-class-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        opt.querySelector('input[type="radio"]').checked = true;
+
+        const val = opt.dataset.value;
+        document.getElementById('otherClassField').style.display = val === 'other' ? 'block' : 'none';
+        checkFormValidity();
+      });
+    });
+
+    // ── TIN type toggle ───────────────────────────────────────
+    document.querySelectorAll('.tin-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tin-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        tinType = btn.dataset.tin;
+
+        const tinLabel = document.getElementById('tinLabel');
+        const tinInput = document.getElementById('tinValue');
+        if (tinType === 'ssn') {
+          tinLabel.innerHTML = 'Social Security Number <span class="required">*</span>';
+          tinInput.placeholder = 'XXX-XX-XXXX';
+        } else {
+          tinLabel.innerHTML = 'Employer Identification Number <span class="required">*</span>';
+          tinInput.placeholder = 'XX-XXXXXXX';
+        }
+        tinInput.value = '';
+        checkFormValidity();
+      });
+    });
+
+    // ── TIN auto-formatting ───────────────────────────────────
+    document.getElementById('tinValue').addEventListener('input', (e) => {
+      let digits = e.target.value.replace(/\D/g, '');
+      if (digits.length > 9) digits = digits.slice(0, 9);
+
+      if (tinType === 'ssn') {
+        // Format: XXX-XX-XXXX
+        if (digits.length > 5) {
+          e.target.value = `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`;
+        } else if (digits.length > 3) {
+          e.target.value = `${digits.slice(0,3)}-${digits.slice(3)}`;
+        } else {
+          e.target.value = digits;
+        }
+      } else {
+        // Format: XX-XXXXXXX
+        if (digits.length > 2) {
+          e.target.value = `${digits.slice(0,2)}-${digits.slice(2)}`;
+        } else {
+          e.target.value = digits;
+        }
+      }
+      checkFormValidity();
+    });
+
+    // ── Form validity check ───────────────────────────────────
+    function checkFormValidity() {
+      const legalName = document.getElementById('legalName').value.trim();
+      const taxClass = document.querySelector('input[name="taxClass"]:checked')?.value;
+      const taxClassOther = document.getElementById('taxClassOther').value.trim();
+      const street = document.getElementById('addressStreet').value.trim();
+      const city = document.getElementById('addressCity').value.trim();
+      const state = document.getElementById('addressState').value;
+      const zip = document.getElementById('addressZip').value.trim();
+      const tinDigits = document.getElementById('tinValue').value.replace(/\D/g, '');
+      const certAgreed = document.getElementById('certAgree').checked;
+
+      const valid = legalName
+        && taxClass
+        && (taxClass !== 'other' || taxClassOther)
+        && street && city && state && zip
+        && tinDigits.length === 9
+        && certAgreed;
+
+      submitBtn.disabled = !valid;
+    }
+
+    // Listen for changes on all form inputs
+    document.querySelectorAll('#w9Form input, #w9Form select').forEach(el => {
+      el.addEventListener('input', checkFormValidity);
+      el.addEventListener('change', checkFormValidity);
+    });
+
+    // ── Submit ────────────────────────────────────────────────
+    submitBtn.addEventListener('click', async () => {
+      if (submitBtn.disabled) return;
+
+      const taxClass = document.querySelector('input[name="taxClass"]:checked')?.value;
+      const payload = {
+        token: tokenValue,
+        legal_name: document.getElementById('legalName').value.trim(),
+        business_name: document.getElementById('businessName').value.trim() || undefined,
+        tax_classification: taxClass,
+        tax_classification_other: taxClass === 'other' ? document.getElementById('taxClassOther').value.trim() : undefined,
+        exempt_payee_code: document.getElementById('exemptPayee').value.trim() || undefined,
+        fatca_exemption_code: document.getElementById('fatcaCode').value.trim() || undefined,
+        address_street: document.getElementById('addressStreet').value.trim(),
+        address_city: document.getElementById('addressCity').value.trim(),
+        address_state: document.getElementById('addressState').value,
+        address_zip: document.getElementById('addressZip').value.trim(),
+        tin_type: tinType,
+        tin_value: document.getElementById('tinValue').value,
+        certification_agreed: true,
+      };
+
+      showState(processingState);
+      errorMsg.classList.remove('visible');
+
+      try {
+        const resp = await fetch(W9_SUBMIT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await resp.json();
+
+        if (!resp.ok || !result.success) {
+          errorMsg.textContent = result.error || 'Submission failed. Please try again.';
+          errorMsg.classList.add('visible');
+          showState(w9Form);
+          return;
+        }
+
+        showState(successResult);
+
+      } catch (err) {
+        console.error('W-9 submission error:', err);
+        errorMsg.textContent = 'Something went wrong. Please try again.';
+        errorMsg.classList.add('visible');
+        showState(w9Form);
+      }
+    });
+
+    // Initialize
+    validateToken();
+  </script>
+  <script type="module" src="../shared/version-info.js"></script>
+  <script type="module">
+    import { initPublicPage } from '../shared/public-shell.js';
+    initPublicPage({ transparent: false, light: false, activePage: '/spaces/' });
+  </script>
+</body>
+</html>

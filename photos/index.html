@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <title>Photos & Media — The Austin YOUR_PROPERTY_NAME</title>
+  <meta name="description" content="Photo galleries and videos from the Austin YOUR_PROPERTY_NAME.">
+  <link rel="canonical" href="https://YOUR_DOMAIN/photos/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://YOUR_DOMAIN/photos/">
+  <meta property="og:title" content="Photos & Media — The Austin YOUR_PROPERTY_NAME">
+  <meta property="og:description" content="Photo galleries and videos from the Austin YOUR_PROPERTY_NAME.">
+  <meta property="og:site_name" content="Austin YOUR_PROPERTY_NAME">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://YOUR_DOMAIN/shared/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Photos & Media — The Austin YOUR_PROPERTY_NAME">
+  <meta name="twitter:description" content="Photo galleries and videos from the Austin YOUR_PROPERTY_NAME.">
+  <meta name="twitter:image" content="https://YOUR_DOMAIN/shared/og-image.jpg">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://YOUR_DOMAIN/"},{"@type":"ListItem","position":2,"name":"Photos & Media","item":"https://YOUR_DOMAIN/photos/"}]}
+  </script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/favicon.png">
+</head>
+<body>
+  <!-- Header -->
+  <header class="aap-header aap-header--transparent aap-header--light" id="aap-header">
+    <div class="aap-header__inner">
+      <a href="/" class="aap-header__logo">
+        <img width="21" height="30" src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-white-transparent.png" alt="YOUR_PROPERTY_NAME Austin" class="aap-header__icon" data-light-src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-white-transparent.png" data-dark-src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png">
+              <img width="22" height="22" src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-white-transparent.png" alt="YOUR_PROPERTY_NAME Austin" class="aap-header__wordmark" data-light-src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-white-transparent.png" data-dark-src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png">
+        <span title="Site version" class="aap-header__version"></span>
+      </a>
+
+      <nav class="aap-nav" id="aap-nav">
+        <ul class="aap-nav__list">
+          <li><a href="/visiting/" class="aap-nav__link">Visiting</a></li>
+          <li><a href="/spaces/" class="aap-nav__link">Rentals</a></li>
+          <li><a href="/events/" class="aap-nav__link">Events</a></li>
+          <li><a href="/community/" class="aap-nav__link">Community</a></li>
+          <li><a href="/photos/" class="aap-nav__link aap-nav__link--active">Photos</a></li>
+          <li><a href="/contact/" class="aap-nav__link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <button class="aap-menu-toggle" id="aap-menu-toggle" aria-label="Toggle menu">
+        <span class="aap-menu-toggle__bar"></span>
+        <span class="aap-menu-toggle__bar"></span>
+        <span class="aap-menu-toggle__bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation -->
+  <div class="aap-mobile-nav" id="aap-mobile-nav">
+    <button class="aap-mobile-nav__close" id="aap-mobile-nav-close" aria-label="Close menu">×</button>
+    <ul class="aap-mobile-nav__list">
+      <li class="aap-mobile-nav__item"><a href="/visiting/" class="aap-mobile-nav__link">Visiting</a></li>
+      <li class="aap-mobile-nav__item"><a href="/spaces/" class="aap-mobile-nav__link">Rentals</a></li>
+      <li class="aap-mobile-nav__item"><a href="/events/" class="aap-mobile-nav__link">Events</a></li>
+      <li class="aap-mobile-nav__item"><a href="/community/" class="aap-mobile-nav__link">Community</a></li>
+      <li class="aap-mobile-nav__item"><a href="/photos/" class="aap-mobile-nav__link aap-mobile-nav__link--active">Photos</a></li>
+      <li class="aap-mobile-nav__item"><a href="/contact/" class="aap-mobile-nav__link">Contact</a></li>
+    </ul>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="aap-hero aap-hero--short photos-hero" style="background-image: url('YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/site/hero-property.jpeg')">
+    <div class="aap-hero__content">
+      <h1 class="aap-hero__title">Photos & Media</h1>
+      <p class="aap-hero__subtitle">Explore the YOUR_PROPERTY_NAME through photos and videos</p>
+    </div>
+  </section>
+
+  <!-- Google Photos Link Banner -->
+  <section class="highlights-gallery" id="highlightsGallery">
+    <div class="highlights-gallery__header">
+      <h2>Property Highlights</h2>
+      <p>Explore the beauty of the Austin YOUR_PROPERTY_NAME</p>
+      <a href="https://photos.app.goo.gl/xtwEryJCwoFuyw5U7" target="_blank" rel="noopener" class="gallery-album-link">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 0.5rem;">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+        View Photo Album on Google Photos
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-left: 0.5rem;">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <div class="aap-content">
+
+    <!-- Events -->
+    <section class="photo-section">
+      <h2>Events</h2>
+      <div class="photo-grid">
+        <a href="https://photos.app.goo.gl/oHWp4tiDFtzms8iY8" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Wellness Sunday Dec 7</h3>
+            <p>December gathering</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/UQadhd235rdcYyjv9" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Wellness Sunday Nov 23</h3>
+            <p>November gathering</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/omQyUr2tSnCnTKLw5" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Wellness Sunday Nov 16</h3>
+            <p>Rebecca Duracio photos (full album)</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/sG4B4moPPqV4Dk4H7" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Wellness Sunday Nov 9</h3>
+            <p>November gathering</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/yGMEQo8XRVMmvK3d6" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/>
+              <circle cx="18" cy="16" r="3"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Jam Thursdays</h3>
+            <p>Photos & videos</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/oefHZVnoa73EngY89" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+              <line x1="6" y1="1" x2="6" y2="4"/>
+              <line x1="10" y1="1" x2="10" y2="4"/>
+              <line x1="14" y1="1" x2="14" y2="4"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Coffee & Coworking</h3>
+            <p>Dec 19 - Sonia's photos</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/R4afrsGP3ncdSWPW9" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+              <line x1="6" y1="1" x2="6" y2="4"/>
+              <line x1="10" y1="1" x2="10" y2="4"/>
+              <line x1="14" y1="1" x2="14" y2="4"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Coffee & Coworking</h3>
+            <p>Dec 19 - Oscar's photos</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/FvsyeF7dLhm5et6i8" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Kimberly's Vision Board Gathering</h3>
+            <p>Creative workshop</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/E3NW6zUW52xnmKFx7" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Regen Co.live at Property</h3>
+            <p>Community gathering</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/AhTdboga3upooctaA" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polygon points="23 7 16 12 23 17 23 7"/>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>YOUR_PROPERTY_NAME Walkthrough</h3>
+            <p>Shot by Marlon</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Content & Media -->
+    <section class="photo-section">
+      <h2>Content & Media</h2>
+      <div class="photo-grid">
+        <a href="https://photos.app.goo.gl/KXBdtFeXfmG1bW5H8" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Property Lifestyle Canon</h3>
+            <p>Lifestyle content</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/hbcw5g5JJKTvPPfE9" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Swellness Sessions Photoshoot</h3>
+            <p>By Robo 2025</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/rPfv3CqtxY5U7P9j9" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>GenProperty Photo Uploads</h3>
+            <p>Community uploads</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Videos -->
+    <section class="photo-section">
+      <h2>Videos</h2>
+      <div class="photo-grid">
+        <a href="https://youtu.be/rIJZFcB4PHs" target="_blank" rel="noopener" class="photo-card photo-card--video">
+          <div class="photo-card__thumb photo-card__thumb--img">
+            <img src="https://img.youtube.com/vi/rIJZFcB4PHs/hqdefault.jpg" alt="YOUR_PROPERTY_NAME Walkthrough" loading="lazy">
+            <div class="photo-card__play">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="white">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+            </div>
+          </div>
+          <div class="photo-card__info">
+            <h3>YOUR_PROPERTY_NAME Walkthrough</h3>
+            <p>Full property tour</p>
+          </div>
+        </a>
+
+        <a href="https://youtu.be/P_k0zV90OvY" target="_blank" rel="noopener" class="photo-card photo-card--video">
+          <div class="photo-card__thumb photo-card__thumb--img">
+            <img src="https://img.youtube.com/vi/P_k0zV90OvY/hqdefault.jpg" alt="Sauna Experience" loading="lazy">
+            <div class="photo-card__play">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="white">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+            </div>
+          </div>
+          <div class="photo-card__info">
+            <h3>Sauna Experience</h3>
+            <p>Spa facility tour</p>
+          </div>
+        </a>
+
+        <a href="https://youtu.be/KQgn2DGy_S0" target="_blank" rel="noopener" class="photo-card photo-card--video">
+          <div class="photo-card__thumb photo-card__thumb--img">
+            <img src="https://img.youtube.com/vi/KQgn2DGy_S0/hqdefault.jpg" alt="MOSE Music @ AAP" loading="lazy">
+            <div class="photo-card__play">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="white">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+            </div>
+          </div>
+          <div class="photo-card__info">
+            <h3>MOSE Music @ AAP</h3>
+            <p>Live music performance</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Property Listings -->
+    <section class="photo-section">
+      <h2>Property Listings</h2>
+      <div class="photo-grid">
+        <a href="https://photos.app.goo.gl/xtwEryJCwoFuyw5U7" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>YOUR_PROPERTY_NAME Highlights</h3>
+            <p>General property photos</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/Emes2rA8ZacKExCRA" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Listing Photos</h3>
+            <p>Property listing images</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/HSJ1oMnmSmbg7Eyv5" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Master Pasture</h3>
+            <p>Better pics</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/Fa2Cm22Bu6iqDMn16" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Pequeno Largo</h3>
+            <p>Better pics</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/Wvraww1gCCPvej8u8" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Skyloft Playroom</h3>
+            <p>Better pics</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/LQoFH39Uyk1MHMeLA" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="7" height="9"/>
+              <rect x="14" y="3" width="7" height="5"/>
+              <rect x="14" y="12" width="7" height="9"/>
+              <rect x="3" y="16" width="7" height="5"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Dining and Living Room</h3>
+            <p>Common areas</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Accommodations -->
+    <section class="photo-section">
+      <h2>Accommodations</h2>
+      <div class="photo-grid">
+        <a href="https://photos.app.goo.gl/UAvVfZeTfmhEtX6DA" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Cabins</h3>
+            <p>Nov '25 photos by Sonia</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/aDq9x3gqJR1gUTnh8" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="1" y="6" width="22" height="12" rx="2"/>
+              <path d="M2 6l10-4 10 4"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Spartan Trailer/Van/Cabin</h3>
+            <p>October 2025</p>
+          </div>
+        </a>
+
+        <a href="https://photos.app.goo.gl/3aW42eeLBtQs5raf6" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="1" y="6" width="22" height="12" rx="2"/>
+              <path d="M2 6l10-4 10 4"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Spartan Trailer Photos '25</h3>
+            <p>Latest trailer photos</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Amenities -->
+    <section class="photo-section">
+      <h2>Amenities</h2>
+      <div class="photo-grid">
+        <a href="https://photos.app.goo.gl/oBn2RM53PhMMrf4MA" target="_blank" rel="noopener" class="photo-card">
+          <div class="photo-card__thumb">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+            </svg>
+          </div>
+          <div class="photo-card__info">
+            <h3>Sauna Modification Photos</h3>
+            <p>Spa facility updates</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="aap-footer">
+    <div class="aap-footer__content">
+      <div class="aap-footer__logo">
+        <img width="21" height="30" src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-white-transparent.png" alt="YOUR_PROPERTY_NAME Austin" class="aap-footer__icon">
+            <img width="22" height="22" src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-white-transparent.png" alt="YOUR_PROPERTY_NAME Austin" class="aap-footer__wordmark">
+      </div>
+
+      <div class="aap-footer__social">
+        <a href="https://www.facebook.com/yourorg" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+          </svg>
+        </a>
+        <a href="https://instagram.com/yourorgatx" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="18" cy="6" r="1" fill="currentColor"/>
+          </svg>
+        </a>
+      </div>
+
+      <p class="aap-footer__copyright">
+        © 2025 Austin YOUR_PROPERTY_NAME. All rights reserved.<br>
+        123 Main Stive, Your City, TX 00000
+      </p>
+    </div>
+  </footer>
+
+  <style>
+    /* Darker hero overlay for readability on bright property image */
+    .photos-hero::before {
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(0, 0, 0, 0.35) 50%,
+        rgba(0, 0, 0, 0.55) 100%
+      ) !important;
+    }
+
+    /* Highlights Gallery Banner */
+    .highlights-gallery {
+      background: #1a1a1a;
+      padding: 3rem 0;
+      margin-top: -1px;
+    }
+
+    .highlights-gallery__header {
+      text-align: center;
+      padding: 0 1rem;
+    }
+
+    .highlights-gallery__header h2 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      color: #fff;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .highlights-gallery__header p {
+      color: rgba(255,255,255,0.7);
+      font-size: 1rem;
+      margin: 0 0 1.5rem;
+    }
+
+    .gallery-album-link {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.875rem 2rem;
+      background: var(--aap-accent, #c9a87c);
+      color: #1a1a1a;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .gallery-album-link:hover {
+      background: #d4b78e;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .highlights-gallery {
+        padding: 2rem 0;
+      }
+
+      .highlights-gallery__header h2 {
+        font-size: 1.5rem;
+      }
+
+      .gallery-album-link {
+        font-size: 1rem;
+        padding: 0.75rem 1.5rem;
+      }
+    }
+
+    .photo-section {
+      margin-bottom: 3rem;
+    }
+
+    .photo-section h2 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--aap-accent);
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .photo-card {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      text-decoration: none;
+      color: var(--aap-text);
+      transition: transform 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+    }
+
+    .photo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    /* Thumbnail area at top of card */
+    .photo-card__thumb {
+      width: 100%;
+      height: 140px;
+      background: linear-gradient(145deg, #e8ddd2, #d4c4b0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--aap-accent, #c9a87c);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .photo-card__thumb > svg {
+      width: 56px;
+      height: 56px;
+      opacity: 0.5;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .photo-card:hover .photo-card__thumb > svg {
+      opacity: 0.8;
+      transform: scale(1.15);
+    }
+
+    /* Google Photos badge on album cards */
+    .photo-card__thumb::after {
+      content: '';
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 20px;
+      height: 20px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 4px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cline x1='10' y1='14' x2='21' y2='3'/%3E%3C/svg%3E");
+      background-size: 12px;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    /* Image-based thumbnails (videos) */
+    .photo-card__thumb--img {
+      background: #111;
+      height: 160px;
+    }
+
+    .photo-card__thumb--img::after {
+      display: none;
+    }
+
+    .photo-card__thumb--img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .photo-card:hover .photo-card__thumb--img img {
+      transform: scale(1.05);
+    }
+
+    /* Play button overlay for videos */
+    .photo-card__play {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 52px;
+      height: 52px;
+      background: rgba(0,0,0,0.65);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+      z-index: 1;
+    }
+
+    .photo-card__play svg {
+      width: 28px !important;
+      height: 28px !important;
+      opacity: 1 !important;
+      margin-left: 3px;
+    }
+
+    .photo-card:hover .photo-card__play {
+      background: rgba(220,50,50,0.9);
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    /* Video card accent */
+    .photo-card--video .photo-card__thumb {
+      background: #1a1a1a;
+    }
+
+    /* Card info area */
+    .photo-card__info {
+      padding: 0.875rem 1rem;
+    }
+
+    .photo-card__info h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0 0 0.15rem;
+      line-height: 1.3;
+    }
+
+    .photo-card__info p {
+      font-size: 0.8rem;
+      color: #888;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    @media (max-width: 600px) {
+      .photo-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+
+      .photo-card__thumb {
+        height: 100px;
+      }
+
+      .photo-card__thumb > svg {
+        width: 40px;
+        height: 40px;
+      }
+
+      .photo-card__thumb--img {
+        height: 110px;
+      }
+
+      .photo-card__info {
+        padding: 0.625rem 0.75rem;
+      }
+
+      .photo-card__info h3 {
+        font-size: 0.85rem;
+      }
+
+      .photo-card__info p {
+        font-size: 0.72rem;
+      }
+
+      .photo-card__play {
+        width: 40px;
+        height: 40px;
+      }
+
+      .photo-card__play svg {
+        width: 22px !important;
+        height: 22px !important;
+      }
+    }
+  </style>
+
+  <script type="module" src="../shared/version-info.js"></script>
+  <script>
+    // Header scroll behavior
+    const header = document.getElementById('aap-header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.remove('aap-header--transparent');
+        header.classList.add('aap-header--solid');
+        header.classList.remove('aap-header--light');
+        header.classList.add('aap-header--dark');
+      } else {
+        header.classList.add('aap-header--transparent');
+        header.classList.remove('aap-header--solid');
+        header.classList.add('aap-header--light');
+        header.classList.remove('aap-header--dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('aap-menu-toggle');
+    const mobileNav = document.getElementById('aap-mobile-nav');
+    const mobileNavClose = document.getElementById('aap-mobile-nav-close');
+
+    menuToggle.addEventListener('click', () => {
+      mobileNav.classList.add('aap-mobile-nav--open');
+      document.body.style.overflow = 'hidden';
+    });
+
+    mobileNavClose.addEventListener('click', () => {
+      mobileNav.classList.remove('aap-mobile-nav--open');
+      document.body.style.overflow = '';
+    });
+
+    mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileNav.classList.remove('aap-mobile-nav--open');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // No gallery JS needed - using Google Photos link instead
+  </script>
+</body>
+</html>

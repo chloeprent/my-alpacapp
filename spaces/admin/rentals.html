@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rentals - AlpacAPPs Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=1">
+  <link rel="stylesheet" href="rentals.css?v=3">
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Image Lightbox -->
+  <div id="imageLightbox" class="lightbox hidden">
+    <button class="lightbox-close">&times;</button>
+    <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&#10094;</button>
+    <img id="lightboxImage" src="" alt="">
+    <button class="lightbox-nav lightbox-next" id="lightboxNext">&#10095;</button>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="manage-tabs">
+      <!-- Tab navigation rendered by admin-shell.js -->
+    </div>
+
+    <div class="manage-container">
+      <!-- Rentals Panel -->
+      <div class="manage-panel active">
+        <!-- Pipeline View -->
+        <div class="rental-pipeline" id="rentalPipeline">
+          <div class="pipeline-column" data-stage="community_fit">
+            <div class="pipeline-header">
+              <h3>Community Fit</h3>
+              <span class="pipeline-count" id="community_fitCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="community_fitCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="applications">
+            <div class="pipeline-header">
+              <h3>Applications</h3>
+              <span class="pipeline-count" id="applicationsCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="applicationsCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="approved">
+            <div class="pipeline-header">
+              <h3>Approved</h3>
+              <span class="pipeline-count" id="approvedCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="approvedCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="contract">
+            <div class="pipeline-header">
+              <h3>Contract</h3>
+              <span class="pipeline-count" id="contractCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="contractCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="deposit">
+            <div class="pipeline-header">
+              <h3>Deposit</h3>
+              <span class="pipeline-count" id="depositCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="depositCards"></div>
+          </div>
+          <div class="pipeline-column" data-stage="ready">
+            <div class="pipeline-header">
+              <h3>Ready</h3>
+              <span class="pipeline-count" id="readyCount">0</span>
+            </div>
+            <div class="pipeline-cards" id="readyCards"></div>
+          </div>
+        </div>
+
+        <!-- Applicant Detail Page -->
+        <div id="applicantDetailPage" class="applicant-detail-page hidden">
+          <div class="applicant-detail-header">
+            <button class="btn-back" id="backToPipeline">&larr; Back to Pipeline</button>
+            <div class="applicant-header-info">
+              <div class="applicant-header-left">
+                <div id="detailPhotoGroup" class="applicant-photo-group" style="display: none;">
+                  <img id="detailPhoto" src="" alt="" class="applicant-photo-large">
+                </div>
+                <div>
+                  <h2 id="detailTitle" class="applicant-name"></h2>
+                  <div class="applicant-header-meta">
+                    <span id="detailStatus" class="status-badge"></span>
+                    <span id="detailTestBadge" class="status-badge test" style="display: none; background: #f59e0b; color: white;">TEST</span>
+                    <span id="detailEmail" class="meta-item"></span>
+                    <span id="detailPhone" class="meta-item"></span>
+                    <span id="detailSubmittedAt" class="meta-item text-muted"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Tracker (hidden, kept for tab badge updates) -->
+          <div id="detailStatusTracker" class="status-tracker" style="display:none">
+            <div class="tracker-step" id="detailTrackerTerms">
+              <div class="tracker-icon">📋</div>
+              <div class="tracker-label">Terms</div>
+              <div class="tracker-detail" id="detailTrackerTermsDetail">—</div>
+            </div>
+            <div class="tracker-connector"></div>
+            <div class="tracker-step" id="detailTrackerAgreement">
+              <div class="tracker-icon">📄</div>
+              <div class="tracker-label">Agreement</div>
+              <div class="tracker-detail" id="detailTrackerAgreementDetail">—</div>
+            </div>
+            <div class="tracker-connector"></div>
+            <div class="tracker-step" id="detailTrackerDeposit">
+              <div class="tracker-icon">💰</div>
+              <div class="tracker-label">Deposit</div>
+              <div class="tracker-detail" id="detailTrackerDepositDetail">—</div>
+            </div>
+            <div class="tracker-connector"></div>
+            <div class="tracker-step" id="detailTrackerMoveIn">
+              <div class="tracker-icon">🏠</div>
+              <div class="tracker-label">Move-in</div>
+              <div class="tracker-detail" id="detailTrackerMoveInDetail">—</div>
+            </div>
+          </div>
+
+          <!-- Action Pane - Wizard-like stage guidance -->
+          <div id="actionPane" class="action-pane">
+            <div class="action-pane-progress" id="actionPaneProgress"></div>
+            <div class="action-pane-body">
+              <div class="action-pane-guidance" id="actionPaneGuidance"></div>
+              <div class="action-pane-actions" id="actionPaneActions"></div>
+            </div>
+          </div>
+
+          <!-- Detail tabs -->
+          <div class="detail-tabs">
+            <button class="detail-tab active" data-detail-tab="applicant">Applicant</button>
+            <button class="detail-tab" data-detail-tab="terms">Terms</button>
+            <button class="detail-tab" data-detail-tab="documents">Documents</button>
+            <button class="detail-tab" data-detail-tab="deposits">Deposits</button>
+            <button class="detail-tab" data-detail-tab="rent">Rent</button>
+            <button class="detail-tab" data-detail-tab="history">History</button>
+          </div>
+
+          <!-- APPLICANT TAB -->
+          <div id="applicantTab" class="detail-tab-content active">
+            <div class="detail-section">
+              <h3 class="detail-section-title">Contact Information</h3>
+              <div class="detail-grid">
+                <div class="detail-field"><label>Name</label><p id="detailApplicantName">-</p></div>
+                <div class="detail-field"><label>Email</label><p id="detailApplicantEmail">-</p></div>
+                <div class="detail-field"><label>Phone</label><p id="detailApplicantPhone">-</p></div>
+                <div class="detail-field"><label>Age</label><p id="detailApplicantDOB">-</p></div>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h3 class="detail-section-title">Community Fit Responses</h3>
+              <div class="detail-grid">
+                <div class="detail-field"><label>Preferred Accommodation</label><p id="detailPreferredAccomm">-</p></div>
+                <div class="detail-field"><label>Desired Timeframe</label><p id="detailDesiredTimeframe">-</p></div>
+                <div class="detail-field"><label>Volunteer Interest</label><p id="detailVolunteerInterest">-</p></div>
+                <div class="detail-field"><label>Referral Source</label><p id="detailReferralSource">-</p></div>
+                <div class="detail-field full-width"><label>Co-living Experience</label><p id="detailColivingExp" class="detail-longtext">-</p></div>
+                <div class="detail-field full-width"><label>Life Focus / Goals / Dreams</label><p id="detailLifeFocus" class="detail-longtext">-</p></div>
+                <div class="detail-field full-width"><label>Visiting Guide Response</label><p id="detailVisitingGuide" class="detail-longtext">-</p></div>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h3 class="detail-section-title">Desired Housing</h3>
+              <div class="detail-grid">
+                <div class="detail-field"><label>Preferred Space</label><p id="detailDesiredSpace">-</p></div>
+                <div class="detail-field"><label>Desired Move-in</label><p id="detailDesiredMoveIn">-</p></div>
+                <div class="detail-field"><label>Desired Term</label><p id="detailDesiredTerm">-</p></div>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h3 class="detail-section-title">Financial Information</h3>
+              <div class="detail-grid">
+                <div class="detail-field"><label>Employment Status</label><p id="detailEmploymentStatus">-</p></div>
+                <div class="detail-field"><label>Employer</label><p id="detailEmployer">-</p></div>
+                <div class="detail-field"><label>Monthly Income</label><p id="detailMonthlyIncome">-</p></div>
+                <div class="detail-field"><label>Deposit Return Method</label><p id="detailDepositReturnMethod">-</p></div>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h3 class="detail-section-title">Previous Residence</h3>
+              <div class="detail-grid" id="detailPrevResidence">
+                <div class="detail-field full-width"><label>Address</label><p id="detailPrevAddress">-</p></div>
+                <div class="detail-field"><label>Move-in Date</label><p id="detailPrevStartDate">-</p></div>
+                <div class="detail-field"><label>Move-out Date</label><p id="detailPrevEndDate">-</p></div>
+                <div class="detail-field"><label>Landlord Name</label><p id="detailLandlordName">-</p></div>
+                <div class="detail-field"><label>Landlord Contact</label><p id="detailLandlordContact">-</p></div>
+                <div class="detail-field full-width"><label>Reason for Leaving</label><p id="detailReasonForLeaving">-</p></div>
+                <div class="detail-field"><label>Prior Evictions</label><p id="detailPriorEvictions">-</p></div>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h3 class="detail-section-title">Household</h3>
+              <div class="detail-grid">
+                <div class="detail-field"><label>Partner Email</label><p id="detailPartnerEmail">-</p></div>
+                <div class="detail-field"><label>Children's Ages</label><p id="detailKidsAges">-</p></div>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h3 class="detail-section-title">Property Details</h3>
+              <div class="detail-grid">
+                <div class="detail-field full-width"><label>Vehicles</label><p id="detailVehicles">-</p></div>
+                <div class="detail-field full-width"><label>Pets</label><p id="detailPets">-</p></div>
+                <div class="detail-field full-width"><label>Allergies</label><p id="detailAllergies">-</p></div>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h3 class="detail-section-title">Social Profiles</h3>
+              <div class="detail-grid">
+                <div class="detail-field"><label>Instagram</label><p id="detailInstagram">-</p></div>
+                <div class="detail-field"><label>Facebook</label><p id="detailFacebook">-</p></div>
+                <div class="detail-field"><label>X (Twitter)</label><p id="detailXHandle">-</p></div>
+                <div class="detail-field"><label>MySpace</label><p id="detailMyspace">-</p></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TERMS TAB -->
+          <div id="termsTab" class="detail-tab-content">
+            <form id="termsForm" class="terms-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="termSpace">Space <span class="required">*</span></label>
+                  <select id="termSpace" required><option value="">Select space...</option></select>
+                </div>
+                <div class="form-group">
+                  <label for="termRate">Rate <span class="required">*</span></label>
+                  <div class="rate-input-group">
+                    <span class="rate-prefix">$</span>
+                    <input type="number" id="termRate" min="0" step="1" required>
+                    <select id="termRateTerm">
+                      <option value="monthly">/ month</option>
+                      <option value="weekly">/ week</option>
+                      <option value="nightly">/ night</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="termMoveIn">Move-in Date <span class="required">*</span></label>
+                  <input type="date" id="termMoveIn" required>
+                </div>
+                <div class="form-group">
+                  <label for="termLeaseEnd">Lease End Date</label>
+                  <input type="date" id="termLeaseEnd">
+                  <small class="form-hint">Leave blank for open-ended</small>
+                </div>
+                <div class="form-group">
+                  <label for="termNoticePeriod">Termination Notice</label>
+                  <select id="termNoticePeriod">
+                    <option value="none">None (fixed-length lease)</option>
+                    <option value="1_day">1 day notice</option>
+                    <option value="1_week">1 week notice</option>
+                    <option value="30_days" selected>30 days notice</option>
+                    <option value="60_days">60 days notice</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="termSecurityDeposit">Security Deposit</label>
+                  <input type="number" id="termSecurityDeposit" min="0" step="1" value="0">
+                  <small class="form-hint">Can be $0. Due at move-in.</small>
+                </div>
+                <div class="form-group">
+                  <label for="termReservationDeposit">Reservation Deposit</label>
+                  <input type="number" id="termReservationDeposit" min="0" step="1" value="0">
+                  <small class="form-hint">Due after signing. Credited to first month.</small>
+                </div>
+              </div>
+              <div class="form-grid" style="margin-top: 1rem;">
+                <div class="form-group">
+                  <label for="termCheckInTime">Check-in Time</label>
+                  <select id="termCheckInTime">
+                    <option value="">Not set</option>
+                    <option value="flexible">Flexible</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="1:00 PM">1:00 PM</option>
+                    <option value="2:00 PM">2:00 PM</option>
+                    <option value="3:00 PM">3:00 PM</option>
+                    <option value="4:00 PM">4:00 PM</option>
+                    <option value="5:00 PM">5:00 PM</option>
+                  </select>
+                  <small class="form-hint">Included in welcome email</small>
+                </div>
+                <div class="form-group">
+                  <label for="termCheckOutTime">Check-out Time</label>
+                  <select id="termCheckOutTime">
+                    <option value="">Not set</option>
+                    <option value="flexible">Flexible</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="12:00 PM">12:00 PM</option>
+                    <option value="1:00 PM">1:00 PM</option>
+                  </select>
+                  <small class="form-hint">Included in welcome email</small>
+                </div>
+              </div>
+              <div class="form-group" style="margin-top: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                  <input type="checkbox" id="termRequireLease" checked>
+                  Require lease agreement signing
+                </label>
+                <small class="form-hint">Uncheck for VIP/comp guests who don't need a lease</small>
+              </div>
+              <div class="form-group" style="margin-top: 1rem;">
+                <label for="termAdditionalTerms">Additional Terms</label>
+                <textarea id="termAdditionalTerms" rows="4" placeholder="Any additional terms..."></textarea>
+              </div>
+              <div class="terms-save-row" style="margin-top: 1rem; display: flex; align-items: center; gap: 1rem;">
+                <button type="button" id="saveTermsBtn" class="btn-small btn-primary">Save Terms</button>
+                <span id="termsSaveStatus" class="save-status"></span>
+              </div>
+            </form>
+          </div>
+
+          <!-- DOCUMENTS TAB -->
+          <div id="documentsTab" class="detail-tab-content">
+            <div class="documents-section">
+              <div class="document-status">
+                <h4>Rental Agreement Status</h4>
+                <p id="agreementStatusDisplay" class="status-badge">Pending</p>
+              </div>
+              <div id="generateSection" class="generate-section">
+                <h4>Generate Lease Agreement</h4>
+                <p class="text-muted" style="margin-bottom: 1rem;">Preview the lease agreement and generate a PDF for signing.</p>
+                <div id="leasePreviewContainer" class="lease-preview-container">
+                  <div id="leasePreview" class="lease-preview"></div>
+                </div>
+                <div class="generate-actions" style="margin-top: 1rem;">
+                  <button type="button" id="previewLeaseBtn" class="btn-small">Preview Agreement</button>
+                  <button type="button" id="generatePdfBtn" class="btn-small btn-primary">Generate Signable Agreement PDF</button>
+                </div>
+                <p id="noTemplateWarning" class="warning-text" style="display: none; margin-top: 0.5rem;">
+                  No active lease template found. <a href="templates.html">Create one</a> in the Templates section.
+                </p>
+              </div>
+              <div id="pdfSection" class="pdf-section" style="display: none;">
+                <h4>Current Document</h4>
+                <div class="pdf-info">
+                  <a id="pdfDownloadLink" href="#" target="_blank" class="pdf-link">
+                    <span class="pdf-icon">📄</span>
+                    <span id="pdfFilename">lease-agreement.pdf</span>
+                  </a>
+                  <span id="pdfGeneratedAt" class="text-muted"></span>
+                </div>
+                <div class="pdf-actions" style="margin-top: 1rem;">
+                  <button type="button" id="sendForSignatureBtn" class="btn-small btn-primary">Send for Signature</button>
+                </div>
+              </div>
+              <div id="signatureSection" class="signature-section" style="display: none;">
+                <h4>Signature Status</h4>
+                <p id="signatureStatusText">Awaiting signature...</p>
+                <div id="signedPdfSection" style="display: none; margin-top: 1rem;">
+                  <a id="signedPdfLink" href="#" target="_blank" class="pdf-link">
+                    <span class="pdf-icon">✅</span>
+                    <span id="signedPdfFilename">Download Signed Agreement</span>
+                  </a>
+                </div>
+                <div class="signature-actions" style="margin-top: 1rem;">
+                  <button type="button" id="checkSignatureStatusBtn" class="btn-small">Check Status</button>
+                  <button type="button" id="resendSignatureBtn" class="btn-small">Resend Request</button>
+                </div>
+              </div>
+              <details class="legacy-section" style="margin-top: 1.5rem;">
+                <summary class="text-muted" style="cursor: pointer;">Manual Document Entry</summary>
+                <div style="padding-top: 1rem;">
+                  <div class="form-group">
+                    <label for="agreementDocUrl">Document URL</label>
+                    <input type="text" id="agreementDocUrl" placeholder="Paste document URL manually...">
+                  </div>
+                  <div class="document-actions" style="margin-top: 1rem;">
+                    <button type="button" id="markAgreementGenerated" class="btn-small">Mark as Generated</button>
+                    <button type="button" id="markAgreementSent" class="btn-small">Mark as Sent</button>
+                    <button type="button" id="markAgreementSigned" class="btn-small btn-primary">Mark as Signed</button>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Identity Verification Section -->
+              <div class="identity-verification-section" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                <h4>Identity Verification</h4>
+                <div id="identityVerificationContent">
+                  <p class="text-muted">Loading...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DEPOSITS TAB -->
+          <div id="depositsTab" class="detail-tab-content">
+            <div id="paymentSummaryCard" class="payment-summary-card hidden">
+              <h4 class="payment-summary-title">Payment Summary — Due Before Move-in</h4>
+              <div id="paymentSummaryContent"></div>
+            </div>
+            <div class="deposits-grid">
+              <div class="deposit-card">
+                <h4>Move-in Reservation Deposit</h4>
+                <p class="deposit-amount" id="moveInDepositAmount">$0</p>
+                <p class="deposit-status" id="moveInDepositStatus">Pending</p>
+                <button type="button" id="recordMoveInDepositBtn" class="btn-small btn-primary">Record Payment</button>
+              </div>
+              <div class="deposit-card">
+                <h4>Security Deposit</h4>
+                <p class="deposit-amount" id="securityDepositAmount">$0</p>
+                <p class="deposit-status" id="securityDepositStatus">Pending</p>
+                <button type="button" id="recordSecurityDepositBtn" class="btn-small btn-primary">Record Payment</button>
+              </div>
+            </div>
+            <div class="proration-section" style="margin-top: 1.5rem;">
+              <h4>Stay & Payment Summary</h4>
+              <div id="prorationDetails" class="proration-details"></div>
+            </div>
+            <div class="deposit-request-section" style="margin-top: 1.5rem;">
+              <h4>Request Deposit</h4>
+              <div id="depositRequestedInfo" style="margin-bottom: 0.75rem;"></div>
+              <button type="button" id="sendDepositRequestBtn" class="btn-small">Send Deposit Request Email</button>
+              <button type="button" id="copyDepositRequestBtn" class="btn-small">Copy Payment Instructions</button>
+              <button type="button" id="confirmDepositBtn" class="btn-small btn-primary">Confirm Deposit</button>
+            </div>
+          </div>
+
+          <!-- RENT TAB -->
+          <div id="rentTab" class="detail-tab-content">
+            <div class="rent-summary">
+              <p><strong>Monthly Rent:</strong> <span id="rentMonthlyAmount">$0</span></p>
+            </div>
+            <div class="rent-history" style="margin-top: 1rem;">
+              <h4>Payment History</h4>
+              <table id="rentHistoryTable" class="data-table">
+                <thead>
+                  <tr><th>Period</th><th>Amount</th><th>Paid</th><th>Method</th></tr>
+                </thead>
+                <tbody id="rentHistoryBody">
+                  <tr><td colspan="4" class="text-muted">No payments recorded</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <button type="button" id="recordRentPaymentBtn" class="btn-small btn-primary" style="margin-top: 1rem;">Record Rent Payment</button>
+          </div>
+
+          <!-- HISTORY TAB -->
+          <div id="historyTab" class="detail-tab-content">
+            <div id="applicationHistory" class="application-history">
+              <p class="text-muted">Application timeline will appear here.</p>
+            </div>
+          </div>
+
+          <div class="applicant-detail-footer">
+            <div id="rentalActions" class="rental-action-buttons"></div>
+          </div>
+        </div>
+
+        <!-- Denied Section -->
+        <details class="section" id="deniedSection" style="margin-top: 1.5rem;">
+          <summary class="section-header" style="cursor: pointer;">
+            <h2>Denied</h2>
+            <span id="deniedCount" class="text-muted">0</span>
+          </summary>
+          <div class="section-body">
+            <div id="deniedList" class="spaces-list"></div>
+          </div>
+        </details>
+
+        <!-- Active & Upcoming Assignments Table -->
+        <div class="section" style="margin-top: 1.5rem;">
+          <div class="section-header">
+            <h2>Active & Upcoming Assignments</h2>
+            <span id="assignmentsCount" class="text-muted">0</span>
+          </div>
+          <div class="section-body">
+            <div id="assignmentsTableContainer">
+              <div class="calendar-loading">Loading assignments...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reservations Calendar Section -->
+        <div class="section" style="margin-top: 1.5rem;">
+          <div class="section-header">
+            <h2>Reservations Calendar</h2>
+            <div class="calendar-controls">
+              <button class="btn-small" id="calendarToday">Today</button>
+              <span id="calendarMonthRange" class="calendar-month-label" style="min-width: auto;"></span>
+            </div>
+          </div>
+          <div class="section-body">
+            <div id="reservationsCalendar" class="reservations-calendar">
+              <div class="calendar-loading">Loading reservations...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create Application -->
+        <div class="section" style="margin-top: 1.5rem;">
+          <div class="section-header">
+            <h2>Create Application</h2>
+          </div>
+          <div class="section-body">
+            <form id="createApplicationForm" class="add-space-form">
+              <div class="flex gap-4 flex-wrap">
+                <div class="form-group" style="flex:1; min-width:140px;">
+                  <label for="newAppFirstName">First Name</label>
+                  <input type="text" id="newAppFirstName" required placeholder="First name">
+                </div>
+                <div class="form-group" style="flex:1; min-width:140px;">
+                  <label for="newAppLastName">Last Name</label>
+                  <input type="text" id="newAppLastName" placeholder="Last name">
+                </div>
+                <div class="form-group" style="flex:1.5; min-width:200px;">
+                  <label for="newAppEmail">Email</label>
+                  <input type="email" id="newAppEmail" required placeholder="email@example.com">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="newAppSpaceId">Desired Space</label>
+                <select id="newAppSpaceId"><option value="">Any / Flexible</option></select>
+              </div>
+              <button type="submit" class="btn-primary">Create Application</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Airbnb Rentals Section -->
+        <div class="section" style="margin-top: 1.5rem;">
+          <div class="section-header">
+            <h2>Airbnb Rentals</h2>
+            <button class="btn-small btn-primary" id="syncAirbnbBtn">Sync Now</button>
+          </div>
+          <div class="section-body">
+            <p class="text-muted" style="margin-bottom: 1rem;">
+              Import bookings from Airbnb iCal feeds. Syncs automatically every hour.
+            </p>
+            <div id="airbnbSyncStatus" class="sync-status">
+              <p>Last sync: <span id="lastSyncTime">Never</span></p>
+            </div>
+            <div id="airbnbSyncResults" class="sync-results hidden">
+              <h4>Sync Results</h4>
+              <div id="syncResultsContent"></div>
+            </div>
+            <div class="airbnb-spaces-list" style="margin-top: 1rem;">
+              <div id="linkedSpacesList" class="linked-spaces-grid"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compose SMS Modal -->
+  <div id="composeSmsModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 id="composeSmsTitle">Send SMS</h2>
+        <button class="modal-close" id="closeComposeSmsModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Recipient</label>
+          <select id="smsRecipientSelect" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+            <option value="">Select a tenant...</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.25rem;">Message</label>
+          <textarea id="smsComposeBody" maxlength="1600" placeholder="Type your message..." rows="4" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px; resize: vertical; font-family: inherit;"></textarea>
+          <div style="display: flex; justify-content: space-between; margin-top: 0.25rem;">
+            <span class="text-muted" style="font-size: 0.75rem;"><span id="smsCharCount">0</span> chars (<span id="smsSegmentCount">0</span> segments)</span>
+            <span class="text-muted" style="font-size: 0.75rem;">160 chars = 1 segment</span>
+          </div>
+        </div>
+        <div id="smsConversationSection" class="hidden" style="margin-bottom: 1rem;">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Conversation History</label>
+          <div id="smsConversationThread" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; background: #fafafa;"></div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+          <button class="btn-small" id="cancelComposeSmsBtn">Cancel</button>
+          <button class="btn-small btn-primary" id="sendSmsBtn">Send SMS</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record Deposit Modal -->
+  <div id="recordDepositModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="recordDepositTitle">Record Deposit</h2>
+        <button type="button" class="modal-close" id="closeRecordDepositModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="recordDepositForm">
+          <input type="hidden" id="depositType">
+          <div class="form-group">
+            <label for="depositAmount">Amount *</label>
+            <input type="number" id="depositAmount" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="depositMethod">Payment Method *</label>
+            <select id="depositMethod" required>
+              <option value="">Select method...</option>
+              <option value="paypal">PayPal (Preferred)</option>
+              <option value="venmo">Venmo</option>
+              <option value="zelle">Zelle</option>
+              <option value="bank_ach">Bank ACH</option>
+              <option value="cash">Cash</option>
+              <option value="check">Check</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="depositTransactionId">Transaction ID (optional)</label>
+            <input type="text" id="depositTransactionId" placeholder="Reference number...">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelRecordDepositBtn" class="btn-secondary">Cancel</button>
+        <button type="button" id="confirmRecordDepositBtn" class="btn-primary">Record Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record Rent Payment Modal -->
+  <div id="recordRentModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Record Rent Payment</h2>
+        <button class="modal-close" id="closeRecordRentModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="recordRentForm">
+          <div class="form-group">
+            <label for="rentPaymentAmount">Amount *</label>
+            <input type="number" id="rentPaymentAmount" step="0.01" min="0" required placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label for="rentPaymentMethod">Payment Method *</label>
+            <select id="rentPaymentMethod" required>
+              <option value="">Select method...</option>
+              <option value="paypal">PayPal (Preferred)</option>
+              <option value="venmo">Venmo</option>
+              <option value="zelle">Zelle</option>
+              <option value="bank_ach">Bank ACH</option>
+              <option value="cash">Cash</option>
+              <option value="check">Check</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="rentPaymentPeriodStart">Period Start *</label>
+            <input type="date" id="rentPaymentPeriodStart" required>
+          </div>
+          <div class="form-group">
+            <label for="rentPaymentPeriodEnd">Period End *</label>
+            <input type="date" id="rentPaymentPeriodEnd" required>
+          </div>
+          <div class="form-group">
+            <label for="rentPaymentTransactionId">Transaction ID (optional)</label>
+            <input type="text" id="rentPaymentTransactionId" placeholder="Reference number...">
+          </div>
+          <div class="form-group">
+            <label for="rentPaymentNotes">Notes (optional)</label>
+            <input type="text" id="rentPaymentNotes" placeholder="e.g., Zelle from tenant">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelRecordRentBtn" class="btn-secondary">Cancel</button>
+        <button type="button" id="confirmRecordRentBtn" class="btn-primary">Record Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invitation Text Modal -->
+  <div id="inviteTextModal" class="modal hidden">
+    <div class="modal-content" style="max-width: 550px;">
+      <div class="modal-header">
+        <h2>Invitation Ready</h2>
+        <button class="modal-close" id="closeInviteModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">
+          The invitation has been created. Copy the text below and send it via email or message:
+        </p>
+        <textarea id="inviteTextContent" readonly style="width: 100%; height: 250px; padding: 1rem; font-family: inherit; font-size: 0.875rem; border: 1px solid var(--border); border-radius: var(--radius); resize: none; background: var(--bg);"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="closeInviteModalBtn">Close</button>
+        <button class="btn-primary" id="copyInviteTextBtn">Copy to Clipboard</button>
+        <button class="btn-primary" id="sendInviteEmailBtn" style="background: var(--available);">Send Email</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assignment Detail Modal -->
+  <div id="assignmentDetailModal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="assignmentDetailTitle">Assignment Details</h2>
+        <span id="assignmentDetailStatus" class="status-badge"></span>
+        <button class="modal-close" id="closeAssignmentDetail">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid" style="gap: 1.5rem;">
+          <div class="form-section" style="grid-column: 1 / -1;">
+            <h3 style="margin: 0 0 1rem 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Tenant</h3>
+            <div class="form-grid">
+              <div class="info-group"><label>Name</label><p id="assignmentTenantName">-</p></div>
+              <div class="info-group"><label>Email</label><p id="assignmentTenantEmail">-</p></div>
+              <div class="info-group"><label>Phone</label><p id="assignmentTenantPhone">-</p></div>
+            </div>
+          </div>
+          <div class="form-section" style="grid-column: 1 / -1;">
+            <h3 style="margin: 0 0 1rem 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Space & Dates</h3>
+            <div class="form-grid">
+              <div class="form-group"><label for="assignmentSpace">Space</label><select id="assignmentSpace"><option value="">Select a space...</option></select></div>
+              <div class="form-group"><label for="assignmentStatus">Status</label>
+                <select id="assignmentStatus">
+                  <option value="prospect">Prospect</option>
+                  <option value="pending_contract">Pending Contract</option>
+                  <option value="contract_sent">Contract Sent</option>
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="form-group"><label for="assignmentStartDate">Start Date</label><input type="date" id="assignmentStartDate"></div>
+              <div class="form-group"><label for="assignmentEndDate">End Date</label><input type="date" id="assignmentEndDate"><small class="form-hint">Leave empty for open-ended</small></div>
+            </div>
+          </div>
+          <div class="form-section" style="grid-column: 1 / -1;">
+            <h3 style="margin: 0 0 1rem 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Financial</h3>
+            <div class="form-grid">
+              <div class="form-group"><label for="assignmentRateAmount">Rate</label>
+                <div class="rate-input-group">
+                  <span class="rate-prefix">$</span>
+                  <input type="number" id="assignmentRateAmount" step="0.01" min="0">
+                  <select id="assignmentRateTerm"><option value="monthly">/ month</option><option value="weekly">/ week</option><option value="daily">/ day</option></select>
+                </div>
+              </div>
+              <div class="form-group"><label for="assignmentDepositAmount">Deposit Amount</label>
+                <div class="rate-input-group"><span class="rate-prefix">$</span><input type="number" id="assignmentDepositAmount" step="0.01" min="0"></div>
+              </div>
+              <div class="form-group"><label for="assignmentNoticeDays">Notice Period (days)</label><input type="number" id="assignmentNoticeDays" min="0" placeholder="e.g., 30"></div>
+              <div class="form-group"><label><input type="checkbox" id="assignmentIsFree" style="width: auto; margin-right: 0.5rem;"> Free / No Rent</label></div>
+            </div>
+          </div>
+          <div class="form-section" style="grid-column: 1 / -1;">
+            <h3 style="margin: 0 0 1rem 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Early Departure</h3>
+            <div class="form-grid">
+              <div class="form-group"><label for="assignmentDesiredDeparture">Desired Departure Date</label><input type="date" id="assignmentDesiredDeparture"><small class="form-hint">If tenant wants to leave early</small></div>
+              <div class="form-group"><label><input type="checkbox" id="assignmentDepartureListed" style="width: auto; margin-right: 0.5rem;"> List for availability (show to consumers)</label></div>
+            </div>
+          </div>
+          <div class="form-section" style="grid-column: 1 / -1;">
+            <h3 style="margin: 0 0 1rem 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Notes</h3>
+            <div class="form-group"><textarea id="assignmentNotes" rows="3" placeholder="Any notes about this assignment..."></textarea></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="closeAssignmentDetailBtn">Cancel</button>
+        <button class="btn-primary" id="saveAssignmentBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="rentals.js"></script>
+</body>
+</html>

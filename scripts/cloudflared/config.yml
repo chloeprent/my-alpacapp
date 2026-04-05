@@ -1,0 +1,24 @@
+###############################################
+# Cloudflare Tunnel — YOUR_CAMERA_PROXY
+#
+# Routes YOUR_CAMERA_PROXY to local services:
+#   /ptz/*, /camera/*, /sensors/*, /protect/* → ptz-proxy (port 8901)
+#   /api/* (go2rtc streams, WebRTC)           → go2rtc (port 1984)
+#
+# Deploy to: ~/.cloudflared/config.yml on Alpaca Mac
+# After `cloudflared tunnel create alpaca-cam`, update tunnel ID below
+###############################################
+
+# tunnel: <TUNNEL_ID>
+# credentials-file: /Users/alpaca/.cloudflared/<TUNNEL_ID>.json
+
+ingress:
+  # ptz-proxy handles camera controls, events, exports, thumbnails
+  - hostname: YOUR_CAMERA_PROXY
+    path: "^/(ptz|camera|sensors|sensor|protect|clients).*"
+    service: http://localhost:8901
+  # go2rtc handles live streams (HLS, WebRTC, API)
+  - hostname: YOUR_CAMERA_PROXY
+    service: http://localhost:1984
+  # Catch-all (required by cloudflared)
+  - service: http_status:404

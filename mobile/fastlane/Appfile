@@ -1,0 +1,8 @@
+# App identifier and Apple ID for Fastlane
+# Update apple_id once Apple Developer enrollment is complete
+
+app_identifier("com.alpacaplayhouse.app")
+# apple_id("rahulio@alpacaplayhouse.com")  # Uncomment once Apple Developer is set up
+
+# Google Play JSON key for Android deployment
+# json_key_file("./fastlane/google-play-key.json")  # Uncomment once Google Play is set up

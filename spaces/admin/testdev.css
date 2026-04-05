@@ -1,0 +1,264 @@
+.testdev-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.testdev-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.testdev-toolbar h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.testdev-toolbar p {
+  margin: 0.3rem 0 0;
+  color: var(--text-muted);
+}
+
+.testdev-toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.testdev-select {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+/* Summary cards */
+.testdev-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.testdev-summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem;
+}
+
+.testdev-summary-card h2 {
+  margin: 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.testdev-summary-value {
+  margin: 0.45rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.testdev-summary-sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Commits card */
+.testdev-commits-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.testdev-commits-header {
+  padding: 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.testdev-commits-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.testdev-commits-header p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* Date groups */
+.testdev-date-group {
+  border-bottom: 1px solid var(--border);
+}
+
+.testdev-date-group:last-child {
+  border-bottom: none;
+}
+
+.testdev-date-label {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Commit rows */
+.testdev-commit-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.testdev-commit-row:last-child {
+  border-bottom: none;
+}
+
+.testdev-commit-row:hover {
+  background: var(--bg);
+}
+
+.testdev-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.testdev-avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.testdev-commit-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.testdev-commit-message {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.87rem;
+}
+
+.testdev-commit-message a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.testdev-commit-message a:hover {
+  text-decoration: underline;
+  color: var(--accent);
+}
+
+.testdev-commit-body {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: pre-line;
+  max-height: 3.6em;
+  overflow: hidden;
+}
+
+.testdev-commit-meta {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.6rem;
+}
+
+.testdev-author {
+  font-weight: 600;
+}
+
+.testdev-sha {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+/* Type badges */
+.testdev-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.testdev-badge--fix {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.testdev-badge--feat {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.testdev-badge--chore {
+  background: #f5f5f5;
+  color: #737373;
+}
+
+.testdev-badge--refactor {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.testdev-badge--docs {
+  background: #fefce8;
+  color: #ca8a04;
+}
+
+/* Load more */
+.testdev-load-more {
+  padding: 0.75rem;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.testdev-empty {
+  padding: 1.5rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .testdev-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .testdev-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

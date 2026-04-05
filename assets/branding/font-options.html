@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../../favicon.png">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+    <title>GenProperty - Font Options</title>
+    <!-- Google Fonts -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f5f5f5;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #2b2d2c;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6b7370;
+            margin-bottom: 2rem;
+        }
+        .fonts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .font-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .font-header {
+            padding: 1.25rem 1.5rem;
+            background: #5f7161;
+            color: white;
+        }
+        .font-header h2 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+        .font-header p {
+            opacity: 0.9;
+            font-size: 0.8rem;
+        }
+        .font-preview {
+            padding: 1.5rem;
+            background: #f7f8f6;
+        }
+        .preview-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        .preview-title {
+            font-weight: 600;
+            color: #2b2d2c;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+        .preview-subtitle {
+            color: #6b7370;
+            font-size: 0.85rem;
+        }
+        .preview-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            background: #e9f2eb;
+            color: #4a7c59;
+        }
+        .preview-body {
+            color: #6b7370;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .preview-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: #6b7370;
+            margin-bottom: 1rem;
+        }
+        .preview-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #5f7161;
+        }
+        .preview-price span {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #6b7370;
+        }
+        .preview-btn {
+            margin-top: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: #5f7161;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        .font-samples {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e2e4e1;
+        }
+        .sample-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .sample-row:last-child {
+            border-bottom: none;
+        }
+        .sample-label {
+            font-size: 0.7rem;
+            color: #8a8d89;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sample-text {
+            color: #2b2d2c;
+        }
+
+        /* Font-specific styles */
+        .font-dm-sans { font-family: 'DM Sans', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .font-nunito { font-family: 'Nunito', sans-serif; }
+        .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        .font-source { font-family: 'Source Sans 3', sans-serif; }
+        .font-lato { font-family: 'Lato', sans-serif; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+
+        .current-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <h1>GenProperty Font Options</h1>
+    <p class="subtitle">Preview how different fonts look with the Modern Sage palette</p>
+
+    <div class="fonts-grid">
+        <!-- DM Sans (Current) -->
+        <div class="font-card">
+            <div class="font-header font-dm-sans">
+                <h2>DM Sans <span class="current-badge">Current</span></h2>
+                <p>Clean, geometric, modern sans-serif</p>
+            </div>
+            <div class="font-preview font-dm-sans">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-dm-sans">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Medium</span>
+                    <span class="sample-text" style="font-weight: 500">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Semibold</span>
+                    <span class="sample-text" style="font-weight: 600">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inter -->
+        <div class="font-card">
+            <div class="font-header font-inter">
+                <h2>Inter</h2>
+                <p>Highly legible, neutral, professional</p>
+            </div>
+            <div class="font-preview font-inter">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-inter">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Medium</span>
+                    <span class="sample-text" style="font-weight: 500">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Semibold</span>
+                    <span class="sample-text" style="font-weight: 600">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plus Jakarta Sans -->
+        <div class="font-card">
+            <div class="font-header font-jakarta">
+                <h2>Plus Jakarta Sans</h2>
+                <p>Fresh, friendly, contemporary</p>
+            </div>
+            <div class="font-preview font-jakarta">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-jakarta">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Medium</span>
+                    <span class="sample-text" style="font-weight: 500">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Semibold</span>
+                    <span class="sample-text" style="font-weight: 600">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nunito -->
+        <div class="font-card">
+            <div class="font-header font-nunito">
+                <h2>Nunito</h2>
+                <p>Rounded, warm, approachable</p>
+            </div>
+            <div class="font-preview font-nunito">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-nunito">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Medium</span>
+                    <span class="sample-text" style="font-weight: 500">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Semibold</span>
+                    <span class="sample-text" style="font-weight: 600">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outfit -->
+        <div class="font-card">
+            <div class="font-header font-outfit">
+                <h2>Outfit</h2>
+                <p>Geometric, sleek, tech-forward</p>
+            </div>
+            <div class="font-preview font-outfit">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-outfit">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Medium</span>
+                    <span class="sample-text" style="font-weight: 500">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Semibold</span>
+                    <span class="sample-text" style="font-weight: 600">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manrope -->
+        <div class="font-card">
+            <div class="font-header font-manrope">
+                <h2>Manrope</h2>
+                <p>Modern, distinctive letterforms</p>
+            </div>
+            <div class="font-preview font-manrope">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-manrope">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Medium</span>
+                    <span class="sample-text" style="font-weight: 500">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Semibold</span>
+                    <span class="sample-text" style="font-weight: 600">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Source Sans 3 -->
+        <div class="font-card">
+            <div class="font-header font-source">
+                <h2>Source Sans 3</h2>
+                <p>Adobe's workhorse, excellent readability</p>
+            </div>
+            <div class="font-preview font-source">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-source">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Medium</span>
+                    <span class="sample-text" style="font-weight: 500">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Semibold</span>
+                    <span class="sample-text" style="font-weight: 600">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Poppins -->
+        <div class="font-card">
+            <div class="font-header font-poppins">
+                <h2>Poppins</h2>
+                <p>Geometric, bold, playful</p>
+            </div>
+            <div class="font-preview font-poppins">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-poppins">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Medium</span>
+                    <span class="sample-text" style="font-weight: 500">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Semibold</span>
+                    <span class="sample-text" style="font-weight: 600">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lato -->
+        <div class="font-card">
+            <div class="font-header font-lato">
+                <h2>Lato</h2>
+                <p>Classic, warm, reliable</p>
+            </div>
+            <div class="font-preview font-lato">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div>
+                            <div class="preview-title">The Meadow Suite</div>
+                            <div class="preview-subtitle">GenProperty Residency</div>
+                        </div>
+                        <span class="preview-badge">Available</span>
+                    </div>
+                    <div class="preview-body">
+                        Cozy 1-bedroom retreat with stunning hill country views. Perfect for creative professionals seeking tranquility.
+                    </div>
+                    <div class="preview-details">
+                        <span>🛏️ 1 bed</span>
+                        <span>🚿 1 bath</span>
+                        <span>📐 450 sqft</span>
+                    </div>
+                    <div class="preview-price">$1,200 <span>/month</span></div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+            <div class="font-samples font-lato">
+                <div class="sample-row">
+                    <span class="sample-label">Regular</span>
+                    <span class="sample-text" style="font-weight: 400">Aa Bb Cc 123</span>
+                </div>
+                <div class="sample-row">
+                    <span class="sample-label">Bold</span>
+                    <span class="sample-text" style="font-weight: 700">Aa Bb Cc 123</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="max-width: 800px; margin: 3rem auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h2 style="margin-bottom: 1rem; color: #2b2d2c;">Quick Comparison</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+                <tr style="border-bottom: 2px solid #e2e4e1;">
+                    <th style="text-align: left; padding: 0.75rem; color: #6b7370;">Font</th>
+                    <th style="text-align: left; padding: 0.75rem; color: #6b7370;">Vibe</th>
+                    <th style="text-align: left; padding: 0.75rem; color: #6b7370;">Best For</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 0.75rem; font-weight: 600;">DM Sans</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Clean, geometric</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Modern, tech-forward brands</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 0.75rem; font-weight: 600;">Inter</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Neutral, professional</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Maximum readability</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 0.75rem; font-weight: 600;">Plus Jakarta Sans</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Fresh, contemporary</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Friendly, modern startups</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 0.75rem; font-weight: 600;">Nunito</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Rounded, warm</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Approachable, family brands</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 0.75rem; font-weight: 600;">Outfit</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Sleek, geometric</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Modern, tech products</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 0.75rem; font-weight: 600;">Manrope</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Distinctive, modern</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Unique brand identity</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 0.75rem; font-weight: 600;">Source Sans 3</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Clear, utilitarian</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Long-form content</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 0.75rem; font-weight: 600;">Poppins</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Bold, playful</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Energetic, young brands</td>
+                </tr>
+                <tr>
+                    <td style="padding: 0.75rem; font-weight: 600;">Lato</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Classic, warm</td>
+                    <td style="padding: 0.75rem; color: #6b7370;">Traditional, trustworthy</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

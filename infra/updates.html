@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YOUR_APP_NAME Updates — Sync New Features</title>
+  <meta name="description" content="Catch up on new YOUR_APP_NAME features and sync them into your project with Claude Code.">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-warm: #faf8f5;
+      --text: #1a1a1a;
+      --text-muted: #666666;
+      --accent: #c9a87c;
+      --accent-light: #f5efe6;
+      --border: #e5e5e5;
+      --code-bg: #faf8f5;
+      --success: #6b8e5a;
+      --success-light: #eef5eb;
+      --warning-bg: #fceee9;
+      --warning-border: #c75b3a;
+      --claude-bg: #f3effc;
+      --claude-border: #7c6a9a;
+      --new-bg: #eef6ff;
+      --new-border: #3b82f6;
+      --shadow: 0 1px 3px rgba(26,26,26,0.06), 0 1px 2px rgba(26,26,26,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg-warm);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    /* Header */
+    .guide-header {
+      background: var(--text);
+      color: #fff;
+      padding: calc(80px + 2rem) 2rem 2rem;
+    }
+    .guide-header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .guide-header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; display: inline-block; margin-bottom: 1rem; }
+    .guide-header a:hover { text-decoration: underline; }
+    .guide-header h1 { font-size: 2rem; font-weight: 400; line-height: 1.3; }
+    .guide-header h1 span { color: var(--accent); }
+    .guide-header p { color: #b0b0b0; font-size: 0.95rem; margin-top: 0.75rem; max-width: 650px; }
+
+    /* Container */
+    .container { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* Note boxes */
+    .guide-note {
+      background: var(--claude-bg);
+      border-left: 3px solid var(--claude-border);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 2rem;
+      font-size: 0.92rem;
+    }
+    .guide-note strong { color: #5a4a7a; display: block; margin-bottom: 0.25rem; }
+
+    /* Feature cards */
+    .feature-card {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .feature-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light), var(--shadow); }
+    .feature-card h2 {
+      font-size: 1.3rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .feature-card h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin: 1.25rem 0 0.5rem;
+    }
+    .feature-card h3:first-of-type { margin-top: 0.75rem; }
+    .feature-card p { margin-bottom: 0.75rem; }
+    .feature-card ul, .feature-card ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    .feature-card li { margin-bottom: 0.3rem; }
+    .feature-card li::marker { color: var(--accent); font-weight: 600; }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.15em 0.5em;
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+    .badge-new { background: var(--new-bg); color: var(--new-border); border: 1px solid var(--new-border); }
+    .badge-date { background: var(--accent-light); color: #7a6030; border: 1px solid #d4c4a0; }
+
+    /* Checkbox */
+    .feature-select {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+    }
+    .feature-select input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Code blocks */
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: var(--accent-light);
+      color: #6b5230;
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+      font-size: 0.86em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    pre code { background: none; color: var(--text); padding: 0; }
+
+    /* Callouts */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      padding: 1rem 1.25rem;
+      border-radius: 0 6px 6px 0;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .callout.warning { border-color: var(--warning-border); background: var(--warning-bg); }
+    .callout.success { border-color: var(--success); background: var(--success-light); }
+    .callout strong { display: block; margin-bottom: 0.25rem; }
+
+    /* Prereq tags */
+    .prereq-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: #fff3e0;
+      color: #b45309;
+      border: 1px solid #fbbf24;
+      padding: 0.1em 0.5em;
+      border-radius: 4px;
+      margin-right: 0.35rem;
+    }
+
+    /* Prompt output area */
+    .prompt-output {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 500px;
+      overflow-y: auto;
+      display: none;
+    }
+    .prompt-output.visible { display: block; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #b8935e; }
+    .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--accent-light); }
+    .btn-copy { background: #333; color: #fff; font-size: 0.8rem; padding: 0.5rem 1rem; }
+    .btn-copy:hover { background: #555; }
+    .btn-copy.copied { background: var(--success); }
+
+    .action-bar {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      margin: 0 -1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+      z-index: 10;
+    }
+    .action-bar .count { font-size: 0.85rem; color: var(--text-muted); }
+
+    a { color: var(--accent); }
+    a:hover { color: #a08050; }
+
+    /* Claude instruction block — visible to Claude when reading the page */
+    .claude-instructions {
+      background: var(--claude-bg);
+      border: 2px solid var(--claude-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.88rem;
+    }
+    .claude-instructions h2 { color: #5a4a7a; font-size: 1.1rem; margin-bottom: 0.75rem; }
+    .claude-instructions ol { padding-left: 1.5rem; }
+    .claude-instructions li { margin-bottom: 0.5rem; }
+
+    @media (max-width: 640px) {
+      .guide-header h1 { font-size: 1.6rem; }
+      .feature-card { padding: 1.5rem; }
+      .action-bar { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<span data-site-version style="display:none;">v260405.02 4:44p</span>
+<div id="siteHeader"></div>
+
+<div class="guide-header">
+  <div class="guide-header-inner">
+    <a href="/infra/">&larr; Back to YOUR_APP_NAME Infra</a>
+    <h1><span>YOUR_APP_NAME</span> Updates</h1>
+    <p>New features added to the template since you first cloned it. Select the ones you want, copy the prompt, and paste it into Claude Code to adopt them.</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Instructions for Claude (when it reads this page) -->
+  <div class="claude-instructions">
+    <h2>Instructions for Claude</h2>
+    <p>When a user pastes a prompt generated by this page, follow these steps:</p>
+    <ol>
+      <li><strong>Read the user's current project state</strong> &mdash; check what's already installed by looking at their <code>package.json</code>, <code>cloudflare/</code> directory, <code>shared/</code> directory, and <code>.claude/settings.json</code>.</li>
+      <li><strong>For each requested feature</strong>, follow the detailed adoption steps in the feature card below. Each card has a "What Claude Does" section with exact commands and file changes.</li>
+      <li><strong>Don't duplicate work</strong> &mdash; if the user already has a feature partially or fully set up, skip to the missing parts.</li>
+      <li><strong>Ask for credentials only when needed</strong> &mdash; some features (like D1 session logging) require the user to provide a Cloudflare auth token. Prompt once with all needed values.</li>
+      <li><strong>Commit and push after each feature</strong> &mdash; one feature per commit so changes are easy to review or revert.</li>
+      <li><strong>Update docs</strong> &mdash; after each feature, update the relevant <code>docs/*.md</code> files (KEY-FILES.md, CHANGELOG.md, INTEGRATIONS.md, etc.).</li>
+    </ol>
+  </div>
+
+  <div class="guide-note">
+    <strong>How this works</strong>
+    Check the features you want below, then click "Generate Prompt for Claude." Copy and paste it into Claude Code in your project directory. Claude will pull the new code from the template repo and configure everything for you.
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FEATURE: Session Logging to Cloudflare D1
+       ════════════════════════════════════════════════════════════════ -->
+  <div class="feature-card" data-feature="d1-session-logging">
+    <label class="feature-select"><input type="checkbox" data-feature-id="d1-session-logging"></label>
+    <h2>
+      <span class="badge badge-new">New</span>
+      Session Logging to Cloudflare D1
+    </h2>
+    <p><span class="badge badge-date">Added Mar 2026</span></p>
+    <p>Automatically save every Claude Code session transcript to a Cloudflare D1 (SQLite) database. Search past conversations, track token usage and costs, and never lose context from previous sessions.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li>Cloudflare Worker API with endpoints: save sessions, list/search/filter, get full transcript, aggregate stats</li>
+      <li>D1 SQLite database with indexed <code>sessions</code> table</li>
+      <li>Auto-save hook that fires on every Claude Code stop event (rate-limited to once per 5 minutes per session)</li>
+      <li>Bearer token authentication</li>
+      <li>Bulk timestamp repair endpoint for imported sessions</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+      <span class="prereq-tag">Cloudflare account (free)</span>
+      <span class="prereq-tag">Node.js 18+</span>
+    </p>
+
+    <h3>What Claude does</h3>
+    <ol>
+      <li>Check if <code>cloudflare/claude-sessions/</code> already exists in the project. If not, pull it from the template repo.</li>
+      <li>Install Wrangler CLI globally if not present: <code>npm install -g wrangler</code></li>
+      <li>Run <code>wrangler login</code> (opens browser for Cloudflare auth)</li>
+      <li>Create D1 database: <code>npx wrangler d1 create claude-sessions</code></li>
+      <li>Update <code>cloudflare/claude-sessions/wrangler.jsonc</code> with the returned <code>database_id</code></li>
+      <li>Ask the user to choose a secure auth token (or generate one)</li>
+      <li>Set the auth token in <code>src/index.js</code> &mdash; replace <code>CHANGE_ME_TO_A_SECRET</code> with the chosen token</li>
+      <li>Apply the schema: <code>cd cloudflare/claude-sessions && npx wrangler d1 execute claude-sessions --file=schema.sql --remote</code></li>
+      <li>Deploy the worker: <code>cd cloudflare/claude-sessions && npx wrangler deploy</code></li>
+      <li>Note the worker URL from the deploy output (e.g., <code>https://claude-sessions.USERNAME.workers.dev</code>)</li>
+      <li>Copy the hook script to the user's home directory:
+        <pre><code>mkdir -p ~/.claude/hooks
+cp cloudflare/claude-sessions/hooks/save-session.sh ~/.claude/hooks/save-session.sh
+chmod +x ~/.claude/hooks/save-session.sh</code></pre>
+      </li>
+      <li>Update the hook script with the Worker URL and auth token (replace the placeholder values)</li>
+      <li>Add the Stop hook to <code>~/.claude/settings.json</code>:
+        <pre><code>{
+  "hooks": {
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$HOME/.claude/hooks/save-session.sh",
+        "timeout": 15
+      }]
+    }]
+  }
+}</code></pre>
+      </li>
+      <li>Validate by running: <code>curl -H "Authorization: Bearer TOKEN" https://WORKER_URL/stats</code></li>
+      <li>Update <code>docs/KEY-FILES.md</code>, <code>docs/INTEGRATIONS.md</code>, and <code>docs/CHANGELOG.md</code></li>
+    </ol>
+
+    <div class="callout">
+      <strong>Files added/modified</strong>
+      <code>cloudflare/claude-sessions/</code> (new directory with worker, schema, hook script, wrangler config) &bull;
+      <code>~/.claude/hooks/save-session.sh</code> &bull;
+      <code>~/.claude/settings.json</code> (hooks block)
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FEATURE: On-Demand Context System
+       ════════════════════════════════════════════════════════════════ -->
+  <div class="feature-card" data-feature="on-demand-context">
+    <label class="feature-select"><input type="checkbox" data-feature-id="on-demand-context"></label>
+    <h2>
+      <span class="badge badge-new">New</span>
+      On-Demand Context System
+    </h2>
+    <p><span class="badge badge-date">Added Mar 2026</span></p>
+    <p>Reduce Claude Code token usage by splitting heavy documentation into on-demand files. Instead of loading everything into <code>CLAUDE.md</code>, Claude only loads the specific <code>docs/*.md</code> file it needs for a given task.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li>Slim <code>CLAUDE.md</code> (~30 lines, always loaded) with an on-demand doc index</li>
+      <li>Separate doc files: <code>CREDENTIALS.md</code>, <code>SCHEMA.md</code>, <code>PATTERNS.md</code>, <code>KEY-FILES.md</code>, <code>DEPLOY.md</code>, <code>INTEGRATIONS.md</code>, <code>CHANGELOG.md</code></li>
+      <li>Thousands of tokens saved per conversation</li>
+      <li><code>CREDENTIALS.md</code> automatically gitignored</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p><span class="prereq-tag">None</span></p>
+
+    <h3>What Claude does</h3>
+    <ol>
+      <li>Check if <code>docs/</code> directory already exists with the expected files. If so, skip or merge.</li>
+      <li>Pull the latest <code>docs/</code> directory structure from the template repo:
+        <pre><code>docs/CREDENTIALS.md  (gitignored — API keys, tokens)
+docs/SCHEMA.md       (database table definitions)
+docs/PATTERNS.md     (code patterns, Tailwind tokens)
+docs/KEY-FILES.md    (project file structure)
+docs/DEPLOY.md       (deployment workflow, URLs)
+docs/INTEGRATIONS.md (external service configs)
+docs/CHANGELOG.md    (recent changes log)</code></pre>
+      </li>
+      <li>Update <code>CLAUDE.md</code> to the slim version with on-demand doc index header (preserve any custom directives the user has added)</li>
+      <li>Add <code>docs/CREDENTIALS.md</code> to <code>.gitignore</code> if not already present</li>
+      <li>Migrate any credentials, schema info, or patterns currently in <code>CLAUDE.md</code> to the appropriate <code>docs/*.md</code> file</li>
+      <li>Populate <code>docs/KEY-FILES.md</code> with the user's actual project structure</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Files added/modified</strong>
+      <code>CLAUDE.md</code> (slimmed down) &bull;
+      <code>docs/*.md</code> (7 new files) &bull;
+      <code>.gitignore</code> (add CREDENTIALS.md)
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FEATURE: Open Brain — Session Viewer Dashboard
+       Origin: https://natesnewsletter.substack.com/p/every-ai-you-use-forgets-you-heres
+       ════════════════════════════════════════════════════════════════ -->
+  <div class="feature-card" data-feature="open-brain">
+    <label class="feature-select"><input type="checkbox" data-feature-id="open-brain"></label>
+    <h2>
+      <span class="badge badge-new">New</span>
+      Open Brain &mdash; Session Transparency Dashboard
+    </h2>
+    <p><span class="badge badge-date">Added Mar 2026</span></p>
+    <p>A public-facing (or admin-only) page that displays your Claude Code session history from D1. Shows what Claude worked on, when, token counts, and costs. Full radical transparency for how AI is being used in your project.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li>HTML dashboard page that queries the D1 session API</li>
+      <li>Session list with search, date filters, and project filters</li>
+      <li>Expandable full transcript view for each session</li>
+      <li>Aggregate stats: total sessions, tokens, cost, average duration</li>
+      <li>Configurable: public or auth-gated access</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+      <span class="prereq-tag">D1 Session Logging (above)</span>
+    </p>
+
+    <h3>What Claude does</h3>
+    <ol>
+      <li>Verify D1 session logging is set up and the Worker is responding</li>
+      <li>Create <code>open-brain/index.html</code> &mdash; a standalone dashboard page with:
+        <ul>
+          <li>Stats summary bar (total sessions, tokens, cost)</li>
+          <li>Filterable session list (search, date range, project)</li>
+          <li>Click-to-expand transcript viewer with markdown rendering</li>
+          <li>Styled to match the project's design system</li>
+        </ul>
+      </li>
+      <li>Ask the user: should this be public or require authentication?
+        <ul>
+          <li><strong>Public</strong> &mdash; accessible to anyone at <code>/open-brain/</code></li>
+          <li><strong>Auth-gated</strong> &mdash; wrap in the existing auth system, admin-only</li>
+        </ul>
+      </li>
+      <li>Configure the Worker URL and auth in the dashboard's JavaScript</li>
+      <li>Update <code>docs/KEY-FILES.md</code> and <code>docs/CHANGELOG.md</code></li>
+    </ol>
+
+    <div class="callout">
+      <strong>Files added</strong>
+      <code>open-brain/index.html</code> (standalone dashboard)
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FEATURE: Poll Manager with Circuit Breaker
+       ════════════════════════════════════════════════════════════════ -->
+  <div class="feature-card" data-feature="poll-manager">
+    <label class="feature-select"><input type="checkbox" data-feature-id="poll-manager"></label>
+    <h2>
+      <span class="badge badge-new">New</span>
+      Smart Polling with Circuit Breaker
+    </h2>
+    <p><span class="badge badge-date">Added Mar 2026</span></p>
+    <p>Intelligent data refresh that pauses when the tab is hidden, backs off exponentially on failures, and auto-recovers when Supabase comes back online. Prevents hammering your API during outages.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li><code>PollManager</code> class with configurable intervals (default: 30s)</li>
+      <li>Visibility API integration &mdash; pauses when tab is hidden</li>
+      <li>Exponential backoff after 3 consecutive failures</li>
+      <li>Auto-pause after 6 consecutive failures (circuit breaker open)</li>
+      <li>Automatic recovery when Supabase health check passes</li>
+      <li>Supabase health check utility (<code>shared/supabase-health.js</code>)</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p><span class="prereq-tag">Supabase configured</span></p>
+
+    <h3>What Claude does</h3>
+    <ol>
+      <li>Pull <code>shared/services/poll-manager.js</code> from the template repo</li>
+      <li>Pull <code>shared/supabase-health.js</code> from the template repo</li>
+      <li>Wire the PollManager into existing pages that fetch data periodically</li>
+      <li>Replace any existing <code>setInterval</code> polling with <code>PollManager</code></li>
+      <li>Update <code>docs/KEY-FILES.md</code> and <code>docs/PATTERNS.md</code></li>
+    </ol>
+
+    <div class="callout">
+      <strong>Files added</strong>
+      <code>shared/services/poll-manager.js</code> &bull;
+      <code>shared/supabase-health.js</code>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FEATURE: Tab Visibility Configuration
+       ════════════════════════════════════════════════════════════════ -->
+  <div class="feature-card" data-feature="tab-visibility">
+    <label class="feature-select"><input type="checkbox" data-feature-id="tab-visibility"></label>
+    <h2>
+      <span class="badge badge-new">New</span>
+      Intranet Tab Visibility Config
+    </h2>
+    <p><span class="badge badge-date">Added Mar 2026</span></p>
+    <p>Database-driven configuration for which intranet sections and tabs are visible. Toggle tabs on/off per section without code changes &mdash; just update a Supabase table.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li><code>page_display_config</code> Supabase table with RLS</li>
+      <li>Authenticated users can read and update visibility settings</li>
+      <li>Seed data for all default sections (admin, devices, residents, associates, staff)</li>
+      <li>UI automatically hides/shows tabs based on config</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p><span class="prereq-tag">Supabase configured</span></p>
+
+    <h3>What Claude does</h3>
+    <ol>
+      <li>Run the migration: <code>supabase/migrations/001_page_display_config.sql</code> against the user's Supabase project via <code>psql</code> or the Supabase SQL editor</li>
+      <li>Pull the updated intranet components from the template repo if they've changed:
+        <ul>
+          <li><code>src/components/intranet/section-tabs.tsx</code></li>
+          <li><code>src/components/intranet/sub-tabs.tsx</code></li>
+          <li><code>src/components/intranet/tab-content.tsx</code></li>
+        </ul>
+      </li>
+      <li>Customize the seed data for the user's specific sections/tabs</li>
+      <li>Update <code>docs/SCHEMA.md</code> and <code>docs/CHANGELOG.md</code></li>
+    </ol>
+
+    <div class="callout">
+      <strong>Files added/modified</strong>
+      <code>supabase/migrations/001_page_display_config.sql</code> &bull;
+      Intranet tab components (3 files)
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FEATURE: Error Logger
+       ════════════════════════════════════════════════════════════════ -->
+  <div class="feature-card" data-feature="error-logger">
+    <label class="feature-select"><input type="checkbox" data-feature-id="error-logger"></label>
+    <h2>
+      <span class="badge badge-new">New</span>
+      Centralized Error Logger
+    </h2>
+    <p><span class="badge badge-date">Added Mar 2026</span></p>
+    <p>A lightweight error logging utility that standardizes error handling across the app. Captures, formats, and optionally reports errors to a central location.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li><code>shared/error-logger.js</code> &mdash; consistent error capture and formatting</li>
+      <li>Integrates with the rest of your shared utilities</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p><span class="prereq-tag">None</span></p>
+
+    <h3>What Claude does</h3>
+    <ol>
+      <li>Pull <code>shared/error-logger.js</code> from the template repo</li>
+      <li>Wire it into existing error handling patterns (try/catch blocks, fetch error handlers)</li>
+      <li>Update <code>docs/KEY-FILES.md</code> and <code>docs/PATTERNS.md</code></li>
+    </ol>
+
+    <div class="callout">
+      <strong>Files added</strong>
+      <code>shared/error-logger.js</code>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FEATURE: Stop Hook (replaces SessionEnd)
+       ════════════════════════════════════════════════════════════════ -->
+  <div class="feature-card" data-feature="stop-hook-upgrade">
+    <label class="feature-select"><input type="checkbox" data-feature-id="stop-hook-upgrade"></label>
+    <h2>
+      <span class="badge badge-new">New</span>
+      Stop Hook Upgrade (replaces SessionEnd)
+    </h2>
+    <p><span class="badge badge-date">Added Mar 2026</span></p>
+    <p>If you previously set up session logging with the <code>SessionEnd</code> hook, this upgrade switches to the <code>Stop</code> hook which also captures worktree and subagent sessions. Includes rate-limiting to avoid excessive API calls.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li>Session capture for worktree and subagent sessions (previously missed)</li>
+      <li>Rate limiting: only saves once per 5 minutes per session</li>
+      <li>Lock file mechanism to prevent duplicate saves</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+      <span class="prereq-tag">D1 Session Logging already set up</span>
+    </p>
+
+    <h3>What Claude does</h3>
+    <ol>
+      <li>Check <code>~/.claude/settings.json</code> for an existing <code>SessionEnd</code> hook</li>
+      <li>Replace it with the <code>Stop</code> hook configuration</li>
+      <li>Update <code>~/.claude/hooks/save-session.sh</code> with the latest version (includes rate-limiting)</li>
+      <li>Verify the hook fires correctly by checking for the lock directory</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Files modified</strong>
+      <code>~/.claude/settings.json</code> (hook event type) &bull;
+      <code>~/.claude/hooks/save-session.sh</code> (rate-limiting)
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════════════
+       FEATURE: DevControl — AI Development Dashboard
+       ════════════════════════════════════════════════════════════════ -->
+  <div class="feature-card" data-feature="devcontrol">
+    <label class="feature-select"><input type="checkbox" data-feature-id="devcontrol"></label>
+    <h2>
+      <span class="badge badge-new">New</span>
+      DevControl &mdash; AI Development Dashboard
+    </h2>
+    <p><span class="badge badge-date">Added Mar 2026</span></p>
+    <p>A comprehensive admin dashboard for monitoring your AI-assisted development workflow. Six sub-tabs covering releases, sessions, token usage, context window analysis, and backup status &mdash; all in one place.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li><strong>Overview</strong> &mdash; card grid linking to each sub-tab with quick descriptions</li>
+      <li><strong>Releases</strong> &mdash; GitHub PR changelog grouped by date, with version tags, line counts, and category badges</li>
+      <li><strong>Sessions</strong> &mdash; view Claude Code session history from D1 (single-project filtered), expandable transcripts, copy support</li>
+      <li><strong>Tokens &amp; Cost</strong> &mdash; token usage analytics, daily breakdown bar chart, per-model usage table</li>
+      <li><strong>Context Window</strong> &mdash; file-by-file token breakdown, stacked usage bar, 90-day history chart with daily snapshots to Supabase</li>
+      <li><strong>Backups</strong> &mdash; backup status cards (DB &rarr; R2, R2 &rarr; external drive) with activity log from Supabase</li>
+    </ul>
+
+    <h3>Prerequisites</h3>
+    <p>
+      <span class="prereq-tag">Supabase configured</span>
+      <span class="prereq-tag">GitHub repo (for Releases tab)</span>
+    </p>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Optional: D1 Session Logging (for Sessions tab), <code>backup_logs</code> table (for Backups tab)</p>
+
+    <h3>What Claude does</h3>
+    <ol>
+      <li>Pull the DevControl files from the template repo:
+        <pre><code>spaces/admin/devcontrol.html   (admin page shell)
+spaces/admin/devcontrol.js     (all 6 sub-tab logic)
+spaces/admin/devcontrol.css    (complete styling)</code></pre>
+      </li>
+      <li>Configure the project-specific values at the top of <code>devcontrol.js</code>:
+        <ul>
+          <li><code>GH_OWNER</code> / <code>GH_REPO</code> &mdash; for Releases and Context tabs (GitHub API)</li>
+          <li><code>SESSIONS_API</code> / <code>SESSIONS_TOKEN</code> / <code>PROJECT_FILTER</code> &mdash; for Sessions and Tokens tabs (D1 Worker)</li>
+        </ul>
+      </li>
+      <li>Add the DevControl tab to the admin navigation in <code>shared/admin-shell.js</code>:
+        <pre><code>{ id: 'devcontrol', label: 'DevControl', href: 'devcontrol.html',
+  permission: 'view_settings', section: 'admin' }</code></pre>
+      </li>
+      <li>Add the DevControl icon to <code>admin-shell.js</code> icon map</li>
+      <li>Create the <code>context_snapshots</code> Supabase table for 90-day history tracking:
+        <pre><code>CREATE TABLE context_snapshots (
+  snapshot_date DATE PRIMARY KEY,
+  always_loaded_tokens INTEGER NOT NULL,
+  total_tokens INTEGER NOT NULL,
+  breakdown JSONB DEFAULT '{}'
+);</code></pre>
+      </li>
+      <li>If the user already has a <code>backup_logs</code> table, the Backups tab will work immediately. Otherwise, create it:
+        <pre><code>CREATE TABLE backup_logs (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  source TEXT NOT NULL,
+  backup_type TEXT NOT NULL,
+  status TEXT NOT NULL,
+  duration_seconds INTEGER,
+  details JSONB,
+  r2_key TEXT
+);</code></pre>
+      </li>
+      <li>Update <code>docs/KEY-FILES.md</code>, <code>docs/CHANGELOG.md</code>, and <code>docs/PATTERNS.md</code></li>
+    </ol>
+
+    <div class="callout">
+      <strong>Files added/modified</strong>
+      <code>spaces/admin/devcontrol.html</code> &bull;
+      <code>spaces/admin/devcontrol.js</code> &bull;
+      <code>spaces/admin/devcontrol.css</code> &bull;
+      <code>shared/admin-shell.js</code> (nav entry + icon)
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       PROMPT GENERATOR
+       ════════════════════════════════════════════════════════════════ -->
+  <div id="prompt-section" style="margin-top: 2rem;">
+    <h2 style="font-size: 1.3rem; font-weight: 500; margin-bottom: 1rem;">Generated Prompt</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Select features above, then click the button to generate a prompt you can paste into Claude Code.</p>
+
+    <div id="promptOutput" class="prompt-output"></div>
+
+    <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+      <button id="generateBtn" class="btn btn-primary" onclick="generatePrompt()">Generate Prompt for Claude</button>
+      <button id="copyBtn" class="btn btn-copy" onclick="copyPrompt()" style="display:none;">Copy to clipboard</button>
+    </div>
+  </div>
+
+  <!-- Sticky action bar -->
+  <div class="action-bar" id="actionBar" style="display:none;">
+    <span class="count"><span id="selectedCount">0</span> feature(s) selected</span>
+    <button class="btn btn-primary" onclick="document.getElementById('prompt-section').scrollIntoView({behavior:'smooth'})">Generate Prompt</button>
+  </div>
+
+</div>
+
+<script>
+  // Feature metadata for prompt generation
+  const featureMeta = {
+    'd1-session-logging': {
+      name: 'Session Logging to Cloudflare D1',
+      prompt: `Set up Cloudflare D1 session logging for my Claude Code sessions.
+
+Follow the instructions on the YOUR_APP_NAME updates page (infra/updates.html) for the "Session Logging to Cloudflare D1" feature:
+- Pull the cloudflare/claude-sessions/ directory from the template repo (https://github.com/USERNAME/REPO-infra)
+- Install wrangler, create the D1 database, deploy the worker
+- Set up the save-session.sh hook with the Stop event
+- Ask me for the auth token I want to use
+- Update docs/KEY-FILES.md, docs/INTEGRATIONS.md, and docs/CHANGELOG.md`
+    },
+    'on-demand-context': {
+      name: 'On-Demand Context System',
+      prompt: `Set up the on-demand context system to reduce token usage.
+
+Follow the instructions on the YOUR_APP_NAME updates page (infra/updates.html) for the "On-Demand Context System" feature:
+- Pull the docs/ directory structure from the template repo (https://github.com/USERNAME/REPO-infra)
+- Slim down CLAUDE.md to ~30 lines with on-demand doc index
+- Migrate any existing credentials/schema/patterns from CLAUDE.md to the appropriate docs/*.md file
+- Ensure docs/CREDENTIALS.md is in .gitignore
+- Populate docs/KEY-FILES.md with my actual project structure`
+    },
+    'open-brain': {
+      name: 'Open Brain — Session Transparency Dashboard',
+      prompt: `Set up the Open Brain session transparency dashboard.
+
+Follow the instructions on the YOUR_APP_NAME updates page (infra/updates.html) for the "Open Brain" feature:
+- Verify D1 session logging is working first
+- Create open-brain/index.html with stats, search, filters, and transcript viewer
+- Ask me whether it should be public or auth-gated
+- Style it to match my project's design system
+- Configure the Worker URL and auth token`
+    },
+    'poll-manager': {
+      name: 'Smart Polling with Circuit Breaker',
+      prompt: `Set up the PollManager with circuit breaker pattern.
+
+Follow the instructions on the YOUR_APP_NAME updates page (infra/updates.html) for the "Smart Polling" feature:
+- Pull shared/services/poll-manager.js and shared/supabase-health.js from the template repo (https://github.com/USERNAME/REPO-infra)
+- Replace any existing setInterval polling with PollManager
+- Update docs/KEY-FILES.md and docs/PATTERNS.md`
+    },
+    'tab-visibility': {
+      name: 'Intranet Tab Visibility Config',
+      prompt: `Set up database-driven tab visibility configuration.
+
+Follow the instructions on the YOUR_APP_NAME updates page (infra/updates.html) for the "Tab Visibility Config" feature:
+- Run supabase/migrations/001_page_display_config.sql against my Supabase project
+- Pull updated intranet tab components from the template repo (https://github.com/USERNAME/REPO-infra)
+- Customize the seed data for my specific sections/tabs
+- Update docs/SCHEMA.md and docs/CHANGELOG.md`
+    },
+    'error-logger': {
+      name: 'Centralized Error Logger',
+      prompt: `Set up the centralized error logger.
+
+Follow the instructions on the YOUR_APP_NAME updates page (infra/updates.html) for the "Error Logger" feature:
+- Pull shared/error-logger.js from the template repo (https://github.com/USERNAME/REPO-infra)
+- Wire it into existing error handling patterns
+- Update docs/KEY-FILES.md and docs/PATTERNS.md`
+    },
+    'stop-hook-upgrade': {
+      name: 'Stop Hook Upgrade',
+      prompt: `Upgrade my session logging hook from SessionEnd to Stop.
+
+Follow the instructions on the YOUR_APP_NAME updates page (infra/updates.html) for the "Stop Hook Upgrade" feature:
+- Check ~/.claude/settings.json for a SessionEnd hook and replace with Stop
+- Update ~/.claude/hooks/save-session.sh with the latest version (includes rate-limiting)
+- Verify the lock directory is created at ~/.claude/hooks/.session-locks/`
+    },
+    'devcontrol': {
+      name: 'DevControl — AI Development Dashboard',
+      prompt: `Set up the DevControl admin dashboard for monitoring AI development activity.
+
+Follow the instructions on the YOUR_APP_NAME updates page (infra/updates.html) for the "DevControl" feature:
+- Pull spaces/admin/devcontrol.html, devcontrol.js, and devcontrol.css from the template repo (https://github.com/USERNAME/REPO-infra)
+- Configure GH_OWNER, GH_REPO, SESSIONS_API, SESSIONS_TOKEN, and PROJECT_FILTER in devcontrol.js for my project
+- Add the DevControl tab and icon to shared/admin-shell.js
+- Create the context_snapshots Supabase table for 90-day history tracking
+- Create backup_logs table if I don't already have one
+- Update docs/KEY-FILES.md, docs/CHANGELOG.md, and docs/PATTERNS.md`
+    }
+  };
+
+  // Checkbox handlers
+  document.querySelectorAll('[data-feature-id]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const card = cb.closest('.feature-card');
+      card.classList.toggle('selected', cb.checked);
+      updateCount();
+    });
+  });
+
+  function updateCount() {
+    const checked = document.querySelectorAll('[data-feature-id]:checked');
+    const count = checked.length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('actionBar').style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  function generatePrompt() {
+    const checked = document.querySelectorAll('[data-feature-id]:checked');
+    if (checked.length === 0) {
+      alert('Select at least one feature to generate a prompt.');
+      return;
+    }
+
+    const features = Array.from(checked).map(cb => cb.dataset.featureId);
+    const featureNames = features.map(f => featureMeta[f].name);
+    const featurePrompts = features.map(f => featureMeta[f].prompt);
+
+    // Check dependencies
+    const warnings = [];
+    if (features.includes('open-brain') && !features.includes('d1-session-logging')) {
+      warnings.push('Note: "Open Brain" requires D1 Session Logging. If you haven\'t set it up already, select that feature too.');
+    }
+    if (features.includes('stop-hook-upgrade') && !features.includes('d1-session-logging')) {
+      warnings.push('Note: "Stop Hook Upgrade" requires D1 Session Logging to already be configured.');
+    }
+
+    let prompt = `I cloned the YOUR_APP_NAME template a while ago and want to adopt ${features.length === 1 ? 'this new feature' : 'these new features'}:
+
+${featureNames.map((n, i) => `${i + 1}. ${n}`).join('\n')}
+
+For each feature, pull the necessary files from the template repo at https://github.com/USERNAME/REPO-infra and set them up in my project. Handle all terminal work — installs, deploys, config. Ask me when you need credentials or preferences.
+
+Commit and push after each feature so changes are easy to review.
+
+Here are the detailed instructions for each feature:
+
+${featurePrompts.map((p, i) => `--- Feature ${i + 1}: ${featureNames[i]} ---\n${p}`).join('\n\n')}`;
+
+    if (warnings.length > 0) {
+      prompt = warnings.join('\n') + '\n\n' + prompt;
+    }
+
+    const output = document.getElementById('promptOutput');
+    output.textContent = prompt;
+    output.classList.add('visible');
+    document.getElementById('copyBtn').style.display = 'inline-flex';
+    output.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function copyPrompt() {
+    const text = document.getElementById('promptOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy to clipboard';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+
+<script src="/vendor/supabase-js-2.39.3.min.js"></script>
+<script type="module" src="/shared/version-info.js"></script>
+<script type="module">
+  import { initPublicPage } from '/shared/public-shell.js';
+  initPublicPage({ transparent: true, light: true });
+</script>
+
+</body>
+</html>

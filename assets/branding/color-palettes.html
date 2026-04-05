@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../../favicon.png">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+    <title>GenProperty - Color Palette Options</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #2d3142;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        .palettes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .palette {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .palette-header {
+            padding: 1.5rem;
+            color: white;
+        }
+        .palette-header h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+        .palette-header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+        .color-row {
+            display: flex;
+        }
+        .color-swatch {
+            flex: 1;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        .color-swatch.light {
+            color: #333;
+        }
+        .color-swatch.dark {
+            color: white;
+        }
+        .palette-preview {
+            padding: 1.5rem;
+            background: var(--bg);
+        }
+        .preview-card {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .preview-card h3 {
+            color: var(--text);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .preview-card p {
+            color: var(--muted);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        .preview-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-available {
+            background: var(--available-light);
+            color: var(--available);
+        }
+        .badge-occupied {
+            background: var(--occupied-light);
+            color: var(--occupied);
+        }
+        .preview-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Current Palette */
+        .palette-current .palette-header { background: #3d8b7a; }
+        .palette-current {
+            --primary: #3d8b7a;
+            --bg: #faf9f7;
+            --card: #ffffff;
+            --text: #2d3142;
+            --muted: #7a7d8c;
+            --available: #5a9e8f;
+            --available-light: #e8f5f2;
+            --occupied: #e07a5f;
+            --occupied-light: #fdf0ec;
+        }
+
+        /* Option A: Warm Desert */
+        .palette-desert .palette-header { background: #b5651d; }
+        .palette-desert {
+            --primary: #b5651d;
+            --bg: #faf8f5;
+            --card: #ffffff;
+            --text: #3d3024;
+            --muted: #8c7b6b;
+            --available: #6b8e5a;
+            --available-light: #eef5eb;
+            --occupied: #c75b3a;
+            --occupied-light: #fceee9;
+        }
+
+        /* Option B: Modern Sage */
+        .palette-sage .palette-header { background: #5f7161; }
+        .palette-sage {
+            --primary: #5f7161;
+            --bg: #f7f8f6;
+            --card: #ffffff;
+            --text: #2b2d2c;
+            --muted: #6b7370;
+            --available: #4a7c59;
+            --available-light: #e9f2eb;
+            --occupied: #a85d4e;
+            --occupied-light: #f8eeec;
+        }
+
+        /* Option C: Warm Terracotta */
+        .palette-terracotta .palette-header { background: #c4715b; }
+        .palette-terracotta {
+            --primary: #c4715b;
+            --bg: #faf9f6;
+            --card: #ffffff;
+            --text: #3a302c;
+            --muted: #847670;
+            --available: #6a9a7d;
+            --available-light: #e8f3ec;
+            --occupied: #bf6b4a;
+            --occupied-light: #fceee8;
+        }
+
+        /* Option D: Deep Navy */
+        .palette-navy .palette-header { background: #2c4a5e; }
+        .palette-navy {
+            --primary: #2c4a5e;
+            --bg: #f5f7f9;
+            --card: #ffffff;
+            --text: #1e2a33;
+            --muted: #6b7a85;
+            --available: #3d8b7a;
+            --available-light: #e5f4f1;
+            --occupied: #c76a52;
+            --occupied-light: #fceee9;
+        }
+
+        /* Option E: Soft Lavender */
+        .palette-lavender .palette-header { background: #7c6a9a; }
+        .palette-lavender {
+            --primary: #7c6a9a;
+            --bg: #f9f8fb;
+            --card: #ffffff;
+            --text: #2d2a35;
+            --muted: #7a7585;
+            --available: #5a8f7a;
+            --available-light: #e8f4f0;
+            --occupied: #c7725f;
+            --occupied-light: #fcefec;
+        }
+
+        /* Option F: Sunset Ranch */
+        .palette-sunset .palette-header { background: #d4886a; }
+        .palette-sunset {
+            --primary: #d4886a;
+            --bg: #fffaf7;
+            --card: #ffffff;
+            --text: #3b3230;
+            --muted: #8a7d78;
+            --available: #6b9e72;
+            --available-light: #eaf5eb;
+            --occupied: #cf7a5e;
+            --occupied-light: #fdf0eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>GenProperty Color Palette Options</h1>
+    <p class="subtitle">Click through to see how each palette feels. These can all be customized further.</p>
+
+    <div class="palettes">
+        <!-- Current -->
+        <div class="palette palette-current">
+            <div class="palette-header">
+                <h2>Current (Teal)</h2>
+                <p>The existing GenProperty palette</p>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch dark" style="background: #3d8b7a">Primary<br>#3d8b7a</div>
+                <div class="color-swatch dark" style="background: #5a9e8f">Available<br>#5a9e8f</div>
+                <div class="color-swatch dark" style="background: #e07a5f">Occupied<br>#e07a5f</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch light" style="background: #faf9f7">Background<br>#faf9f7</div>
+                <div class="color-swatch light" style="background: #2d3142; color: white">Text<br>#2d3142</div>
+                <div class="color-swatch light" style="background: #7a7d8c; color: white">Muted<br>#7a7d8c</div>
+            </div>
+            <div class="palette-preview">
+                <div class="preview-card">
+                    <h3>The Meadow Suite</h3>
+                    <p>Cozy 1BR with hill country views</p>
+                    <div class="preview-badges">
+                        <span class="badge badge-available">Available Now</span>
+                        <span class="badge badge-occupied">Occupied</span>
+                    </div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desert -->
+        <div class="palette palette-desert">
+            <div class="palette-header">
+                <h2>A: Warm Desert</h2>
+                <p>Texas ranch feel, warm & inviting</p>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch dark" style="background: #b5651d">Primary<br>#b5651d</div>
+                <div class="color-swatch dark" style="background: #6b8e5a">Available<br>#6b8e5a</div>
+                <div class="color-swatch dark" style="background: #c75b3a">Occupied<br>#c75b3a</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch light" style="background: #faf8f5">Background<br>#faf8f5</div>
+                <div class="color-swatch light" style="background: #3d3024; color: white">Text<br>#3d3024</div>
+                <div class="color-swatch light" style="background: #8c7b6b; color: white">Muted<br>#8c7b6b</div>
+            </div>
+            <div class="palette-preview">
+                <div class="preview-card">
+                    <h3>The Meadow Suite</h3>
+                    <p>Cozy 1BR with hill country views</p>
+                    <div class="preview-badges">
+                        <span class="badge badge-available">Available Now</span>
+                        <span class="badge badge-occupied">Occupied</span>
+                    </div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sage -->
+        <div class="palette palette-sage">
+            <div class="palette-header">
+                <h2>B: Modern Sage</h2>
+                <p>Natural, calm, sophisticated</p>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch dark" style="background: #5f7161">Primary<br>#5f7161</div>
+                <div class="color-swatch dark" style="background: #4a7c59">Available<br>#4a7c59</div>
+                <div class="color-swatch dark" style="background: #a85d4e">Occupied<br>#a85d4e</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch light" style="background: #f7f8f6">Background<br>#f7f8f6</div>
+                <div class="color-swatch light" style="background: #2b2d2c; color: white">Text<br>#2b2d2c</div>
+                <div class="color-swatch light" style="background: #6b7370; color: white">Muted<br>#6b7370</div>
+            </div>
+            <div class="palette-preview">
+                <div class="preview-card">
+                    <h3>The Meadow Suite</h3>
+                    <p>Cozy 1BR with hill country views</p>
+                    <div class="preview-badges">
+                        <span class="badge badge-available">Available Now</span>
+                        <span class="badge badge-occupied">Occupied</span>
+                    </div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terracotta -->
+        <div class="palette palette-terracotta">
+            <div class="palette-header">
+                <h2>C: Warm Terracotta</h2>
+                <p>Earthy, homey, welcoming</p>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch dark" style="background: #c4715b">Primary<br>#c4715b</div>
+                <div class="color-swatch dark" style="background: #6a9a7d">Available<br>#6a9a7d</div>
+                <div class="color-swatch dark" style="background: #bf6b4a">Occupied<br>#bf6b4a</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch light" style="background: #faf9f6">Background<br>#faf9f6</div>
+                <div class="color-swatch light" style="background: #3a302c; color: white">Text<br>#3a302c</div>
+                <div class="color-swatch light" style="background: #847670; color: white">Muted<br>#847670</div>
+            </div>
+            <div class="palette-preview">
+                <div class="preview-card">
+                    <h3>The Meadow Suite</h3>
+                    <p>Cozy 1BR with hill country views</p>
+                    <div class="preview-badges">
+                        <span class="badge badge-available">Available Now</span>
+                        <span class="badge badge-occupied">Occupied</span>
+                    </div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navy -->
+        <div class="palette palette-navy">
+            <div class="palette-header">
+                <h2>D: Deep Navy</h2>
+                <p>Professional, trustworthy, premium</p>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch dark" style="background: #2c4a5e">Primary<br>#2c4a5e</div>
+                <div class="color-swatch dark" style="background: #3d8b7a">Available<br>#3d8b7a</div>
+                <div class="color-swatch dark" style="background: #c76a52">Occupied<br>#c76a52</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch light" style="background: #f5f7f9">Background<br>#f5f7f9</div>
+                <div class="color-swatch light" style="background: #1e2a33; color: white">Text<br>#1e2a33</div>
+                <div class="color-swatch light" style="background: #6b7a85; color: white">Muted<br>#6b7a85</div>
+            </div>
+            <div class="palette-preview">
+                <div class="preview-card">
+                    <h3>The Meadow Suite</h3>
+                    <p>Cozy 1BR with hill country views</p>
+                    <div class="preview-badges">
+                        <span class="badge badge-available">Available Now</span>
+                        <span class="badge badge-occupied">Occupied</span>
+                    </div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lavender -->
+        <div class="palette palette-lavender">
+            <div class="palette-header">
+                <h2>E: Soft Lavender</h2>
+                <p>Unique, creative, memorable</p>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch dark" style="background: #7c6a9a">Primary<br>#7c6a9a</div>
+                <div class="color-swatch dark" style="background: #5a8f7a">Available<br>#5a8f7a</div>
+                <div class="color-swatch dark" style="background: #c7725f">Occupied<br>#c7725f</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch light" style="background: #f9f8fb">Background<br>#f9f8fb</div>
+                <div class="color-swatch light" style="background: #2d2a35; color: white">Text<br>#2d2a35</div>
+                <div class="color-swatch light" style="background: #7a7585; color: white">Muted<br>#7a7585</div>
+            </div>
+            <div class="palette-preview">
+                <div class="preview-card">
+                    <h3>The Meadow Suite</h3>
+                    <p>Cozy 1BR with hill country views</p>
+                    <div class="preview-badges">
+                        <span class="badge badge-available">Available Now</span>
+                        <span class="badge badge-occupied">Occupied</span>
+                    </div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sunset Ranch -->
+        <div class="palette palette-sunset">
+            <div class="palette-header">
+                <h2>F: Sunset Ranch</h2>
+                <p>Warm peach, friendly, approachable</p>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch dark" style="background: #d4886a">Primary<br>#d4886a</div>
+                <div class="color-swatch dark" style="background: #6b9e72">Available<br>#6b9e72</div>
+                <div class="color-swatch dark" style="background: #cf7a5e">Occupied<br>#cf7a5e</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch light" style="background: #fffaf7">Background<br>#fffaf7</div>
+                <div class="color-swatch light" style="background: #3b3230; color: white">Text<br>#3b3230</div>
+                <div class="color-swatch light" style="background: #8a7d78; color: white">Muted<br>#8a7d78</div>
+            </div>
+            <div class="palette-preview">
+                <div class="preview-card">
+                    <h3>The Meadow Suite</h3>
+                    <p>Cozy 1BR with hill country views</p>
+                    <div class="preview-badges">
+                        <span class="badge badge-available">Available Now</span>
+                        <span class="badge badge-occupied">Occupied</span>
+                    </div>
+                    <button class="preview-btn">View Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

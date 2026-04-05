@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="preconnect" href="YOUR_SUPABASE_URL">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <title>YOUR_APP_NAME</title>
+
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- HLS.js loaded lazily when Cameras tab is first opened -->
+
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+  <!-- ======================================= -->
+  <!-- LOADING OVERLAY                          -->
+  <!-- ======================================= -->
+  <div id="loadingOverlay" class="m-loading-overlay">
+    <img src="/assets/branding/logo.jpg" alt="" class="m-loading-logo">
+    <div class="m-loading-spinner"></div>
+    <div class="m-loading-text">Loading...</div>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- LOGIN OVERLAY                             -->
+  <!-- ======================================= -->
+  <div id="loginOverlay" class="m-unauthorized-overlay hidden">
+    <div class="m-unauthorized-card">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="AlpacAPPs" class="m-login-logo" style="height:64px;width:auto;">
+      <h2>We put the AI in Property</h2>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;width:280px">
+        <input id="loginEmail" type="email" placeholder="Email" autocomplete="email"
+               style="height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--m-border);background:var(--m-bg-input);color:var(--m-text);font-size:15px">
+        <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password"
+               style="height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--m-border);background:var(--m-bg-input);color:var(--m-text);font-size:15px">
+        <button id="loginBtn" class="m-btn m-btn--primary" style="width:100%">Sign In</button>
+        <div id="loginError" style="color:var(--m-error);font-size:13px;text-align:center;display:none"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin:4px 0">
+          <div style="flex:1;height:1px;background:var(--m-border)"></div>
+          <span style="font-size:12px;color:var(--m-text-muted)">or</span>
+          <div style="flex:1;height:1px;background:var(--m-border)"></div>
+        </div>
+        <button id="googleSignInBtn" class="m-btn m-btn--secondary" style="width:100%;gap:8px">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Sign in with Google
+        </button>
+      </div>
+      <span title="Site version" class="login-card__version" style="display:block;margin-top:1rem;font-size:0.75rem;color:var(--m-text-muted);"></span>
+    </div>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- UNAUTHORIZED OVERLAY                     -->
+  <!-- ======================================= -->
+  <div id="unauthorizedOverlay" class="m-unauthorized-overlay hidden">
+    <div class="m-unauthorized-card">
+      <h2>Access Denied</h2>
+      <p>Your account does not have resident access.</p>
+      <button id="signOutBtn" class="m-btn m-btn--primary">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- APP CONTENT (hidden until auth)          -->
+  <!-- ======================================= -->
+  <div id="appContent" class="m-app hidden">
+
+    <!-- Top bar -->
+    <header class="m-header">
+      <div class="m-header__brand">
+        <img src="/assets/branding/logo-inverted.jpg" alt="" class="m-header__logo">
+        <span class="m-header__title">YOUR_APP_NAME</span>
+      </div>
+      <div class="m-header__right">
+        <span id="userInfo" class="m-header__user"></span>
+      </div>
+    </header>
+
+    <!-- Tab content sections -->
+    <main class="m-main">
+
+      <!-- CAMERAS TAB -->
+      <section id="tab-cameras" class="m-tab-content active">
+        <div id="camerasContent" class="m-tab-body">
+          <div class="m-loading-inline">Loading cameras...</div>
+        </div>
+      </section>
+
+      <!-- MUSIC TAB -->
+      <section id="tab-music" class="m-tab-content">
+        <div id="musicContent" class="m-tab-body">
+          <div class="m-loading-inline">Loading music...</div>
+        </div>
+      </section>
+
+      <!-- LIGHTS TAB -->
+      <section id="tab-lights" class="m-tab-content">
+        <div id="lightsContent" class="m-tab-body">
+          <div class="m-loading-inline">Loading lights...</div>
+        </div>
+      </section>
+
+      <!-- CLIMATE TAB -->
+      <section id="tab-climate" class="m-tab-content">
+        <div id="climateContent" class="m-tab-body">
+          <div class="m-loading-inline">Loading climate...</div>
+        </div>
+      </section>
+
+      <!-- CARS TAB -->
+      <section id="tab-cars" class="m-tab-content">
+        <div id="carsContent" class="m-tab-body">
+          <div class="m-loading-inline">Loading vehicles...</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom tab bar -->
+    <nav class="m-tab-bar" id="tabBar">
+      <button class="m-tab-btn active" data-tab="cameras">
+        <svg class="m-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span class="m-tab-label">Cameras</span>
+      </button>
+      <button class="m-tab-btn" data-tab="music">
+        <svg class="m-tab-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        <span class="m-tab-label">Music</span>
+      </button>
+      <button class="m-tab-btn" data-tab="lights">
+        <svg class="m-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z"/></svg>
+        <span class="m-tab-label">Lights</span>
+      </button>
+      <button class="m-tab-btn" data-tab="climate">
+        <svg class="m-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>
+        <span class="m-tab-label">Climate</span>
+      </button>
+      <button class="m-tab-btn" data-tab="cars" id="carsTabBtn">
+        <svg class="m-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14M7.5 17a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM16.5 17a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/><path d="M5 12l1.5-4.5h11L19 12"/></svg>
+        <span class="m-tab-label">Cars</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- App logic -->
+  <script type="module" src="mobile-app.js"></script>
+
+</body>
+</html>

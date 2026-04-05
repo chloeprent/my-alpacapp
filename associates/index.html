@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Associates - Redirecting...</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <script type="module" src="../shared/version-info.js"></script>
+  <script>
+    // Redirect to the hours page (default associate landing), preserving any query parameters
+    const params = window.location.search;
+    window.location.replace('./worktracking.html' + params);
+  </script>
+</head>
+<body>
+  <p>Redirecting to hours tracker...</p>
+  <p>If you are not redirected, <a href="./worktracking.html">click here</a>.</p>
+</body>
+</html>

@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Claude Sessions — Admin</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem(location.hostname+'-auth');if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}</style>
+  <link rel="stylesheet" href="/styles/site.css">
+  <link rel="stylesheet" href="/styles/tailwind.out.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #faf9f6;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding-top: 52px;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .breadcrumb { font-size: 0.8rem; color: #888; margin-bottom: 1rem; }
+    .breadcrumb a { color: #888; text-decoration: none; }
+    .breadcrumb a:hover { color: #1a1a1a; }
+
+    /* Header */
+    .header { margin-bottom: 2rem; }
+    .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .header p { color: #666; font-size: 0.9rem; }
+
+    /* Stats */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: #fff;
+      border: 1px solid #e8e5e0;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+    }
+    .stat-card .label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .stat-card .value { font-size: 1.5rem; font-weight: 700; }
+    .stat-card .value.small { font-size: 1.1rem; }
+
+    /* Filters */
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-bar input[type="text"],
+    .filter-bar input[type="date"] {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid #d4d0c8;
+      border-radius: 8px;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .filter-bar input:focus { border-color: #b8a88a; }
+    .filter-bar input[type="text"] { flex: 1; min-width: 180px; }
+    .filter-bar input[type="date"] { width: 150px; }
+    .btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.6rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: #1a1a1a; color: #fff; }
+    .btn-primary:hover { background: #333; }
+    .btn-secondary { background: #e8e5e0; color: #1a1a1a; }
+    .btn-secondary:hover { background: #dbd7d0; }
+
+    /* Sessions list */
+    .sessions-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .session-card {
+      background: #fff;
+      border: 1px solid #e8e5e0;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      transition: all 0.15s;
+    }
+    .session-card:hover { border-color: #c8c4bc; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .session-card.expanded { border-color: #b8a88a; }
+    .session-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .session-header .share-btn {
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 0.3rem 0.45rem;
+      cursor: pointer;
+      color: #aaa;
+      font-size: 0.85rem;
+      line-height: 1;
+      transition: all 0.15s;
+    }
+    .session-header .share-btn:hover { color: #555; border-color: #d4d0c8; background: #f5f3ef; }
+    .session-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .session-meta .date { font-weight: 600; font-size: 0.875rem; }
+    .session-meta .pill {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.2rem 0.55rem;
+      border-radius: 20px;
+      background: #f0ede8;
+      color: #666;
+    }
+    .session-meta .pill.model { background: #e8f0e8; color: #3a6b3a; }
+    .session-meta .pill.tokens { background: #e8e8f0; color: #3a3a6b; }
+    .session-meta .pill.duration { background: #f0e8e8; color: #6b3a3a; }
+    .session-summary {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Transcript */
+    .transcript-container {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e8e5e0;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .transcript-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .transcript-actions .btn {
+      font-size: 0.75rem;
+      padding: 0.4rem 0.85rem;
+    }
+    .transcript-container .msg {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      position: relative;
+    }
+    .transcript-container .msg.user {
+      background: #f0ede8;
+      border-left: 3px solid #b8a88a;
+    }
+    .transcript-container .msg.assistant {
+      background: #f7f7f7;
+      border-left: 3px solid #ccc;
+    }
+    .transcript-container .msg .role {
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+    .msg.user .role { color: #8a7a5a; }
+    .msg.assistant .role { color: #888; }
+    .msg .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid #d4d0c8;
+      border-radius: 5px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.65rem;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s;
+      color: #555;
+    }
+    .msg:hover .copy-btn { opacity: 1; }
+    .msg .copy-btn:hover { background: #fff; border-color: #b8a88a; }
+    .msg .copy-btn.copied { background: #e8f0e8; border-color: #3a6b3a; color: #3a6b3a; }
+
+    /* Load more */
+    .load-more {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    .pagination-info {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.75rem;
+    }
+
+    /* States */
+    .loading, .empty { text-align: center; padding: 3rem; color: #888; font-size: 0.9rem; }
+    .spinner-sm {
+      display: inline-block;
+      width: 24px; height: 24px;
+      border: 2.5px solid #e8e5e0;
+      border-top-color: #1a1a1a;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-bottom: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Setup prompt */
+    .setup-prompt {
+      background: #fff;
+      border: 2px dashed #d4d0c8;
+      border-radius: 12px;
+      padding: 2.5rem;
+      text-align: center;
+      color: #888;
+    }
+    .setup-prompt h2 { font-size: 1.25rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; }
+    .setup-prompt p { max-width: 500px; margin: 0 auto 1rem; line-height: 1.6; }
+    .setup-prompt code {
+      display: inline-block;
+      background: #f0ede8;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-family: 'SF Mono', monospace;
+      font-size: 0.85rem;
+      color: #1a1a1a;
+    }
+
+    /* Full session view */
+    .full-session-view .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      color: #888;
+      text-decoration: none;
+      margin-bottom: 1.5rem;
+      transition: color 0.15s;
+    }
+    .full-session-view .back-link:hover { color: #1a1a1a; }
+    .full-session-view .session-info {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e8e5e0;
+    }
+    .full-session-view .session-info h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .full-session-view .full-transcript .msg {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+      position: relative;
+    }
+    .full-session-view .full-transcript .msg.user {
+      background: #f0ede8;
+      border-left: 3px solid #b8a88a;
+    }
+    .full-session-view .full-transcript .msg.assistant {
+      background: #f7f7f7;
+      border-left: 3px solid #ccc;
+    }
+    .full-session-view .full-transcript .msg .role {
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+    .full-session-view .msg.user .role { color: #8a7a5a; }
+    .full-session-view .msg.assistant .role { color: #888; }
+    .full-session-view .msg .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid #d4d0c8;
+      border-radius: 5px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.65rem;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s;
+      color: #555;
+    }
+    .full-session-view .msg:hover .copy-btn { opacity: 1; }
+    .full-session-view .msg .copy-btn:hover { background: #fff; border-color: #b8a88a; }
+    .full-session-view .msg .copy-btn.copied { background: #e8f0e8; border-color: #3a6b3a; color: #3a6b3a; }
+
+    @media (max-width: 600px) {
+      .filter-bar { flex-direction: column; }
+      .filter-bar input[type="date"] { width: 100%; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="container">
+      <div class="breadcrumb"><a href="/clauded/">Claude Dev</a> &rsaquo; Sessions</div>
+      <div class="header">
+        <h1>Claude Sessions</h1>
+        <p>Browse and search past Claude Code conversations</p>
+      </div>
+
+      <div id="sessions-app">
+        <!-- Filled by JS — either the full sessions UI or a setup prompt -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/shared/instant-chrome.js"></script>
+  <script type="module" src="/shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script>
+    // ═══════════════════════════════════════════════════════════════════
+    // CONFIGURATION — Set these after deploying Cloudflare D1 session
+    // logging. See: /infra/updates.html → "Session Logging to D1"
+    // ═══════════════════════════════════════════════════════════════════
+    const CLAUDED_SESSIONS_API = 'https://claude-sessions.your-app.workers.dev'; // YOUR_SESSIONS_WORKER_URL
+    const CLAUDED_SESSIONS_TOKEN = 'property-sessions-2026'; // YOUR_SESSIONS_AUTH_TOKEN
+    // ═══════════════════════════════════════════════════════════════════
+
+    const LIMIT = 50;
+    let currentOffset = 0;
+    let totalSessions = 0;
+    let sessions = [];
+    let expandedId = null;
+    let transcriptCache = {};
+
+    // Expose for index.html feature detection
+    window.CLAUDED_SESSIONS_API = CLAUDED_SESSIONS_API;
+
+    function isConfigured() {
+      return CLAUDED_SESSIONS_API &&
+             !CLAUDED_SESSIONS_API.includes('YOUR_') &&
+             CLAUDED_SESSIONS_TOKEN &&
+             !CLAUDED_SESSIONS_TOKEN.includes('YOUR_');
+    }
+
+    function showSetupPrompt() {
+      document.getElementById('sessions-app').innerHTML = `
+        <div class="setup-prompt">
+          <h2>Session Logging Not Configured</h2>
+          <p>To browse Claude Code session history, set up Cloudflare D1 session logging first. The setup guide walks you through it in about 10 minutes.</p>
+          <a href="/infra/updates.html" style="color:#b8a88a;font-size:0.9rem;">View setup instructions &rarr;</a>
+          <p style="margin-top:1.5rem;font-size:0.8rem;color:#aaa;">After setup, update the config at the top of <code>clauded/sessions.html</code></p>
+        </div>`;
+    }
+
+    function showSessionsUI() {
+      document.getElementById('sessions-app').innerHTML = `
+        <div class="stats-bar" id="stats-bar">
+          <div class="stat-card"><div class="label">Sessions</div><div class="value" id="stat-sessions">--</div></div>
+          <div class="stat-card"><div class="label">Total Tokens</div><div class="value small" id="stat-tokens">--</div></div>
+          <div class="stat-card"><div class="label">Total Hours</div><div class="value" id="stat-hours">--</div></div>
+          <div class="stat-card"><div class="label">Avg Duration</div><div class="value" id="stat-avg">--</div></div>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="search-input" placeholder="Search sessions..." />
+          <input type="date" id="date-from" title="From date" />
+          <input type="date" id="date-to" title="To date" />
+          <button class="btn btn-primary" onclick="applyFilters()">Search</button>
+          <button class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+        </div>
+        <div id="sessions-container">
+          <div class="loading"><div class="spinner-sm"></div><br>Loading sessions...</div>
+        </div>
+        <div class="load-more" id="load-more" style="display:none;">
+          <div class="pagination-info" id="pagination-info"></div>
+          <button class="btn btn-secondary" onclick="loadMore()">Load More</button>
+        </div>`;
+
+      document.getElementById('search-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') applyFilters();
+      });
+
+      loadStats();
+      loadSessions();
+    }
+
+    const headers = { 'Authorization': `Bearer ${CLAUDED_SESSIONS_TOKEN}` };
+
+    async function api(path) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      try {
+        const res = await fetch(`${CLAUDED_SESSIONS_API}${path}`, { headers, signal: controller.signal });
+        clearTimeout(timeout);
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
+        return res.json();
+      } catch (e) {
+        clearTimeout(timeout);
+        if (e.name === 'AbortError') throw new Error('Request timed out — the API may be blocked by a browser extension. Try disabling your ad blocker.');
+        throw e;
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const s = await api('/stats');
+        document.getElementById('stat-sessions').textContent = (s.total_sessions || 0).toLocaleString();
+        document.getElementById('stat-tokens').textContent = s.total_tokens ? (s.total_tokens / 1e6).toFixed(1) + 'M' : '0';
+        const hrs = s.total_minutes ? (s.total_minutes / 60).toFixed(1) : '0';
+        document.getElementById('stat-hours').textContent = hrs;
+        const avg = s.avg_duration ? Math.round(s.avg_duration) + 'm' : '--';
+        document.getElementById('stat-avg').textContent = avg;
+      } catch (e) {
+        console.error('Stats error:', e);
+      }
+    }
+
+    function buildQuery() {
+      const params = new URLSearchParams();
+      params.set('limit', LIMIT);
+      params.set('offset', currentOffset);
+      const search = document.getElementById('search-input').value.trim();
+      const from = document.getElementById('date-from').value;
+      const to = document.getElementById('date-to').value;
+      if (search) params.set('search', search);
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      return '/sessions?' + params.toString();
+    }
+
+    async function loadSessions(append = false) {
+      const container = document.getElementById('sessions-container');
+      if (!append) {
+        container.innerHTML = '<div class="loading"><div class="spinner-sm"></div><br>Loading sessions...</div>';
+        sessions = [];
+        currentOffset = 0;
+      }
+
+      try {
+        const data = await api(buildQuery());
+        totalSessions = data.total || 0;
+        sessions = append ? sessions.concat(data.sessions) : data.sessions;
+        currentOffset = sessions.length;
+        renderSessions();
+      } catch (e) {
+        container.innerHTML = `<div class="empty" style="white-space:normal;max-width:500px;margin:0 auto;">
+          <strong>Failed to load sessions</strong><br>
+          <span style="font-size:0.82rem;color:#999;">${escHtml(e.message)}</span>
+        </div>`;
+        console.error(e);
+      }
+    }
+
+    function renderSessions() {
+      const container = document.getElementById('sessions-container');
+      if (!sessions.length) {
+        container.innerHTML = '<div class="empty">No sessions found.</div>';
+        document.getElementById('load-more').style.display = 'none';
+        return;
+      }
+
+      container.innerHTML = '<div class="sessions-list">' + sessions.map(s => {
+        const rawDate = s.started_at || s.ended_at;
+        const date = rawDate ? new Date(rawDate.includes('Z') || rawDate.includes('+') ? rawDate : rawDate + 'Z') : null;
+        const dateStr = date && !isNaN(date) ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date unknown';
+        const timeStr = date && !isNaN(date) ? date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+        const project = s.project || 'unknown';
+        const model = s.model ? s.model.replace('claude-', '').split('-202')[0] : '';
+        let durMins = s.duration_mins;
+        if (!durMins && s.started_at && s.ended_at) {
+          durMins = Math.max(1, Math.round((new Date(s.ended_at) - new Date(s.started_at)) / 60000));
+        }
+        const duration = durMins && durMins < 1440 ? durMins + 'm' : '';
+        const tokens = s.token_count ? (s.token_count / 1000).toFixed(0) + 'k' : '';
+        const summary = (s.summary || '').substring(0, 120);
+        const isExpanded = expandedId === s.id;
+
+        return `<div class="session-card ${isExpanded ? 'expanded' : ''}">
+          <div class="session-header">
+            <div class="session-meta" onclick="toggleSession('${s.id}')" style="cursor:pointer;">
+              <span class="date">${dateStr} ${timeStr}</span>
+              <span class="pill">${project}</span>
+              ${model ? `<span class="pill model">${model}</span>` : ''}
+              ${duration ? `<span class="pill duration">${duration}</span>` : ''}
+              ${tokens ? `<span class="pill tokens">${tokens} tokens</span>` : ''}
+            </div>
+            <button class="share-btn" onclick="event.stopPropagation(); openSessionView('${s.id}')" title="Open full session">&#x2197;</button>
+          </div>
+          ${summary ? `<div class="session-summary" onclick="toggleSession('${s.id}')" style="cursor:pointer;">${escHtml(summary)}</div>` : ''}
+          ${isExpanded ? `<div class="transcript-container" id="transcript-${s.id}"><div class="loading"><div class="spinner-sm"></div></div></div>` : ''}
+        </div>`;
+      }).join('') + '</div>';
+
+      const loadMoreEl = document.getElementById('load-more');
+      if (sessions.length < totalSessions) {
+        loadMoreEl.style.display = 'block';
+        document.getElementById('pagination-info').textContent = `Showing ${sessions.length} of ${totalSessions} sessions`;
+      } else {
+        loadMoreEl.style.display = 'none';
+      }
+
+      if (expandedId) loadTranscript(expandedId);
+    }
+
+    async function toggleSession(id) {
+      expandedId = expandedId === id ? null : id;
+      renderSessions();
+    }
+
+    async function loadTranscript(id) {
+      const el = document.getElementById('transcript-' + id);
+      if (!el) return;
+
+      if (transcriptCache[id]) {
+        el.innerHTML = renderTranscript(transcriptCache[id], id);
+        return;
+      }
+
+      try {
+        const data = await api('/sessions/' + id);
+        transcriptCache[id] = data.transcript || '';
+        el.innerHTML = renderTranscript(data.transcript || '', id);
+      } catch (e) {
+        el.innerHTML = '<div class="empty">Failed to load transcript.</div>';
+      }
+    }
+
+    function renderTranscript(text, sessionId) {
+      if (!text) return '<div class="empty">No transcript available.</div>';
+      const actions = `<div class="transcript-actions">
+        <button class="btn btn-secondary" onclick="event.stopPropagation(); copyFullSession('${sessionId}')">Copy Full Session</button>
+      </div>`;
+      const parts = text.split(/\n---\n/);
+      let msgIndex = 0;
+      const msgs = parts.map(part => {
+        part = part.trim();
+        if (!part) return '';
+        const isUser = part.startsWith('## User');
+        const isAssistant = part.startsWith('## Assistant');
+        const role = isUser ? 'user' : isAssistant ? 'assistant' : 'unknown';
+        const content = part.replace(/^## (User|Assistant)\n?/, '').trim();
+        const display = content.length > 3000 ? content.substring(0, 3000) + '\n\n... [truncated]' : content;
+        const idx = msgIndex++;
+        return `<div class="msg ${role}"><span class="role">${role}</span><button class="copy-btn" onclick="event.stopPropagation(); copyMsg(this, '${sessionId}', ${idx})">Copy</button>${escHtml(display)}</div>`;
+      }).filter(Boolean).join('');
+      return actions + msgs;
+    }
+
+    function getMessages(sessionId) {
+      const text = transcriptCache[sessionId];
+      if (!text) return [];
+      return text.split(/\n---\n/).map(part => {
+        part = part.trim();
+        if (!part) return null;
+        const isUser = part.startsWith('## User');
+        const role = isUser ? 'User' : 'Assistant';
+        const content = part.replace(/^## (User|Assistant)\n?/, '').trim();
+        return { role, content };
+      }).filter(Boolean);
+    }
+
+    function copyMsg(btn, sessionId, idx) {
+      const msgs = getMessages(sessionId);
+      if (!msgs[idx]) return;
+      navigator.clipboard.writeText(msgs[idx].content).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1500);
+      });
+    }
+
+    function copyFullSession(sessionId) {
+      const msgs = getMessages(sessionId);
+      if (!msgs.length) return;
+      const full = msgs.map(m => `### ${m.role}\n\n${m.content}`).join('\n\n---\n\n');
+      navigator.clipboard.writeText(full).then(() => {
+        const btn = event.target;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy Full Session'; }, 1500);
+      });
+    }
+
+    function openSessionView(id) {
+      window.location.href = '?session=' + id;
+    }
+
+    async function showFullSessionView(id) {
+      const container = document.querySelector('.container');
+      container.innerHTML = `<div class="full-session-view">
+        <div class="breadcrumb"><a href="/clauded/">Claude Dev</a> &rsaquo; <a href="/clauded/sessions.html">Sessions</a> &rsaquo; Detail</div>
+        <a href="?" class="back-link">&larr; All sessions</a>
+        <div id="full-session-content"><div class="loading"><div class="spinner-sm"></div><br>Loading session...</div></div>
+      </div>`;
+      document.title = 'Claude Session';
+
+      try {
+        const data = await api('/sessions/' + id);
+        const t = data.transcript || '';
+        transcriptCache[id] = t;
+        const session = data;
+
+        const rawDate = session.started_at || session.ended_at;
+        const date = rawDate ? new Date(rawDate.includes('Z') || rawDate.includes('+') ? rawDate : rawDate + 'Z') : null;
+        const dateStr = date && !isNaN(date) ? date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+        const model = session.model ? session.model.replace('claude-', '').split('-202')[0] : '';
+        const project = session.project || '';
+        const tokens = session.token_count ? (session.token_count / 1000).toFixed(0) + 'k tokens' : '';
+        let durMinsF = session.duration_mins;
+        if (!durMinsF && session.started_at && session.ended_at) {
+          durMinsF = Math.max(1, Math.round((new Date(session.ended_at) - new Date(session.started_at)) / 60000));
+        }
+        const duration = durMinsF && durMinsF < 1440 ? durMinsF + 'm' : '';
+        const pills = [project, model, duration, tokens].filter(Boolean).map(p => `<span class="pill" style="font-size:0.72rem;padding:0.2rem 0.55rem;border-radius:20px;background:#f0ede8;color:#666;margin-right:0.35rem;">${escHtml(p)}</span>`).join('');
+
+        const parts = t.split(/\n---\n/);
+        let msgIdx = 0;
+        const msgs = parts.map(part => {
+          part = part.trim();
+          if (!part) return '';
+          const isUser = part.startsWith('## User');
+          const role = isUser ? 'user' : 'assistant';
+          const content = part.replace(/^## (User|Assistant)\n?/, '').trim();
+          const idx = msgIdx++;
+          return `<div class="msg ${role}"><span class="role">${role}</span><button class="copy-btn" onclick="event.stopPropagation(); copyMsg(this, '${id}', ${idx})">Copy</button>${escHtml(content)}</div>`;
+        }).filter(Boolean).join('');
+
+        document.getElementById('full-session-content').innerHTML = `
+          <div class="session-info">
+            <h2>${dateStr}</h2>
+            <div>${pills}</div>
+            ${session.summary ? `<p style="margin-top:0.5rem;font-size:0.85rem;color:#555;">${escHtml(session.summary)}</p>` : ''}
+            <div class="transcript-actions" style="margin-top:0.75rem;">
+              <button class="btn btn-secondary" onclick="copyFullSession('${id}')">Copy Full Session</button>
+            </div>
+          </div>
+          <div class="full-transcript">${msgs || '<div class="empty">No transcript available.</div>'}</div>`;
+        document.title = 'Session — ' + (dateStr || id);
+      } catch (e) {
+        document.getElementById('full-session-content').innerHTML = `<div class="empty">Failed to load session.<br><span style="font-size:0.82rem;color:#999;">${escHtml(e.message)}</span></div>`;
+      }
+    }
+
+    function escHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function applyFilters() {
+      expandedId = null;
+      transcriptCache = {};
+      loadSessions(false);
+    }
+
+    function clearFilters() {
+      document.getElementById('search-input').value = '';
+      document.getElementById('date-from').value = '';
+      document.getElementById('date-to').value = '';
+      expandedId = null;
+      transcriptCache = {};
+      loadSessions(false);
+    }
+
+    function loadMore() {
+      loadSessions(true);
+    }
+
+    // Boot: check config, then show UI or setup prompt
+    const urlParams = new URLSearchParams(window.location.search);
+    const singleSessionId = urlParams.get('session');
+
+    if (!isConfigured()) {
+      showSetupPrompt();
+    } else if (singleSessionId) {
+      showFullSessionView(singleSessionId);
+    } else {
+      showSessionsUI();
+    }
+  </script>
+  <script type="module">
+    import { initAdminPage } from '/shared/admin-shell.js';
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initAdminPage({
+        activeTab: null,
+        requiredRole: 'admin',
+        section: 'admin',
+        onReady: () => {},
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <title>Tricky Lockout Numbers - YOUR_PROPERTY_NAME</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: #f5f4ed;
+      color: #2e2226;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(46,34,38,0.1), 0 2px 4px rgba(46,34,38,0.06);
+      max-width: 400px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .card-header {
+      background: #2e2226;
+      color: #fff;
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+    }
+    .card-header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .card-header p {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      margin-top: 0.25rem;
+    }
+    .contacts {
+      list-style: none;
+      padding: 0.5rem 0;
+    }
+    .contacts li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.875rem 1.5rem;
+      border-bottom: 1px solid #f0efe8;
+    }
+    .contacts li:last-child {
+      border-bottom: none;
+    }
+    .name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .phone {
+      font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+      font-size: 0.95rem;
+      color: #6b5e62;
+      letter-spacing: 0.03em;
+    }
+    .version {
+      text-align: center;
+      padding: 0.75rem;
+      font-size: 0.7rem;
+      color: #6b5e62;
+      opacity: 0.5;
+    }
+  </style>
+  <script type="module" src="shared/version-info.js"></script>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <h1>Tricky Lockout Numbers</h1>
+      <p>numbers are reversed</p>
+    </div>
+    <ul class="contacts">
+      <li><span class="name">Rahulio</span><span class="phone">690-744-7424</span></li>
+      <li><span class="name">Phoebe</span><span class="phone">470-816-2818</span></li>
+      <li><span class="name">Haydn</span><span class="phone">775-652-3818</span></li>
+      <li><span class="name">Emina</span><span class="phone">605-414-3747</span></li>
+      <li><span class="name">Kathy</span><span class="phone">376-652-3818</span></li>
+    </ul>
+    <div class="version"></div>
+  </div>
+</body>
+</html>

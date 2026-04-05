@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Media Library - AlpacAPPs Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=5">
+  <link rel="stylesheet" href="media.css?v=5">
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading overlay shown while checking auth -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3Cpath d=%22M10.5 1.5C8.3 1.5 6.5 3.3 6.5 5.5v4.1L3.8 13c-1 1.3-1.5 2.8-1.5 4.4 0 4.6 3.7 8.3 8.2 8.3s8.2-3.7 8.2-8.3c0-1.6-.5-3.2-1.5-4.4l-2.7-3.4V5.5c0-2.2-1.8-4-4-4z%22 fill=%22%231f1720%22/%3E%3Cellipse cx=%2210.5%22 cy=%2218.6%22 rx=%223.1%22 ry=%224.7%22 fill=%22%23f6f5f0%22/%3E%3C/svg%3E'">
+      <img src="YOUR_SUPABASE_URL/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="YOUR_PROPERTY_NAME" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22Arial,sans-serif%22 fill=%22%231f1720%22%3EProperty%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <!-- Access denied (populated by JS) -->
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <!-- Main app content -->
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+
+    <span data-site-version style="display:none">v260405.02 4:44p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="manage-tabs" id="tabNav"></div>
+
+    <!-- Storage indicator -->
+    <div class="storage-banner">
+      <div id="storageIndicator" class="storage-indicator-inline"></div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <div class="upload-area" id="uploadArea">
+        <input type="file" id="mediaFileInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
+        <div class="upload-prompt">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span>Drop images here or <button type="button" class="btn-link" id="browseFilesBtn">browse</button></span>
+          <span class="upload-hint">JPEG, PNG, WebP, GIF • Max 10 files at once</span>
+        </div>
+      </div>
+
+      <!-- Upload preview and options (shown when files selected) -->
+      <div id="uploadPreviewSection" class="upload-preview-section hidden">
+        <div class="upload-preview-header">
+          <span><strong id="uploadFileCount">0</strong> files selected</span>
+          <button type="button" class="btn-small" id="clearUploadBtn">Clear All</button>
+        </div>
+
+        <div id="uploadPreviewGrid" class="upload-preview-grid"></div>
+
+        <div class="upload-options">
+          <div class="upload-options-row">
+            <div class="form-group">
+              <label for="uploadBulkCaption">Caption for all (optional):</label>
+              <input type="text" id="uploadBulkCaption" placeholder="Leave empty to set per-image">
+            </div>
+            <div class="form-group">
+              <label for="uploadCategory">Category:</label>
+              <select id="uploadCategory">
+                <option value="space">Space</option>
+                <option value="mktg">Marketing</option>
+                <option value="projects">Projects</option>
+                <option value="archive">Archive</option>
+              </select>
+            </div>
+          </div>
+
+          <fieldset class="form-fieldset">
+            <legend>Tags (apply to all)</legend>
+            <div id="uploadTagsContainer" class="tags-container">
+              <!-- Tags populated by JS -->
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- Upload progress -->
+        <div id="uploadProgress" class="upload-progress hidden">
+          <div class="progress-bar">
+            <div class="progress-fill" id="uploadProgressFill"></div>
+          </div>
+          <p class="progress-text" id="uploadProgressText">Uploading 0 of 0...</p>
+        </div>
+
+        <div class="upload-actions">
+          <button type="button" class="btn-secondary" id="cancelUploadBtn">Cancel</button>
+          <button type="button" class="btn-primary" id="submitUploadBtn">Upload All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters and actions bar -->
+    <div class="media-toolbar">
+      <div class="toolbar-left">
+        <div class="filter-group">
+          <label>Category:</label>
+          <select id="categoryFilter">
+            <option value="">All</option>
+            <option value="mktg">Marketing</option>
+            <option value="projects">Projects</option>
+            <option value="archive">Archive</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Tags:</label>
+          <div id="tagFilterChips" class="tag-filter-chips"></div>
+        </div>
+        <button id="clearFilters" class="btn-small">Clear Filters</button>
+      </div>
+      <div class="toolbar-right">
+        <span id="mediaCount" class="media-count">0 items</span>
+        <button id="bulkTagBtn" class="btn-small" disabled>Edit Tags (<span id="selectedCount">0</span>)</button>
+        <button id="bulkDeleteBtn" class="btn-small btn-danger-outline" disabled>Delete Selected</button>
+        <button id="selectAllBtn" class="btn-small">Select All</button>
+        <button id="deselectAllBtn" class="btn-small hidden">Deselect All</button>
+      </div>
+    </div>
+
+    <!-- Media grid -->
+    <main>
+      <div id="mediaGrid" class="media-library-grid">
+        <!-- Media items populated by JS -->
+      </div>
+
+      <div id="emptyState" class="empty-state hidden">
+        <p>No media found.</p>
+        <p class="hint">Upload some images from a space's edit page.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Media Detail/Edit Modal -->
+  <div id="mediaDetailModal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2>Media Details</h2>
+        <button class="modal-close" id="closeMediaDetail">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="media-detail-layout">
+          <!-- Image preview -->
+          <div class="media-preview">
+            <img id="detailImage" src="" alt="Media preview">
+          </div>
+
+          <!-- Details and editing -->
+          <div class="media-details">
+            <div class="form-group">
+              <label for="detailCaption">Caption</label>
+              <input type="text" id="detailCaption" placeholder="Add a caption...">
+            </div>
+
+            <div class="form-group">
+              <label for="detailCategory">Category</label>
+              <select id="detailCategory">
+                <option value="mktg">Marketing</option>
+                <option value="projects">Projects</option>
+                <option value="archive">Archive</option>
+              </select>
+            </div>
+
+            <fieldset class="form-fieldset">
+              <legend>Tags</legend>
+              <div id="detailTagsContainer" class="tags-container"></div>
+            </fieldset>
+
+            <div class="media-meta">
+              <p><strong>Size:</strong> <span id="detailSize">-</span></p>
+              <p><strong>Dimensions:</strong> <span id="detailDimensions">-</span></p>
+              <p><strong>Uploaded:</strong> <span id="detailDate">-</span></p>
+              <p><strong>Used in:</strong> <span id="detailSpaces">-</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="deleteMediaBtn" class="btn-danger">Delete Permanently</button>
+        <div class="footer-right">
+          <button id="cancelMediaDetail" class="btn-secondary">Cancel</button>
+          <button id="saveMediaDetail" class="btn-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Tag Edit Modal -->
+  <div id="bulkTagModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Tags for <span id="bulkCount">0</span> Items</h2>
+        <button class="modal-close" id="closeBulkTag">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="form-hint" style="margin-bottom: 1rem;">
+          Select tags to add or remove from all selected items.
+        </p>
+
+        <div class="bulk-tag-actions">
+          <div class="bulk-action-group">
+            <h4>Add Tags</h4>
+            <div id="bulkAddTags" class="tags-container"></div>
+          </div>
+          <div class="bulk-action-group">
+            <h4>Remove Tags</h4>
+            <div id="bulkRemoveTags" class="tags-container"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelBulkTag" class="btn-secondary">Cancel</button>
+        <button id="applyBulkTags" class="btn-primary">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instant chrome: skip spinner + pre-render header for returning users -->
+  <script src="../../shared/instant-chrome.js"></script>
+
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <!-- TUS client for resumable uploads (files > 6MB) -->
+  <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.1.0/dist/tus.min.js" integrity="sha384-e14cNjQjd5R4CjmEtpwqhtz1Yr92mbPYc08UpfD17q3OEaOPNnZM0sxye7khgesI" crossorigin="anonymous"></script>
+  <script type="module" src="media.js"></script>
+</body>
+</html>

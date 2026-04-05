@@ -1,0 +1,147 @@
+/**
+ * YOUR_APP_NAME Design Tokens
+ *
+ * Canonical source of truth for every visual constant in the AAP design system.
+ * All values use CSS custom properties prefixed with `--aap-`.
+ *
+ * Spacing uses a strict 4 px base grid (0.25 rem increments).
+ * Colors are the warm property palette — cream backgrounds, amber accents,
+ * warm-dark text, and warm-tinted shadows.
+ *
+ * This file is imported by site.css and referenced by the Tailwind v4 @theme.
+ * If you add a token here, mirror it in styles/tailwind.css @theme so both
+ * systems stay in sync.
+ */
+
+:root {
+  /* ===========================================
+     COLOR — Core palette
+     =========================================== */
+  --aap-bg:            #faf9f6;              /* Cream canvas           */
+  --aap-bg-muted:      #f2f0e8;              /* Muted cream for cards  */
+  --aap-bg-dark:       #1c1618;              /* Dark background        */
+  --aap-text:          #2a1f23;              /* Body text              */
+  --aap-text-light:    #faf9f6;              /* Text on dark surfaces  */
+  --aap-text-muted:    #7d6f74;              /* Secondary / caption    */
+  --aap-accent:        #d4883a;              /* Amber primary action   */
+  --aap-accent-hover:  #be7830;              /* Amber hover / pressed  */
+  --aap-accent-light:  rgba(212, 136, 58, 0.1); /* Amber tint bg      */
+  --aap-link:          #2a1f23;              /* Inline link text       */
+  --aap-link-hover:    #d4883a;              /* Inline link hover      */
+  --aap-border:        #e6e2d9;              /* Default border         */
+  --aap-overlay:       rgba(28, 22, 24, 0.6); /* Modal / drawer scrim */
+
+  /* ===========================================
+     COLOR — Status
+     =========================================== */
+  --aap-success:       #2d8a4e;
+  --aap-success-light: rgba(45, 138, 78, 0.10);
+  --aap-error:         #c53030;
+  --aap-error-light:   rgba(197, 48, 48, 0.10);
+  --aap-warning:       #d69e2e;
+  --aap-warning-light: rgba(214, 158, 46, 0.10);
+  --aap-info:          #3182ce;
+  --aap-info-light:    rgba(49, 130, 206, 0.10);
+
+  /* ===========================================
+     TYPOGRAPHY
+     =========================================== */
+  --aap-font-heading:  'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --aap-font-body:     'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Type scale (major-second ~1.125) */
+  --aap-text-xs:   0.75rem;   /* 12 px */
+  --aap-text-sm:   0.875rem;  /* 14 px */
+  --aap-text-base: 1rem;      /* 16 px */
+  --aap-text-lg:   1.125rem;  /* 18 px */
+  --aap-text-xl:   1.25rem;   /* 20 px */
+  --aap-text-2xl:  1.5rem;    /* 24 px */
+  --aap-text-3xl:  2rem;      /* 32 px */
+
+  /* Line heights */
+  --aap-leading-tight:  1.25;
+  --aap-leading-normal: 1.5;
+  --aap-leading-loose:  1.75;
+
+  /* Font weights */
+  --aap-weight-light:    300;
+  --aap-weight-normal:   400;
+  --aap-weight-medium:   500;
+  --aap-weight-semibold: 600;
+  --aap-weight-bold:     700;
+
+  /* ===========================================
+     SPACING — 4 px base grid
+     =========================================== */
+  --aap-space-0:   0;
+  --aap-space-1:   0.25rem;   /*  4 px */
+  --aap-space-2:   0.5rem;    /*  8 px */
+  --aap-space-3:   0.75rem;   /* 12 px */
+  --aap-space-4:   1rem;      /* 16 px */
+  --aap-space-5:   1.25rem;   /* 20 px */
+  --aap-space-6:   1.5rem;    /* 24 px */
+  --aap-space-8:   2rem;      /* 32 px */
+  --aap-space-10:  2.5rem;    /* 40 px */
+  --aap-space-12:  3rem;      /* 48 px */
+  --aap-space-16:  4rem;      /* 64 px */
+  --aap-space-20:  5rem;      /* 80 px */
+  --aap-space-24:  6rem;      /* 96 px */
+
+  /* Named aliases (backward compat with site.css) */
+  --aap-space-xs:  var(--aap-space-2);   /*  8 px */
+  --aap-space-sm:  var(--aap-space-4);   /* 16 px */
+  --aap-space-md:  var(--aap-space-6);   /* 24 px */
+  --aap-space-lg:  var(--aap-space-8);   /* 32 px */
+  --aap-space-xl:  var(--aap-space-12);  /* 48 px */
+  --aap-space-2xl: var(--aap-space-16);  /* 64 px */
+  --aap-space-3xl: var(--aap-space-24);  /* 96 px */
+
+  /* ===========================================
+     LAYOUT
+     =========================================== */
+  --aap-max-width:     1200px;
+  --aap-max-width-sm:   640px;
+  --aap-max-width-md:   768px;
+  --aap-max-width-lg:  1024px;
+  --aap-header-height:  44px;
+
+  /* ===========================================
+     BORDER RADIUS
+     =========================================== */
+  --aap-radius-sm:   4px;
+  --aap-radius:      8px;
+  --aap-radius-lg:  16px;
+  --aap-radius-xl:  24px;
+  --aap-radius-full: 9999px;
+
+  /* ===========================================
+     SHADOWS — warm tint (42, 31, 35)
+     =========================================== */
+  --aap-shadow-sm: 0 1px 2px rgba(42, 31, 35, 0.04);
+  --aap-shadow:    0 2px 8px rgba(42, 31, 35, 0.06),
+                   0 1px 2px rgba(42, 31, 35, 0.04);
+  --aap-shadow-lg: 0 8px 24px rgba(42, 31, 35, 0.08),
+                   0 2px 6px rgba(42, 31, 35, 0.04);
+  --aap-shadow-xl: 0 16px 48px rgba(42, 31, 35, 0.12),
+                   0 4px 12px rgba(42, 31, 35, 0.06);
+
+  /* ===========================================
+     MOTION / TRANSITIONS
+     =========================================== */
+  --aap-duration-fast:  150ms;
+  --aap-duration:       200ms;
+  --aap-duration-slow:  400ms;
+  --aap-ease:           ease;
+  --aap-ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --aap-transition:     var(--aap-duration) var(--aap-ease);
+  --aap-transition-slow: var(--aap-duration-slow) var(--aap-ease-out);
+
+  /* ===========================================
+     Z-INDEX
+     =========================================== */
+  --aap-z-dropdown:  100;
+  --aap-z-sticky:    200;
+  --aap-z-overlay:   300;
+  --aap-z-modal:     400;
+  --aap-z-toast:     500;
+}

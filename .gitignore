@@ -1,0 +1,56 @@
+# Private credentials and operator directives
+CLAUDE.local.md
+docs/CREDENTIALS.md
+HOMEAUTOMATION.local.md
+.mcp.json
+.machine-name
+# SSH password files (use ~/.ssh/alpacapps-*.pass outside repo; ignore any local pass files)
+.sshpass-*
+*.pass
+
+# Nested repo clone (used by bug-fixer on droplet)
+alpacapps/
+.claude/worktrees/
+
+# Root node_modules (Tailwind CSS build tools)
+node_modules/
+
+# OS files
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+.idea/
+.vscode/
+# Mobile app (Capacitor)
+mobile/node_modules/
+mobile/www/
+mobile/build/
+mobile/ios/App/Pods/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/build/
+mobile/android/local.properties
+
+# Signing keys (never commit)
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+mobile/fastlane/google-play-key.json
+
+# Fastlane temp files
+mobile/fastlane/report.xml
+mobile/fastlane/screenshots/
+mobile/fastlane/test_output/
+
+# Dev/testing
+dev/testing/node_modules/
+
+# PAI Discord bot
+pai-discord/node_modules/
+
+# Gmail OAuth credentials (secret)
+scripts/gmail-credentials.json
+.gstack/
