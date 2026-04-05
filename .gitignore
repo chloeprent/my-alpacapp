@@ -1,3 +1,6 @@
+# Setup wizard state (local only)
+.setup-state.json
+
 # Private credentials and operator directives
 CLAUDE.local.md
 docs/CREDENTIALS.md

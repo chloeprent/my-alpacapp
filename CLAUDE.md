@@ -3,7 +3,7 @@
 This is **alpacapps-infra**. If the user mentions **finleg**, **portsie**, or **sponic** and the request doesn't match this project, **STOP** and warn:
 > "You mentioned **{keyword}** but this session is in **alpacapps-infra**. Did you mean to run this in the other project?"
 
-# [Your Project Name] — Project Directives
+# my-alpacapp — Project Directives
 
 > **On-demand docs — load when the task matches:**
 > - `docs/CREDENTIALS.md` — **load for:** SQL queries, deploying functions, SSH, API calls
@@ -41,7 +41,7 @@ This is **alpacapps-infra**. If the user mentions **finleg**, **portsie**, or **
 ## Quick Refs
 
 - **Tech:** Vanilla HTML/JS + Tailwind v4 | Supabase | Cloudflare Pages
-- **Live:** https://YOUR_PROJECT.pages.dev/ (or custom domain)
+- **Live:** https://my-alpacapp.pages.dev/ (or custom domain — update once Cloudflare is connected)
 - **Architecture:** Browser → Cloudflare Pages → Supabase (no server-side code)
 - **Template repo:** https://github.com/rsonnad/alpacapps-infra
 - **Upgrade guide:** `infra/infra-upgrade-guide.md`
