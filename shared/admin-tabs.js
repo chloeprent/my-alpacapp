@@ -19,6 +19,7 @@ export const ALL_ADMIN_TABS = [
   { id: 'phyprop', label: 'PhyProp', href: 'phyprop.html', permission: 'view_spaces', section: 'staff' },
   { id: 'inventory', label: 'Inventory', href: 'inventory.html', permission: 'view_inventory', section: 'staff' },
   { id: 'appdev', label: 'App Dev', href: 'appdev.html', permission: 'view_appdev', section: 'staff' },
+  { id: 'crm', label: 'CRM', href: 'crm.html', permission: 'view_crm', section: 'staff' },
   // Admin section
   { id: 'users', label: 'Users', href: 'users.html', permission: 'view_users', section: 'admin' },
   { id: 'passwords', label: 'Passwords', href: 'passwords.html', permission: 'view_passwords', section: 'admin' },

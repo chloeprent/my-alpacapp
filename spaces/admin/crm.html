@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>CRM - Swoon Admin</title>
+  <link rel="icon" type="image/png" href="../../favicon.png">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <script>try{var c=localStorage.getItem("your-project-cached-auth");if(c&&JSON.parse(c).appUser)document.documentElement.dataset.cachedAuth="1"}catch(e){}</script>
+  <style>.hidden{display:none!important}[data-cached-auth] #loadingOverlay{opacity:0!important;pointer-events:none!important;visibility:hidden!important}[data-cached-auth] #appContent.hidden{display:block!important}#loadingOverlay{position:fixed;inset:0;background:#f6f5f0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .16s ease-out}.loading-overlay__logo{display:flex;align-items:center;gap:.75rem;min-height:40px}.loading-overlay__icon{height:40px;width:auto;max-width:none}.loading-overlay__wordmark{height:28px;width:auto;max-width:none}</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="manage-shared.css?v=1">
+  <link rel="stylesheet" href="crm.css?v=1">
+  <link rel="stylesheet" href="../../styles/site.css">
+  <link rel="stylesheet" href="../../styles/tailwind.out.css">
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-overlay__logo">
+      <img src="https://ohcdjvbveokyyilceenf.supabase.co/storage/v1/object/public/housephotos/logos/logo-black-transparent.png" alt="" class="loading-overlay__icon" width="28" height="40" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 21 30%22%3E%3C/svg%3E'">
+      <img src="https://ohcdjvbveokyyilceenf.supabase.co/storage/v1/object/public/housephotos/logos/wordmark-black-transparent.png" alt="Swoon" class="loading-overlay__wordmark" width="28" height="28" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 28%22%3E%3Ctext x=%220%22 y=%2220%22 font-size=%2216%22 font-family=%22sans-serif%22%3ESwoon%3C/text%3E%3C/svg%3E'">
+    </div>
+    <div class="spinner spinner--sm"></div>
+  </div>
+
+  <div id="unauthorizedOverlay" class="loading-overlay hidden"></div>
+
+  <div id="appContent" class="hidden">
+    <div id="siteHeader"></div>
+    <span data-site-version style="display:none">v260405.03 7:39p</span>
+
+    <div class="context-switcher hidden" id="contextSwitcher">
+      <a href="/residents/" class="context-switcher-btn">Resident</a>
+      <a class="context-switcher-btn active">Staff</a>
+    </div>
+
+    <div class="manage-tabs"></div>
+
+    <div class="manage-container">
+      <div class="manage-panel active">
+
+        <!-- ── Stats Bar ── -->
+        <div class="crm-stats" id="crmStats">
+          <div class="crm-stat">
+            <span class="crm-stat-number" id="statTotal">0</span>
+            <span class="crm-stat-label">Total Leads</span>
+          </div>
+          <div class="crm-stat">
+            <span class="crm-stat-number" id="statConversation">0</span>
+            <span class="crm-stat-label">In Conversation</span>
+          </div>
+          <div class="crm-stat">
+            <span class="crm-stat-number" id="statCallsBooked">0</span>
+            <span class="crm-stat-label">Calls Booked</span>
+          </div>
+          <div class="crm-stat">
+            <span class="crm-stat-number" id="statClients">0</span>
+            <span class="crm-stat-label">Clients</span>
+          </div>
+        </div>
+
+        <!-- ── Follow-up Alert ── -->
+        <div class="crm-follow-ups hidden" id="followUpAlert">
+          <div class="crm-follow-up-header">
+            <span>📋 Follow-ups due</span>
+            <span class="crm-follow-up-count" id="followUpCount">0</span>
+          </div>
+          <div id="followUpList" class="crm-follow-up-list"></div>
+        </div>
+
+        <!-- ── Toolbar: Search + Add ── -->
+        <div class="crm-toolbar">
+          <input type="text" id="crmSearch" placeholder="Search by name or @username..." class="form-input crm-search">
+          <div class="crm-toolbar-actions">
+            <select id="crmFilterStage" class="form-input crm-filter">
+              <option value="">All stages</option>
+              <option value="new_lead">New Lead</option>
+              <option value="lead_magnet_sent">Lead Magnet Sent</option>
+              <option value="in_conversation">In Conversation</option>
+              <option value="call_booked">Call Booked</option>
+              <option value="client">Client</option>
+              <option value="cold">Cold</option>
+            </select>
+            <button class="btn-primary" id="addContactBtn">+ Add Contact</button>
+          </div>
+        </div>
+
+        <!-- ── Pipeline View (Kanban) ── -->
+        <div class="crm-pipeline" id="crmPipeline">
+          <div class="pipeline-column" data-stage="new_lead">
+            <div class="pipeline-header">
+              <h3>🆕 New Lead</h3>
+              <span class="pipeline-count" id="countNewLead">0</span>
+            </div>
+            <div class="pipeline-cards" id="cardsNewLead"></div>
+          </div>
+          <div class="pipeline-column" data-stage="lead_magnet_sent">
+            <div class="pipeline-header">
+              <h3>🧲 Lead Magnet</h3>
+              <span class="pipeline-count" id="countLeadMagnet">0</span>
+            </div>
+            <div class="pipeline-cards" id="cardsLeadMagnet"></div>
+          </div>
+          <div class="pipeline-column" data-stage="in_conversation">
+            <div class="pipeline-header">
+              <h3>💬 In Conversation</h3>
+              <span class="pipeline-count" id="countConversation">0</span>
+            </div>
+            <div class="pipeline-cards" id="cardsConversation"></div>
+          </div>
+          <div class="pipeline-column" data-stage="call_booked">
+            <div class="pipeline-header">
+              <h3>📞 Call Booked</h3>
+              <span class="pipeline-count" id="countCallBooked">0</span>
+            </div>
+            <div class="pipeline-cards" id="cardsCallBooked"></div>
+          </div>
+          <div class="pipeline-column" data-stage="client">
+            <div class="pipeline-header">
+              <h3>✅ Client</h3>
+              <span class="pipeline-count" id="countClient">0</span>
+            </div>
+            <div class="pipeline-cards" id="cardsClient"></div>
+          </div>
+        </div>
+
+        <!-- ── Cold/Inactive (collapsible) ── -->
+        <details class="section" style="margin-top: 1.5rem;">
+          <summary class="section-header" style="cursor: pointer;">
+            <h2>❄️ Cold / Not Now</h2>
+            <span id="countCold" class="text-muted">0</span>
+          </summary>
+          <div class="section-body">
+            <div id="coldList" class="crm-cold-list"></div>
+          </div>
+        </details>
+
+        <!-- ── List View (below pipeline) ── -->
+        <div class="section" style="margin-top: 1.5rem;">
+          <div class="section-header">
+            <h2>All Contacts</h2>
+            <span id="contactListCount" class="text-muted">0</span>
+          </div>
+          <div class="section-body" style="overflow-x: auto;">
+            <table class="data-table" id="contactsTable" style="width: 100%; font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Contact</th>
+                  <th>Stage</th>
+                  <th>Source</th>
+                  <th>Lead Magnet</th>
+                  <th>Last Activity</th>
+                  <th>Follow-up</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="contactsTableBody">
+                <tr><td colspan="7" style="text-align:center; color: #999; padding: 1.5rem;">Loading contacts...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- ADD / EDIT CONTACT MODAL -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="contactModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="contactModalTitle">Add Contact</h2>
+        <button class="modal-close" id="closeContactModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="contactForm">
+          <input type="hidden" id="contactId">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="contactIg">Instagram Username</label>
+              <input type="text" id="contactIg" placeholder="@username">
+            </div>
+            <div class="form-group">
+              <label for="contactName">Full Name</label>
+              <input type="text" id="contactName" placeholder="Their name">
+            </div>
+            <div class="form-group">
+              <label for="contactEmail">Email</label>
+              <input type="email" id="contactEmail" placeholder="email@example.com">
+            </div>
+            <div class="form-group">
+              <label for="contactPhone">Phone</label>
+              <input type="tel" id="contactPhone" placeholder="(555) 123-4567">
+            </div>
+            <div class="form-group">
+              <label for="contactStage">Stage</label>
+              <select id="contactStage">
+                <option value="new_lead">New Lead</option>
+                <option value="lead_magnet_sent">Lead Magnet Sent</option>
+                <option value="in_conversation">In Conversation</option>
+                <option value="call_booked">Call Booked</option>
+                <option value="client">Client</option>
+                <option value="cold">Cold / Not Now</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contactSource">Source</label>
+              <select id="contactSource">
+                <option value="instagram">Instagram</option>
+                <option value="manychat">ManyChat</option>
+                <option value="reddit">Reddit</option>
+                <option value="referral">Referral</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contactKeyword">Keyword Used</label>
+              <input type="text" id="contactKeyword" placeholder="e.g. GUIDE">
+            </div>
+            <div class="form-group">
+              <label for="contactFollowUp">Next Follow-up</label>
+              <input type="date" id="contactFollowUp">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top: 1rem;">
+            <label for="contactNotes">Notes</label>
+            <textarea id="contactNotes" rows="3" placeholder="What's their situation? What did you talk about?"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelContactBtn">Cancel</button>
+        <button type="button" class="btn-primary" id="saveContactBtn">Save Contact</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- CONTACT DETAIL MODAL -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="detailModal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h2 id="detailTitle">Contact Details</h2>
+        <button class="modal-close" id="closeDetailModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Contact info summary -->
+        <div class="crm-detail-info" id="detailInfo"></div>
+
+        <!-- Stage move buttons -->
+        <div class="crm-detail-actions" id="detailStageActions"></div>
+
+        <!-- Activity log -->
+        <div style="margin-top: 1.5rem;">
+          <h3 style="margin-bottom: 0.75rem;">Activity Log</h3>
+          <div class="crm-activity-add">
+            <input type="text" id="newActivityNote" placeholder="Add a note..." class="form-input" style="flex: 1;">
+            <button class="btn-small btn-primary" id="addActivityNoteBtn">Add Note</button>
+          </div>
+          <div id="activityLog" class="crm-activity-log">
+            <p class="text-muted">Loading activity...</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="editFromDetailBtn">Edit Contact</button>
+        <button type="button" class="btn-danger" id="deleteContactBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../shared/instant-chrome.js"></script>
+  <script type="module" src="../../shared/version-info.js"></script>
+  <script src="/vendor/supabase-js-2.39.3.min.js"></script>
+  <script type="module" src="crm.js"></script>
+</body>
+</html>
