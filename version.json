@@ -1,12 +1,12 @@
 {
-  "version": "v260409.04 7:36p",
-  "release": 4,
-  "sha": "90f73e1",
-  "fullSha": "90f73e1b868fe7092b64d188415abb2602e09aae",
+  "version": "v260409.05 9:01p",
+  "release": 5,
+  "sha": "faf6231",
+  "fullSha": "faf6231b1b1e194df59699d4038111659e34a9a8",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-09T15:36:41-04:00",
-  "commits": [{"sha":"90f73e1","message":"Add trending topics content agent for weekly theme scanning (#4)","author":"chloeprent"}]
+  "pushedAt": "2026-04-09T17:01:47-04:00",
+  "commits": [{"sha":"faf6231","message":"Add ManyChat → CRM sync script for auto-importing IG leads (#5)","author":"chloeprent"}]
 }
