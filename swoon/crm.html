@@ -587,9 +587,35 @@
     });
 
     // ══════════════════════════════════════════
+    // QUICK-ADD VIA URL PARAMETER
+    // e.g. crm.html?add=@username or crm.html?add=sarah_explores
+    // ══════════════════════════════════════════
+    function checkQuickAdd() {
+      const params = new URLSearchParams(window.location.search);
+      const addUser = params.get('add');
+      if (addUser) {
+        openAddModal();
+        const clean = addUser.replace(/^@/, '');
+        document.getElementById('editIg').value = clean;
+        // Clear the URL param so refreshing doesn't re-trigger
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+
+    // ══════════════════════════════════════════
     // BOOT
     // ══════════════════════════════════════════
-    loadContacts();
+    loadContacts().then(() => checkQuickAdd());
   </script>
+
+  <!-- ══════════════════════════════════════════════════════════
+       BOOKMARKLET SETUP INSTRUCTIONS (hidden, for reference)
+       ══════════════════════════════════════════════════════════
+
+       Drag this link to your bookmarks bar:
+
+       javascript:void(function(){var u=window.location.href;if(u.includes('instagram.com/')){var m=u.match(/instagram\.com\/([^/?]+)/);if(m&&m[1]&&!['p','reel','explore','direct','stories','accounts'].includes(m[1])){window.open('https://chloeprent.github.io/my-alpacapp/swoon/crm.html?add='+m[1],'_blank')}}else{var n=prompt('Enter IG username:');if(n)window.open('https://chloeprent.github.io/my-alpacapp/swoon/crm.html?add='+n.replace('@',''),'_blank')}})()
+
+       ═══════════════════════════════════════════════════════ -->
 </body>
 </html>
