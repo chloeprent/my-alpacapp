@@ -1,12 +1,12 @@
 {
-  "version": "v260405.04 9:51p",
-  "release": 4,
-  "sha": "6f56a9d",
-  "fullSha": "6f56a9d716bda8fe2c87e60ab8254b9ff0847a91",
+  "version": "v260409.01 6:31p",
+  "release": 1,
+  "sha": "fbd7c9b",
+  "fullSha": "fbd7c9b3b1677f1749b280243b47e87b9183dcb2",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
-  "machine": "runnervm727z3",
-  "pushedAt": "2026-04-05T17:51:12-04:00",
-  "commits": [{"sha":"6f56a9d","message":"Add swoon.coach homepage clone","author":"Chloe Prentoulis"}]
+  "machine": "runnervm35a4x",
+  "pushedAt": "2026-04-09T14:30:54-04:00",
+  "commits": [{"sha":"fbd7c9b","message":"Add Swoon CRM pipeline and Reddit lead listener agent (#1)","author":"chloeprent"}]
 }
