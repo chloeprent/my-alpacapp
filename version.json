@@ -1,12 +1,12 @@
 {
-  "version": "v260409.01 6:31p",
-  "release": 1,
-  "sha": "fbd7c9b",
-  "fullSha": "fbd7c9b3b1677f1749b280243b47e87b9183dcb2",
+  "version": "v260409.02 6:50p",
+  "release": 2,
+  "sha": "1a0280a",
+  "fullSha": "1a0280a1b6e7fb2cc85f57903f567379ac02c877",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
-  "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-09T14:30:54-04:00",
-  "commits": [{"sha":"fbd7c9b","message":"Add Swoon CRM pipeline and Reddit lead listener agent (#1)","author":"chloeprent"}]
+  "machine": "runnervm727z3",
+  "pushedAt": "2026-04-09T14:50:29-04:00",
+  "commits": [{"sha":"1a0280a","message":"Add standalone CRM page with public anon key access (#2)","author":"chloeprent"}]
 }
