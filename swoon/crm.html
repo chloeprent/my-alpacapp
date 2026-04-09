@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swoon CRM — Lead Pipeline</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #faf8f5; color: #2d2926; line-height: 1.5; }
+
+    /* ── Header ── */
+    .header { background: #fff; border-bottom: 1px solid #e8e0d8; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+    .header h1 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: #8b6f5e; }
+    .header-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+    /* ── Buttons ── */
+    .btn { padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; border: none; cursor: pointer; transition: all 0.15s; }
+    .btn-primary { background: #8b6f5e; color: #fff; }
+    .btn-primary:hover { background: #7a6050; }
+    .btn-secondary { background: #f5f0eb; color: #5a4a3a; border: 1px solid #e8e0d8; }
+    .btn-secondary:hover { background: #ede4d7; }
+    .btn-small { padding: 0.3rem 0.65rem; font-size: 0.75rem; border-radius: 6px; }
+    .btn-danger { background: #dc3545; color: #fff; }
+    .btn-danger:hover { background: #c82333; }
+
+    /* ── Container ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+    /* ── Stats ── */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .stat-number { font-size: 2rem; font-weight: 700; color: #2d2926; line-height: 1; }
+    .stat-label { font-size: 0.7rem; color: #a09080; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.25rem; }
+
+    /* ── Follow-up Alert ── */
+    .follow-up-alert { background: #fff8e1; border: 1px solid #ffc107; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: none; }
+    .follow-up-alert.visible { display: block; }
+    .follow-up-alert h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .follow-up-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.25rem 0; cursor: pointer; }
+    .follow-up-item:hover { color: #8b6f5e; }
+
+    /* ── Toolbar ── */
+    .toolbar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+    .search-input { flex: 1; min-width: 200px; padding: 0.5rem 0.75rem; border: 1px solid #e8e0d8; border-radius: 8px; font-size: 0.85rem; background: #fff; }
+    .search-input:focus { outline: none; border-color: #8b6f5e; }
+    .filter-select { padding: 0.5rem; border: 1px solid #e8e0d8; border-radius: 8px; font-size: 0.85rem; background: #fff; }
+
+    /* ── Pipeline ── */
+    .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 2rem; }
+    .pipeline-col { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); min-height: 200px; display: flex; flex-direction: column; }
+    .pipeline-col-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #f0ebe5; }
+    .pipeline-col-header h3 { font-size: 0.8rem; font-weight: 600; }
+    .pipeline-col-count { background: #8b6f5e; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+    .pipeline-col-cards { padding: 0.5rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+
+    /* ── Cards ── */
+    .card { background: #faf8f5; border-radius: 8px; padding: 0.75rem; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+    .card:hover { background: #f5f0eb; transform: translateY(-1px); }
+    .card.overdue { border-left-color: #dc3545; }
+    .card.has-follow-up { border-left-color: #ffc107; }
+    .card-name { font-weight: 600; font-size: 0.85rem; }
+    .card-ig { font-size: 0.75rem; color: #a09080; }
+    .card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 0.35rem; font-size: 0.7rem; color: #a09080; }
+    .card-keyword { background: #ede4d7; color: #8b5a23; font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; font-weight: 500; }
+
+    /* ── Cold section ── */
+    .cold-section { background: #fff; border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+    .cold-section summary { cursor: pointer; font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; }
+    .cold-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f0ebe5; font-size: 0.85rem; cursor: pointer; }
+    .cold-item:hover { color: #8b6f5e; }
+
+    /* ── Table ── */
+    .table-section { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); overflow: hidden; }
+    .table-header { padding: 1rem 1.25rem; border-bottom: 1px solid #f0ebe5; display: flex; justify-content: space-between; align-items: center; }
+    .table-header h2 { font-size: 1rem; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    thead th { text-align: left; padding: 0.75rem 1rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #a09080; border-bottom: 1px solid #f0ebe5; }
+    tbody td { padding: 0.65rem 1rem; border-bottom: 1px solid #f8f5f0; }
+    tbody tr { cursor: pointer; transition: background 0.1s; }
+    tbody tr:hover { background: #faf8f5; }
+
+    /* ── Stage Badges ── */
+    .badge { font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
+    .badge-new_lead { background: #e3f2fd; color: #1565c0; }
+    .badge-lead_magnet_sent { background: #fff3e0; color: #e65100; }
+    .badge-in_conversation { background: #f3e5f5; color: #7b1fa2; }
+    .badge-call_booked { background: #e8f5e9; color: #2e7d32; }
+    .badge-client { background: #e8f5e9; color: #1b5e20; }
+    .badge-cold { background: #eceff1; color: #546e7a; }
+
+    /* ── Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: none; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 16px; width: 90%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f0ebe5; }
+    .modal-header h2 { font-size: 1.1rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #a09080; }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 1px solid #f0ebe5; }
+
+    /* ── Form ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.75rem; font-weight: 500; color: #5a4a3a; }
+    .form-group input, .form-group select, .form-group textarea { padding: 0.5rem 0.65rem; border: 1px solid #e8e0d8; border-radius: 8px; font-size: 0.85rem; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #8b6f5e; }
+
+    /* ── Detail modal ── */
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+    .detail-field label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: #a09080; display: block; }
+    .detail-field p { font-size: 0.9rem; font-weight: 500; margin: 0.15rem 0 0; }
+    .detail-field a { color: #8b6f5e; }
+    .stage-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; padding: 1rem 0; border-top: 1px solid #f0ebe5; border-bottom: 1px solid #f0ebe5; margin: 1rem 0; }
+    .stage-btn { font-size: 0.7rem; padding: 0.3rem 0.6rem; border-radius: 6px; border: 1px solid #e8e0d8; background: #fff; cursor: pointer; transition: all 0.15s; }
+    .stage-btn:hover { background: #ede4d7; border-color: #8b6f5e; }
+    .stage-btn.active { background: #8b6f5e; color: #fff; border-color: #8b6f5e; }
+
+    /* ── Activity ── */
+    .activity-add { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .activity-add input { flex: 1; }
+    .activity-log { max-height: 250px; overflow-y: auto; }
+    .activity-item { display: flex; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #f8f5f0; font-size: 0.85rem; }
+    .activity-icon { width: 24px; text-align: center; flex-shrink: 0; }
+    .activity-time { font-size: 0.7rem; color: #a09080; }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #2d2926; color: #fff; padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.85rem; z-index: 200; animation: slideIn 0.3s ease; }
+    .toast.success { background: #2e7d32; }
+    .toast.error { background: #c62828; }
+    @keyframes slideIn { from { transform: translateY(1rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .pipeline { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .toolbar { flex-direction: column; }
+      .container { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Swoon CRM</h1>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Contact</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card"><span class="stat-number" id="statTotal">0</span><span class="stat-label">Total Leads</span></div>
+      <div class="stat-card"><span class="stat-number" id="statConversation">0</span><span class="stat-label">In Conversation</span></div>
+      <div class="stat-card"><span class="stat-number" id="statCalls">0</span><span class="stat-label">Calls Booked</span></div>
+      <div class="stat-card"><span class="stat-number" id="statClients">0</span><span class="stat-label">Clients</span></div>
+    </div>
+
+    <!-- Follow-up Alert -->
+    <div class="follow-up-alert" id="followUpAlert">
+      <h3>📋 Follow-ups due today</h3>
+      <div id="followUpList"></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <input type="text" class="search-input" id="searchInput" placeholder="Search by name or @username...">
+      <select class="filter-select" id="filterStage">
+        <option value="">All stages</option>
+        <option value="new_lead">New Lead</option>
+        <option value="lead_magnet_sent">Lead Magnet Sent</option>
+        <option value="in_conversation">In Conversation</option>
+        <option value="call_booked">Call Booked</option>
+        <option value="client">Client</option>
+        <option value="cold">Cold</option>
+      </select>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="pipeline" id="pipeline">
+      <div class="pipeline-col" data-stage="new_lead">
+        <div class="pipeline-col-header"><h3>🆕 New Lead</h3><span class="pipeline-col-count" id="countNewLead">0</span></div>
+        <div class="pipeline-col-cards" id="cardsNewLead"></div>
+      </div>
+      <div class="pipeline-col" data-stage="lead_magnet_sent">
+        <div class="pipeline-col-header"><h3>🧲 Lead Magnet</h3><span class="pipeline-col-count" id="countLeadMagnet">0</span></div>
+        <div class="pipeline-col-cards" id="cardsLeadMagnet"></div>
+      </div>
+      <div class="pipeline-col" data-stage="in_conversation">
+        <div class="pipeline-col-header"><h3>💬 Conversation</h3><span class="pipeline-col-count" id="countConversation">0</span></div>
+        <div class="pipeline-col-cards" id="cardsConversation"></div>
+      </div>
+      <div class="pipeline-col" data-stage="call_booked">
+        <div class="pipeline-col-header"><h3>📞 Call Booked</h3><span class="pipeline-col-count" id="countCallBooked">0</span></div>
+        <div class="pipeline-col-cards" id="cardsCallBooked"></div>
+      </div>
+      <div class="pipeline-col" data-stage="client">
+        <div class="pipeline-col-header"><h3>✅ Client</h3><span class="pipeline-col-count" id="countClient">0</span></div>
+        <div class="pipeline-col-cards" id="cardsClient"></div>
+      </div>
+    </div>
+
+    <!-- Cold -->
+    <details class="cold-section">
+      <summary>❄️ Cold / Not Now <span id="countCold" style="color:#a09080; margin-left:0.5rem;">0</span></summary>
+      <div id="coldList" style="margin-top: 0.75rem;"></div>
+    </details>
+
+    <!-- All Contacts Table -->
+    <div class="table-section" style="margin-top: 1.5rem;">
+      <div class="table-header">
+        <h2>All Contacts</h2>
+        <span id="tableCount" style="font-size: 0.8rem; color: #a09080;">0</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr><th>Contact</th><th>Stage</th><th>Source</th><th>Magnet</th><th>Last Activity</th><th>Follow-up</th><th></th></tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="7" style="text-align:center; color:#a09080; padding:2rem;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ADD / EDIT MODAL ═══ -->
+  <div class="modal-overlay" id="editOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="editTitle">Add Contact</h2>
+        <button class="modal-close" onclick="closeModal('editOverlay')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+        <div class="form-grid">
+          <div class="form-group"><label>Instagram Username</label><input type="text" id="editIg" placeholder="@username"></div>
+          <div class="form-group"><label>Full Name</label><input type="text" id="editName" placeholder="Their name"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="editEmail" placeholder="email@example.com"></div>
+          <div class="form-group"><label>Phone</label><input type="tel" id="editPhone" placeholder="(555) 123-4567"></div>
+          <div class="form-group"><label>Stage</label>
+            <select id="editStage">
+              <option value="new_lead">New Lead</option>
+              <option value="lead_magnet_sent">Lead Magnet Sent</option>
+              <option value="in_conversation">In Conversation</option>
+              <option value="call_booked">Call Booked</option>
+              <option value="client">Client</option>
+              <option value="cold">Cold / Not Now</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Source</label>
+            <select id="editSource">
+              <option value="instagram">Instagram</option>
+              <option value="manychat">ManyChat</option>
+              <option value="reddit">Reddit</option>
+              <option value="referral">Referral</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Keyword Used</label><input type="text" id="editKeyword" placeholder="e.g. GUIDE"></div>
+          <div class="form-group"><label>Next Follow-up</label><input type="date" id="editFollowUp"></div>
+          <div class="form-group full-width"><label>Notes</label><textarea id="editNotes" rows="3" placeholder="What's their situation? What did you talk about?"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('editOverlay')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveContact()">Save Contact</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DETAIL MODAL ═══ -->
+  <div class="modal-overlay" id="detailOverlay">
+    <div class="modal" style="max-width: 620px;">
+      <div class="modal-header">
+        <h2 id="detailTitle">Contact</h2>
+        <button class="modal-close" onclick="closeModal('detailOverlay')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid" id="detailGrid"></div>
+        <div class="stage-actions" id="stageActions"></div>
+        <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Activity Log</h3>
+        <div class="activity-add">
+          <input type="text" id="noteInput" placeholder="Add a note..." style="padding:0.4rem 0.65rem; border:1px solid #e8e0d8; border-radius:8px; font-size:0.85rem;">
+          <button class="btn btn-primary btn-small" onclick="addNote()">Add</button>
+        </div>
+        <div class="activity-log" id="activityLog"><p style="color:#a09080;">Loading...</p></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="editFromDetail()">Edit</button>
+        <button class="btn btn-danger btn-small" onclick="deleteContact()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════
+    // SUPABASE CONNECTION
+    // ══════════════════════════════════════════
+    const SUPABASE_URL = 'https://ohcdjvbveokyyilceenf.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_9B3Tm3lraveihngQd5olXQ_-Jw6B1bg';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ══════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════
+    let contacts = [];
+    let currentContact = null;
+
+    const STAGES = {
+      new_lead:         { label: 'New Lead',         emoji: '🆕', cards: 'cardsNewLead',     count: 'countNewLead' },
+      lead_magnet_sent: { label: 'Lead Magnet Sent', emoji: '🧲', cards: 'cardsLeadMagnet',  count: 'countLeadMagnet' },
+      in_conversation:  { label: 'In Conversation',  emoji: '💬', cards: 'cardsConversation', count: 'countConversation' },
+      call_booked:      { label: 'Call Booked',      emoji: '📞', cards: 'cardsCallBooked',  count: 'countCallBooked' },
+      client:           { label: 'Client',           emoji: '✅', cards: 'cardsClient',      count: 'countClient' },
+      cold:             { label: 'Cold',             emoji: '❄️', cards: null,                count: 'countCold' },
+    };
+
+    const ACTIVITY_ICONS = {
+      dm_received: '📩', dm_sent: '📤', lead_magnet: '🧲', keyword_trigger: '🔑',
+      call_booked: '📞', call_completed: '✅', became_client: '🎉',
+      follow_up: '👋', stage_change: '➡️', note: '📝',
+    };
+
+    // ══════════════════════════════════════════
+    // LOAD & RENDER
+    // ══════════════════════════════════════════
+    async function loadContacts() {
+      const { data, error } = await sb.from('swoon_crm_contacts').select('*').order('last_activity_at', { ascending: false });
+      if (error) { showToast('Failed to load: ' + error.message, 'error'); return; }
+      contacts = data || [];
+      render();
+    }
+
+    function render() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const f = document.getElementById('filterStage').value;
+
+      // Clear columns
+      Object.values(STAGES).forEach(s => { if (s.cards) document.getElementById(s.cards).innerHTML = ''; });
+      document.getElementById('coldList').innerHTML = '';
+
+      const counts = {}; Object.keys(STAGES).forEach(s => counts[s] = 0);
+      let filtered = [];
+
+      for (const c of contacts) {
+        const searchable = `${c.ig_username||''} ${c.full_name||''} ${c.email||''}`.toLowerCase();
+        if (q && !searchable.includes(q)) continue;
+        if (f && c.stage !== f) continue;
+        filtered.push(c);
+        counts[c.stage] = (counts[c.stage]||0) + 1;
+
+        if (c.stage === 'cold') {
+          document.getElementById('coldList').innerHTML += coldItemHTML(c);
+        } else if (STAGES[c.stage]?.cards) {
+          document.getElementById(STAGES[c.stage].cards).innerHTML += cardHTML(c);
+        }
+      }
+
+      // Counts
+      Object.entries(STAGES).forEach(([s, cfg]) => { document.getElementById(cfg.count).textContent = counts[s]||0; });
+
+      // Stats
+      document.getElementById('statTotal').textContent = contacts.length;
+      document.getElementById('statConversation').textContent = contacts.filter(c => c.stage === 'in_conversation').length;
+      document.getElementById('statCalls').textContent = contacts.filter(c => c.stage === 'call_booked').length;
+      document.getElementById('statClients').textContent = contacts.filter(c => c.stage === 'client').length;
+
+      // Table
+      const tbody = document.getElementById('tableBody');
+      document.getElementById('tableCount').textContent = filtered.length;
+      if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#a09080;padding:2rem;">No contacts yet — click "+ Add Contact" to start</td></tr>'; return; }
+
+      tbody.innerHTML = filtered.map(c => {
+        const name = c.full_name || c.ig_username || 'Unknown';
+        const ig = c.ig_username ? '@' + c.ig_username.replace(/^@/,'') : '-';
+        const cfg = STAGES[c.stage]||{};
+        return `<tr onclick="openDetail(${c.id})">
+          <td><strong>${esc(name)}</strong><br><span style="font-size:0.75rem;color:#a09080;">${esc(ig)}</span></td>
+          <td><span class="badge badge-${c.stage}">${cfg.emoji||''} ${cfg.label||c.stage}</span></td>
+          <td>${c.source||'-'}</td>
+          <td style="text-align:center">${c.lead_magnet_sent?'✅':'—'}</td>
+          <td>${timeAgo(c.last_activity_at)}</td>
+          <td>${c.next_follow_up||'—'}</td>
+          <td><button class="btn btn-secondary btn-small" onclick="event.stopPropagation();openEditModal(${c.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+
+      // Follow-ups
+      const today = new Date().toISOString().split('T')[0];
+      const due = contacts.filter(c => c.next_follow_up && c.next_follow_up <= today && c.stage !== 'client' && c.stage !== 'cold');
+      const alertEl = document.getElementById('followUpAlert');
+      if (due.length) {
+        alertEl.classList.add('visible');
+        document.getElementById('followUpList').innerHTML = due.map(c => {
+          const name = c.full_name || c.ig_username || 'Unknown';
+          return `<div class="follow-up-item" onclick="openDetail(${c.id})"><span>${STAGES[c.stage]?.emoji||''} ${esc(name)}</span><span style="color:#a09080">${c.next_follow_up}</span></div>`;
+        }).join('');
+      } else { alertEl.classList.remove('visible'); }
+    }
+
+    function cardHTML(c) {
+      const name = c.full_name || c.ig_username || 'Unknown';
+      const ig = c.ig_username ? '@' + c.ig_username.replace(/^@/,'') : '';
+      const today = new Date().toISOString().split('T')[0];
+      const cls = c.next_follow_up && c.next_follow_up < today ? 'overdue' : c.next_follow_up ? 'has-follow-up' : '';
+      const kw = c.keyword_used ? `<span class="card-keyword">${esc(c.keyword_used)}</span>` : '';
+      return `<div class="card ${cls}" onclick="openDetail(${c.id})"><div class="card-name">${esc(name)}</div>${ig?`<div class="card-ig">${esc(ig)}</div>`:''}<div class="card-meta"><span>${timeAgo(c.last_activity_at)}</span>${kw}</div></div>`;
+    }
+
+    function coldItemHTML(c) {
+      const name = c.full_name || c.ig_username || 'Unknown';
+      return `<div class="cold-item" onclick="openDetail(${c.id})"><span>${esc(name)}</span><span style="color:#a09080">${timeAgo(c.last_activity_at)}</span></div>`;
+    }
+
+    // ══════════════════════════════════════════
+    // ADD / EDIT
+    // ══════════════════════════════════════════
+    function openAddModal() {
+      document.getElementById('editTitle').textContent = 'Add Contact';
+      document.getElementById('editId').value = '';
+      ['editIg','editName','editEmail','editPhone','editKeyword','editFollowUp','editNotes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('editStage').value = 'new_lead';
+      document.getElementById('editSource').value = 'instagram';
+      document.getElementById('editOverlay').classList.add('open');
+    }
+
+    function openEditModal(id) {
+      const c = contacts.find(x => x.id === id); if (!c) return;
+      document.getElementById('editTitle').textContent = 'Edit Contact';
+      document.getElementById('editId').value = c.id;
+      document.getElementById('editIg').value = c.ig_username || '';
+      document.getElementById('editName').value = c.full_name || '';
+      document.getElementById('editEmail').value = c.email || '';
+      document.getElementById('editPhone').value = c.phone || '';
+      document.getElementById('editStage').value = c.stage;
+      document.getElementById('editSource').value = c.source || 'instagram';
+      document.getElementById('editKeyword').value = c.keyword_used || '';
+      document.getElementById('editFollowUp').value = c.next_follow_up || '';
+      document.getElementById('editNotes').value = c.notes || '';
+      document.getElementById('editOverlay').classList.add('open');
+    }
+
+    async function saveContact() {
+      const id = document.getElementById('editId').value;
+      const data = {
+        ig_username: document.getElementById('editIg').value.trim() || null,
+        full_name: document.getElementById('editName').value.trim() || null,
+        email: document.getElementById('editEmail').value.trim() || null,
+        phone: document.getElementById('editPhone').value.trim() || null,
+        stage: document.getElementById('editStage').value,
+        source: document.getElementById('editSource').value,
+        keyword_used: document.getElementById('editKeyword').value.trim() || null,
+        next_follow_up: document.getElementById('editFollowUp').value || null,
+        notes: document.getElementById('editNotes').value.trim() || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      try {
+        if (id) {
+          const { error } = await sb.from('swoon_crm_contacts').update(data).eq('id', parseInt(id));
+          if (error) throw error;
+          showToast('Contact updated', 'success');
+        } else {
+          data.last_activity_at = new Date().toISOString();
+          const { data: created, error } = await sb.from('swoon_crm_contacts').insert([data]).select().single();
+          if (error) throw error;
+          await sb.from('swoon_crm_activity').insert({ contact_id: created.id, activity_type: 'note', description: 'Added to CRM' });
+          showToast('Contact added!', 'success');
+        }
+        closeModal('editOverlay');
+        await loadContacts();
+      } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    // ══════════════════════════════════════════
+    // DETAIL
+    // ══════════════════════════════════════════
+    async function openDetail(id) {
+      const c = contacts.find(x => x.id === id); if (!c) return;
+      currentContact = c;
+      const cfg = STAGES[c.stage]||{};
+
+      document.getElementById('detailTitle').textContent = `${cfg.emoji||''} ${c.full_name || c.ig_username || 'Unknown'}`;
+
+      const igLink = c.ig_username ? `<a href="https://instagram.com/${c.ig_username.replace(/^@/,'')}" target="_blank">@${c.ig_username.replace(/^@/,'')}</a>` : '—';
+
+      document.getElementById('detailGrid').innerHTML = `
+        <div class="detail-field"><label>Instagram</label><p>${igLink}</p></div>
+        <div class="detail-field"><label>Name</label><p>${esc(c.full_name||'—')}</p></div>
+        <div class="detail-field"><label>Email</label><p>${esc(c.email||'—')}</p></div>
+        <div class="detail-field"><label>Phone</label><p>${esc(c.phone||'—')}</p></div>
+        <div class="detail-field"><label>Stage</label><p><span class="badge badge-${c.stage}">${cfg.label}</span></p></div>
+        <div class="detail-field"><label>Source</label><p>${esc(c.source||'—')}</p></div>
+        <div class="detail-field"><label>Keyword</label><p>${esc(c.keyword_used||'—')}</p></div>
+        <div class="detail-field"><label>Lead Magnet</label><p>${c.lead_magnet_sent?'✅ Sent':'—'}</p></div>
+        ${c.notes?`<div class="detail-field" style="grid-column:1/-1"><label>Notes</label><p>${esc(c.notes)}</p></div>`:''}
+      `;
+
+      // Stage buttons
+      document.getElementById('stageActions').innerHTML = '<span style="font-size:0.7rem;color:#a09080;margin-right:0.25rem;">Move to:</span>' +
+        Object.entries(STAGES).map(([s,cfg]) => `<button class="stage-btn ${c.stage===s?'active':''}" onclick="moveStage(${c.id},'${s}')" ${c.stage===s?'disabled':''}>${cfg.emoji} ${cfg.label}</button>`).join('');
+
+      // Activity log
+      const { data: acts } = await sb.from('swoon_crm_activity').select('*').eq('contact_id', id).order('created_at', { ascending: false });
+      const logEl = document.getElementById('activityLog');
+      if (!acts?.length) { logEl.innerHTML = '<p style="color:#a09080;font-size:0.85rem;">No activity yet</p>'; }
+      else { logEl.innerHTML = acts.map(a => `<div class="activity-item"><span class="activity-icon">${ACTIVITY_ICONS[a.activity_type]||'📌'}</span><div><p>${esc(a.description||a.activity_type)}</p><span class="activity-time">${fmtDate(a.created_at)}</span></div></div>`).join(''); }
+
+      document.getElementById('detailOverlay').classList.add('open');
+    }
+
+    async function moveStage(id, stage) {
+      const updates = { stage, last_activity_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      if (stage === 'lead_magnet_sent') { updates.lead_magnet_sent = true; updates.lead_magnet_sent_at = new Date().toISOString(); }
+      if (stage === 'call_booked') updates.call_booked_at = new Date().toISOString();
+      if (stage === 'client') updates.became_client_at = new Date().toISOString();
+      if (stage === 'cold') updates.is_warm = false;
+
+      const { error } = await sb.from('swoon_crm_contacts').update(updates).eq('id', id);
+      if (error) { showToast('Error: ' + error.message, 'error'); return; }
+      await sb.from('swoon_crm_activity').insert({ contact_id: id, activity_type: 'stage_change', description: `Moved to ${STAGES[stage]?.label||stage}` });
+      showToast(`Moved to ${STAGES[stage]?.emoji} ${STAGES[stage]?.label}`, 'success');
+      await loadContacts();
+      openDetail(id);
+    }
+
+    async function addNote() {
+      if (!currentContact) return;
+      const input = document.getElementById('noteInput');
+      const note = input.value.trim(); if (!note) return;
+      await sb.from('swoon_crm_activity').insert({ contact_id: currentContact.id, activity_type: 'note', description: note });
+      await sb.from('swoon_crm_contacts').update({ last_activity_at: new Date().toISOString() }).eq('id', currentContact.id);
+      input.value = '';
+      showToast('Note added', 'success');
+      await loadContacts();
+      openDetail(currentContact.id);
+    }
+
+    async function deleteContact() {
+      if (!currentContact) return;
+      if (!confirm('Delete this contact? This cannot be undone.')) return;
+      await sb.from('swoon_crm_activity').delete().eq('contact_id', currentContact.id);
+      await sb.from('swoon_crm_contacts').delete().eq('id', currentContact.id);
+      closeModal('detailOverlay');
+      showToast('Contact deleted', 'success');
+      await loadContacts();
+    }
+
+    function editFromDetail() {
+      if (!currentContact) return;
+      closeModal('detailOverlay');
+      openEditModal(currentContact.id);
+    }
+
+    // ══════════════════════════════════════════
+    // HELPERS
+    // ══════════════════════════════════════════
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function timeAgo(d) { if(!d) return '—'; const ms=Date.now()-new Date(d); const m=Math.floor(ms/60000),h=Math.floor(ms/3600000),dy=Math.floor(ms/86400000); if(m<1)return 'just now'; if(m<60)return m+'m'; if(h<24)return h+'h'; if(dy<7)return dy+'d'; return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+    function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
+    function showToast(msg, type='info') { const t=document.createElement('div'); t.className='toast '+(type||''); t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3500); }
+
+    // Enter key on note input
+    document.getElementById('noteInput')?.addEventListener('keydown', e => { if(e.key==='Enter'){e.preventDefault();addNote();} });
+
+    // Search & filter
+    let debounce;
+    document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(render, 250); });
+    document.getElementById('filterStage').addEventListener('change', render);
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    });
+
+    // ══════════════════════════════════════════
+    // BOOT
+    // ══════════════════════════════════════════
+    loadContacts();
+  </script>
+</body>
+</html>
