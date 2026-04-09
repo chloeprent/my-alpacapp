@@ -1,0 +1,11 @@
+# Reddit API wrapper
+praw==7.8.1
+
+# Supabase Python client
+supabase==2.13.0
+
+# Environment variable management
+python-dotenv==1.1.0
+
+# Date/time handling
+python-dateutil==2.9.0

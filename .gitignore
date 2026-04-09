@@ -1,3 +1,8 @@
+# Environment files with secrets
+.env
+lead-listener/.env
+lead-listener/venv/
+
 # Private credentials and operator directives
 CLAUDE.local.md
 docs/CREDENTIALS.md
