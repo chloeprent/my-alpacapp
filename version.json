@@ -1,12 +1,12 @@
 {
-  "version": "v260409.03 6:55p",
-  "release": 3,
-  "sha": "d06861b",
-  "fullSha": "d06861b832d8caca2df2044283b823b98a144b1f",
+  "version": "v260409.04 7:36p",
+  "release": 4,
+  "sha": "90f73e1",
+  "fullSha": "90f73e1b868fe7092b64d188415abb2602e09aae",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-09T14:55:27-04:00",
-  "commits": [{"sha":"d06861b","message":"Add Instagram quick-add bookmarklet and URL parameter to CRM (#3)","author":"chloeprent"}]
+  "pushedAt": "2026-04-09T15:36:41-04:00",
+  "commits": [{"sha":"90f73e1","message":"Add trending topics content agent for weekly theme scanning (#4)","author":"chloeprent"}]
 }
