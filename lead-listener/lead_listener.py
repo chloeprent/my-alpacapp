@@ -5,15 +5,18 @@ This script scans specific subreddits for people who are thinking about
 opening their relationship but haven't had the conversation yet.
 It saves matching posts to Supabase and sends you a daily email digest.
 
+Uses Reddit's public JSON feeds — no API key required.
+
 YOU review every post before responding. This finds — you decide.
+
+Run: python lead_listener.py
 """
 
 import os
 import re
 import time
+import requests
 from datetime import datetime, timezone, timedelta
-
-import praw
 from supabase import create_client
 from dotenv import load_dotenv
 
@@ -27,7 +30,7 @@ load_dotenv()
 # Which subreddits to scan
 SUBREDDITS = [
     "nonmonogamy",
-    "openrelationships",
+    "ethicalnonmonogamy",
     "relationship_advice",
     "sex",
     "polyamory",
@@ -47,11 +50,11 @@ KEYWORD_PATTERNS = [
     "bring up open relationship",
     "afraid to ask",
     "don't know how to tell",
-    "don't know how to tell",  # curly quote variant
+    "don\u2019t know how to tell",  # curly quote variant
     "my partner doesn't know",
-    "my partner doesn't know",  # curly quote variant
+    "my partner doesn\u2019t know",  # curly quote variant
     "haven't told my partner",
-    "haven't told my partner",  # curly quote variant
+    "haven\u2019t told my partner",  # curly quote variant
     "nervous to bring up",
     "want to suggest open",
 ]
@@ -68,27 +71,21 @@ EXCLUDE_PATTERNS = [
     r"\bcheated\b",
     r"\baffair\b",
     r"\binfidelity\b",
-    r"\bwe(?:'|')re already open\b",
+    r"\bwe(?:'|\u2019)re already open\b",
     r"\bwe opened\b",
     r"\bwe've been open\b",
-    r"\bwe(?:'|')ve been open\b",
+    r"\bwe(?:'|\u2019)ve been open\b",
     r"\balready non-monogamous\b",
     r"\balready poly\b",
 ]
+
+# User-Agent for Reddit's public JSON feeds (be polite, identify yourself)
+REDDIT_USER_AGENT = "SwoonLeadListener/1.0 (by swoon.coach; relationship coaching tool)"
 
 
 # ══════════════════════════════════════════════════════════════
 # CONNECT TO SERVICES
 # ══════════════════════════════════════════════════════════════
-
-def create_reddit_client():
-    """Connect to the Reddit API using your credentials."""
-    return praw.Reddit(
-        client_id=os.environ["REDDIT_CLIENT_ID"],
-        client_secret=os.environ["REDDIT_CLIENT_SECRET"],
-        user_agent=os.environ.get("REDDIT_USER_AGENT", "swoon-lead-listener/1.0"),
-    )
-
 
 def create_supabase_client():
     """Connect to your Supabase database."""
@@ -96,6 +93,33 @@ def create_supabase_client():
         os.environ["SUPABASE_URL"],
         os.environ["SUPABASE_SERVICE_KEY"],
     )
+
+
+def fetch_reddit_json(url):
+    """
+    Fetch a Reddit JSON endpoint (no API key needed).
+    Reddit rate-limits to ~1 request/second for unauthenticated access.
+    Returns the parsed JSON data or None on error.
+    """
+    headers = {"User-Agent": REDDIT_USER_AGENT}
+
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+
+        if response.status_code == 429:
+            print("    ⏳ Rate limited, waiting 30 seconds...")
+            time.sleep(30)
+            return fetch_reddit_json(url)
+
+        if response.status_code != 200:
+            print(f"    ✗ HTTP {response.status_code} for {url}")
+            return None
+
+        return response.json()
+
+    except Exception as e:
+        print(f"    ✗ Error fetching {url}: {e}")
+        return None
 
 
 # ══════════════════════════════════════════════════════════════
@@ -150,21 +174,21 @@ def calculate_match_score(post, matched_keywords):
     score += min(len(matched_keywords), 4)
 
     # Bonus: keyword in the title is a stronger signal
-    title_lower = post.title.lower()
+    title_lower = post["title"].lower()
     if any(kw.lower() in title_lower for kw in matched_keywords):
         score += 2
 
     # Bonus: more targeted subreddits score higher
-    high_signal_subs = ["nonmonogamy", "openrelationships"]
+    high_signal_subs = ["nonmonogamy", "ethicalnonmonogamy"]
     medium_signal_subs = ["polyamory", "relationship_advice"]
-    sub_lower = post.subreddit.display_name.lower()
+    sub_lower = post["subreddit"].lower()
     if sub_lower in high_signal_subs:
         score += 2
     elif sub_lower in medium_signal_subs:
         score += 1
 
     # Bonus: some engagement means the person is genuinely seeking help
-    if 2 <= post.num_comments <= 15:
+    if 2 <= post["num_comments"] <= 15:
         score += 1
 
     # Cap at 10
@@ -177,7 +201,7 @@ def generate_summary(post):
     This is a simple extraction — not AI-generated.
     """
     # Use the post body if available, otherwise just the title
-    text = post.selftext.strip() if post.selftext else post.title
+    text = post["body"].strip() if post["body"] else post["title"]
 
     # Take the first ~300 chars and clean up to sentence boundaries
     snippet = text[:500]
@@ -188,7 +212,7 @@ def generate_summary(post):
     elif len(sentences) == 1:
         summary = sentences[0]
     else:
-        summary = post.title
+        summary = post["title"]
 
     # Trim if too long
     if len(summary) > 300:
@@ -205,8 +229,8 @@ def generate_suggested_reply(post, matched_keywords):
     They read like a kind, knowledgeable friend who's been there.
     """
     # Different openers based on the emotional tone of the post
-    title_lower = post.title.lower()
-    text_lower = (post.selftext or "").lower()
+    title_lower = post["title"].lower()
+    text_lower = (post["body"] or "").lower()
     combined = f"{title_lower} {text_lower}"
 
     if any(w in combined for w in ["scared", "afraid", "terrified", "anxious", "nervous"]):
@@ -245,10 +269,10 @@ def generate_suggested_reply(post, matched_keywords):
 # MAIN SCANNER — Scan subreddits and save matching posts
 # ══════════════════════════════════════════════════════════════
 
-def scan_subreddits(reddit, supabase):
+def scan_subreddits(supabase):
     """
-    Go through each subreddit, look at recent posts, and save
-    any that match our keywords (and pass our filters) to Supabase.
+    Go through each subreddit, look at recent posts via public JSON feed,
+    and save any that match our keywords (and pass our filters) to Supabase.
 
     Returns a list of newly found posts.
     """
@@ -257,30 +281,53 @@ def scan_subreddits(reddit, supabase):
     for sub_name in SUBREDDITS:
         print(f"  Scanning r/{sub_name}...")
         try:
-            subreddit = reddit.subreddit(sub_name)
-            # Look at the 100 newest posts in each subreddit
-            for post in subreddit.new(limit=100):
+            # Fetch the newest 100 posts from the public JSON feed
+            url = f"https://www.reddit.com/r/{sub_name}/new.json?limit=100"
+            data = fetch_reddit_json(url)
+
+            if not data or "data" not in data:
+                print(f"    ✗ No data returned for r/{sub_name}")
+                continue
+
+            posts = data["data"].get("children", [])
+            print(f"    Checking {len(posts)} posts...")
+
+            for item in posts:
+                post = item.get("data", {})
+
+                # Extract post fields
+                post_data_raw = {
+                    "reddit_id": post.get("id", ""),
+                    "subreddit": post.get("subreddit", sub_name),
+                    "title": post.get("title", ""),
+                    "body": post.get("selftext", ""),
+                    "author": post.get("author", None),
+                    "permalink": f"https://reddit.com{post.get('permalink', '')}",
+                    "score": post.get("score", 0),
+                    "num_comments": post.get("num_comments", 0),
+                    "created_utc": post.get("created_utc", 0),
+                }
 
                 # ── Filter 1: Skip if too old ──
-                if is_too_old(post.created_utc):
+                if is_too_old(post_data_raw["created_utc"]):
                     continue
 
                 # ── Filter 2: Skip if too many comments (crowded) ──
-                if post.num_comments > MAX_COMMENTS:
+                if post_data_raw["num_comments"] > MAX_COMMENTS:
                     continue
 
                 # ── Filter 3: Check if we've already seen this post ──
                 existing = (
                     supabase.table("lead_listener_posts")
                     .select("id")
-                    .eq("reddit_id", post.id)
+                    .eq("reddit_id", post_data_raw["reddit_id"])
                     .execute()
                 )
                 if existing.data:
                     continue
 
                 # ── Filter 4: Check for matching keywords ──
-                full_text = f"{post.title} {post.selftext or ''}"
+                full_text = f"{post_data_raw['title']} {post_data_raw['body']}"
                 matched_keywords = find_matching_keywords(full_text)
                 if not matched_keywords:
                     continue
@@ -290,38 +337,38 @@ def scan_subreddits(reddit, supabase):
                     continue
 
                 # ── This post matches! Score it and save it. ──
-                match_score = calculate_match_score(post, matched_keywords)
-                summary = generate_summary(post)
-                suggested_reply = generate_suggested_reply(post, matched_keywords)
+                match_score = calculate_match_score(post_data_raw, matched_keywords)
+                summary = generate_summary(post_data_raw)
+                suggested_reply = generate_suggested_reply(post_data_raw, matched_keywords)
 
-                post_data = {
-                    "reddit_id": post.id,
-                    "subreddit": post.subreddit.display_name,
-                    "title": post.title,
-                    "body": (post.selftext or "")[:5000],  # cap at 5000 chars
-                    "author": str(post.author) if post.author else None,
-                    "permalink": f"https://reddit.com{post.permalink}",
-                    "score": post.score,
-                    "num_comments": post.num_comments,
+                save_data = {
+                    "reddit_id": post_data_raw["reddit_id"],
+                    "subreddit": post_data_raw["subreddit"],
+                    "title": post_data_raw["title"],
+                    "body": (post_data_raw["body"] or "")[:5000],  # cap at 5000 chars
+                    "author": post_data_raw["author"],
+                    "permalink": post_data_raw["permalink"],
+                    "score": post_data_raw["score"],
+                    "num_comments": post_data_raw["num_comments"],
                     "match_score": match_score,
                     "summary": summary,
                     "suggested_reply": suggested_reply,
                     "matched_keywords": matched_keywords,
                     "created_utc": datetime.fromtimestamp(
-                        post.created_utc, tz=timezone.utc
+                        post_data_raw["created_utc"], tz=timezone.utc
                     ).isoformat(),
                 }
 
                 # Save to Supabase
-                supabase.table("lead_listener_posts").insert(post_data).execute()
-                new_posts.append(post_data)
-                print(f"    ✓ Found match: {post.title[:60]}... (score: {match_score}/10)")
+                supabase.table("lead_listener_posts").insert(save_data).execute()
+                new_posts.append(save_data)
+                print(f"    ✓ Found match: {post_data_raw['title'][:60]}... (score: {match_score}/10)")
 
         except Exception as e:
             print(f"    ✗ Error scanning r/{sub_name}: {e}")
             continue
 
-        # Be polite to Reddit's API — short pause between subreddits
+        # Be polite to Reddit — 2 second pause between subreddits
         time.sleep(2)
 
     return new_posts
@@ -469,16 +516,13 @@ def main():
     print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print("=" * 50)
 
-    # Step 1: Connect to Reddit and Supabase
-    print("\n→ Connecting to Reddit...")
-    reddit = create_reddit_client()
-
-    print("→ Connecting to Supabase...")
+    # Step 1: Connect to Supabase
+    print("\n→ Connecting to Supabase...")
     supabase = create_supabase_client()
 
     # Step 2: Scan all subreddits for matching posts
     print("\n→ Scanning subreddits for leads...\n")
-    new_posts = scan_subreddits(reddit, supabase)
+    new_posts = scan_subreddits(supabase)
 
     print(f"\n→ Found {len(new_posts)} new lead{'s' if len(new_posts) != 1 else ''}")
 
