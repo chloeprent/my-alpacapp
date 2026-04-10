@@ -6,6 +6,7 @@ and trending topics over the past 7 days. It groups posts by theme,
 scores them by engagement, and sends a beautiful weekly email digest
 with content ideas Chloe can use for Instagram.
 
+Uses Reddit's public JSON feeds — no API key required.
 No AI/LLM calls — everything is keyword/pattern based.
 
 Run it:  python trending_topics.py
@@ -14,10 +15,9 @@ Run it:  python trending_topics.py
 import os
 import re
 import time
+import requests
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
-
-import praw
 from supabase import create_client
 from dotenv import load_dotenv
 
@@ -32,7 +32,7 @@ load_dotenv()
 # Same subreddits as the lead listener
 SUBREDDITS = [
     "nonmonogamy",
-    "openrelationships",
+    "ethicalnonmonogamy",
     "relationship_advice",
     "sex",
     "polyamory",
@@ -42,8 +42,11 @@ SUBREDDITS = [
 # How far back to look (7 days)
 LOOKBACK_DAYS = 7
 
-# How many posts to pull from each subreddit (hot + top combined)
-POSTS_PER_SUB = 200
+# How many posts to pull from each subreddit per category (hot/top)
+POSTS_PER_CATEGORY = 100
+
+# User-Agent for Reddit's public JSON feeds
+REDDIT_USER_AGENT = "SwoonTrendingTopics/1.0 (by swoon.coach; content planning tool)"
 
 
 # ══════════════════════════════════════════════════════════════
@@ -276,15 +279,6 @@ THEME_DEFINITIONS = [
 # CONNECT TO SERVICES
 # ══════════════════════════════════════════════════════════════
 
-def create_reddit_client():
-    """Connect to the Reddit API using your credentials from .env."""
-    return praw.Reddit(
-        client_id=os.environ["REDDIT_CLIENT_ID"],
-        client_secret=os.environ["REDDIT_CLIENT_SECRET"],
-        user_agent=os.environ.get("REDDIT_USER_AGENT", "swoon-trending-topics/1.0"),
-    )
-
-
 def create_supabase_client():
     """Connect to your Supabase database."""
     return create_client(
@@ -293,14 +287,42 @@ def create_supabase_client():
     )
 
 
+def fetch_reddit_json(url):
+    """
+    Fetch a Reddit JSON endpoint (no API key needed).
+    Reddit rate-limits to ~1 request/second for unauthenticated access.
+    Returns the parsed JSON data or None on error.
+    """
+    headers = {"User-Agent": REDDIT_USER_AGENT}
+
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+
+        if response.status_code == 429:
+            print("    ⏳ Rate limited, waiting 30 seconds...")
+            time.sleep(30)
+            return fetch_reddit_json(url)
+
+        if response.status_code != 200:
+            print(f"    ✗ HTTP {response.status_code} for {url}")
+            return None
+
+        return response.json()
+
+    except Exception as e:
+        print(f"    ✗ Error fetching {url}: {e}")
+        return None
+
+
 # ══════════════════════════════════════════════════════════════
 # POST COLLECTION — Gather posts from the last 7 days
 # ══════════════════════════════════════════════════════════════
 
-def collect_posts(reddit):
+def collect_posts():
     """
-    Pull hot and top posts from each subreddit for the past 7 days.
-    Returns a list of simplified post dicts (no PRAW objects, just data).
+    Pull hot and top posts from each subreddit for the past 7 days
+    using Reddit's public JSON feeds.
+    Returns a list of simplified post dicts.
     De-duplicates by Reddit post ID.
     """
     cutoff = datetime.now(tz=timezone.utc) - timedelta(days=LOOKBACK_DAYS)
@@ -310,43 +332,53 @@ def collect_posts(reddit):
     for sub_name in SUBREDDITS:
         print(f"  Collecting posts from r/{sub_name}...")
         try:
-            subreddit = reddit.subreddit(sub_name)
-
             # Pull from both hot and top (weekly) to get a good cross-section
-            post_sources = [
-                subreddit.hot(limit=POSTS_PER_SUB // 2),
-                subreddit.top(time_filter="week", limit=POSTS_PER_SUB // 2),
+            urls = [
+                f"https://www.reddit.com/r/{sub_name}/hot.json?limit={POSTS_PER_CATEGORY}",
+                f"https://www.reddit.com/r/{sub_name}/top.json?t=week&limit={POSTS_PER_CATEGORY}",
             ]
 
-            for source in post_sources:
-                for post in source:
+            sub_count = 0
+            for url in urls:
+                data = fetch_reddit_json(url)
+                if not data or "data" not in data:
+                    continue
+
+                for item in data["data"].get("children", []):
+                    post = item.get("data", {})
+                    post_id = post.get("id", "")
+
                     # Skip if we already saw this post
-                    if post.id in seen_ids:
+                    if post_id in seen_ids:
                         continue
-                    seen_ids.add(post.id)
+                    seen_ids.add(post_id)
 
                     # Skip if older than our lookback window
-                    post_time = datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
+                    created_utc = post.get("created_utc", 0)
+                    post_time = datetime.fromtimestamp(created_utc, tz=timezone.utc)
                     if post_time < cutoff:
                         continue
 
-                    # Save just the data we need (no PRAW objects)
+                    # Save just the data we need
                     all_posts.append({
-                        "id": post.id,
-                        "subreddit": post.subreddit.display_name,
-                        "title": post.title,
-                        "body": post.selftext or "",
-                        "score": post.score,
-                        "num_comments": post.num_comments,
-                        "permalink": f"https://reddit.com{post.permalink}",
+                        "id": post_id,
+                        "subreddit": post.get("subreddit", sub_name),
+                        "title": post.get("title", ""),
+                        "body": post.get("selftext", ""),
+                        "score": post.get("score", 0),
+                        "num_comments": post.get("num_comments", 0),
+                        "permalink": f"https://reddit.com{post.get('permalink', '')}",
                     })
+                    sub_count += 1
+
+                # Be polite — pause between requests
+                time.sleep(2)
+
+            print(f"    Found {sub_count} posts from past {LOOKBACK_DAYS} days")
 
         except Exception as e:
             print(f"    Error collecting from r/{sub_name}: {e}")
             continue
-
-        # Be polite to Reddit's API
-        time.sleep(2)
 
     print(f"\n  Collected {len(all_posts)} total posts from the past {LOOKBACK_DAYS} days.\n")
     return all_posts
@@ -354,11 +386,6 @@ def collect_posts(reddit):
 
 # ══════════════════════════════════════════════════════════════
 # THEME MATCHING — Match posts to predefined themes
-#
-# For each post, we check if any theme keywords appear in the
-# title or body. A post can match multiple themes. We track
-# which posts matched which themes, the total engagement
-# (upvotes + comments), and which subreddits contributed.
 # ══════════════════════════════════════════════════════════════
 
 def match_posts_to_themes(posts):
@@ -380,16 +407,14 @@ def match_posts_to_themes(posts):
 
     # Check every post against every theme
     for post in posts:
-        # Combine title and body for searching (lowercase for case-insensitive match)
         full_text = f"{post['title']} {post['body']}".lower()
 
         for theme in THEME_DEFINITIONS:
-            # Check if ANY keyword from this theme appears in the post
             matched = False
             for keyword in theme["keywords"]:
                 if keyword.lower() in full_text:
                     matched = True
-                    break  # one match is enough, move on
+                    break
 
             if matched:
                 result = theme_results[theme["name"]]
@@ -397,7 +422,6 @@ def match_posts_to_themes(posts):
                 result["engagement_score"] += post["score"] + post["num_comments"]
                 result["subreddits"].add(post["subreddit"])
 
-                # Keep up to 5 example post titles
                 if len(result["example_posts"]) < 5:
                     result["example_posts"].append(post["title"])
 
@@ -412,17 +436,12 @@ def rank_themes(theme_results):
     """
     Sort themes by a combined score: weighted post count + engagement.
     Only include themes that actually had matching posts.
-
-    The score formula gives weight to both frequency (how many posts)
-    and engagement (how much attention those posts got).
     """
     active_themes = [t for t in theme_results.values() if t["post_count"] > 0]
 
     for theme in active_themes:
-        # Weighted score: post count matters a lot, engagement is a bonus
         theme["rank_score"] = (theme["post_count"] * 10) + (theme["engagement_score"] // 10)
 
-    # Sort by rank score descending (most trending first)
     active_themes.sort(key=lambda t: t["rank_score"], reverse=True)
     return active_themes
 
@@ -430,7 +449,6 @@ def rank_themes(theme_results):
 def generate_theme_summary(theme):
     """
     Create a 1-sentence summary of what people are saying about this theme.
-    Uses the theme name and stats to craft a descriptive sentence.
     """
     count = theme["post_count"]
     subs = theme["subreddits"]
@@ -452,14 +470,11 @@ def generate_theme_summary(theme):
 
 
 # ══════════════════════════════════════════════════════════════
-# SAVE TO SUPABASE — Store trending topics for reference
+# SAVE TO SUPABASE
 # ══════════════════════════════════════════════════════════════
 
 def save_to_supabase(supabase, ranked_themes):
-    """
-    Save each trending topic to the swoon_trending_topics table.
-    This creates a historical record of what was trending each week.
-    """
+    """Save each trending topic to the swoon_trending_topics table."""
     now = datetime.now(tz=timezone.utc).isoformat()
     saved_count = 0
 
@@ -488,16 +503,13 @@ def save_to_supabase(supabase, ranked_themes):
 
 
 # ══════════════════════════════════════════════════════════════
-# EMAIL DIGEST — Beautiful weekly trending topics email
+# EMAIL DIGEST
 # ══════════════════════════════════════════════════════════════
 
 def build_email_html(ranked_themes):
-    """
-    Build a beautiful HTML email showing the top 10 trending topics.
-    Matches the Swoon brand: warm cream tones, Georgia font, earthy accents.
-    """
+    """Build a beautiful HTML email showing the top 10 trending topics."""
     today = datetime.now().strftime("%B %d, %Y")
-    top_themes = ranked_themes[:10]  # Only the top 10
+    top_themes = ranked_themes[:10]
 
     html = f"""
     <html>
@@ -515,8 +527,6 @@ def build_email_html(ranked_themes):
           margin: 0 auto;
           padding: 32px 24px;
         }}
-
-        /* ── Header ── */
         .header {{
           text-align: center;
           padding-bottom: 24px;
@@ -534,8 +544,6 @@ def build_email_html(ranked_themes):
           color: #a09080;
           margin: 4px 0 0 0;
         }}
-
-        /* ── Intro ── */
         .intro {{
           background: #fff;
           border-radius: 12px;
@@ -546,8 +554,6 @@ def build_email_html(ranked_themes):
           line-height: 1.6;
           color: #5a4a3a;
         }}
-
-        /* ── Topic card ── */
         .topic-card {{
           background: #fff;
           border-radius: 12px;
@@ -559,8 +565,6 @@ def build_email_html(ranked_themes):
         .topic-card.top-3 {{
           border-left-color: #8b6f5e;
         }}
-
-        /* ── Topic header row ── */
         .topic-header {{
           display: flex;
           justify-content: space-between;
@@ -588,8 +592,6 @@ def build_email_html(ranked_themes):
           font-weight: 600;
           color: #2d2926;
         }}
-
-        /* ── Stats row ── */
         .stats {{
           display: flex;
           gap: 16px;
@@ -603,16 +605,12 @@ def build_email_html(ranked_themes):
         .stat strong {{
           color: #8b6f5e;
         }}
-
-        /* ── Summary ── */
         .summary {{
           font-size: 14px;
           color: #5a4a3a;
           line-height: 1.6;
           margin-bottom: 16px;
         }}
-
-        /* ── Content ideas ── */
         .ideas {{
           background: #f5f0eb;
           border-radius: 8px;
@@ -633,8 +631,6 @@ def build_email_html(ranked_themes):
           color: #3d3530;
           line-height: 1.7;
         }}
-
-        /* ── Example posts ── */
         .examples {{
           font-size: 12px;
           color: #b0a090;
@@ -651,8 +647,6 @@ def build_email_html(ranked_themes):
           margin: 0;
           padding: 0 0 0 18px;
         }}
-
-        /* ── Footer ── */
         .footer {{
           text-align: center;
           padding-top: 24px;
@@ -693,19 +687,17 @@ def build_email_html(ranked_themes):
             card_class = "topic-card top-3" if rank <= 3 else "topic-card"
             rank_class = "topic-rank" if rank <= 3 else "topic-rank lower"
             summary = generate_theme_summary(theme)
-            sub_list = ", ".join(f"r/{s}" for s in theme["subreddits"][:4])
 
-            # Build content ideas list items
             ideas_html = ""
             for idea in theme["content_ideas"]:
                 ideas_html += f"<li>{idea}</li>\n"
 
-            # Build example posts list items (up to 3 for the email)
             examples_html = ""
             for title in theme["example_posts"][:3]:
-                # Truncate long titles
                 display_title = title[:80] + "..." if len(title) > 80 else title
                 examples_html += f"<li>{display_title}</li>\n"
+
+            sub_list = ", ".join(f"r/{s}" for s in theme["subreddits"][:4])
 
             html += f"""
         <div class="{card_class}">
@@ -754,11 +746,7 @@ def build_email_html(ranked_themes):
 
 
 def send_digest_email(ranked_themes, supabase):
-    """
-    Send the weekly trending topics digest via Gmail SMTP.
-    Uses the same Gmail credentials as the lead listener.
-    Marks all included topics as emailed so they don't repeat.
-    """
+    """Send the weekly trending topics digest via Gmail SMTP."""
     import smtplib
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
@@ -767,7 +755,6 @@ def send_digest_email(ranked_themes, supabase):
     today = datetime.now().strftime("%b %d")
     count = min(len(ranked_themes), 10)
 
-    # Build the email message
     msg = MIMEMultipart("alternative")
     msg["Subject"] = f"Swoon Trending Topics — Top {count} this week ({today})"
     msg["From"] = os.environ["GMAIL_ADDRESS"]
@@ -775,13 +762,11 @@ def send_digest_email(ranked_themes, supabase):
     msg.attach(MIMEText(html_content, "html"))
 
     try:
-        # Connect to Gmail's SMTP server and send
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(os.environ["GMAIL_ADDRESS"], os.environ["GMAIL_APP_PASSWORD"])
             server.send_message(msg)
         print(f"\n  Digest email sent via Gmail!")
 
-        # Mark all topics as emailed in Supabase so we know they were sent
         now = datetime.now(tz=timezone.utc).isoformat()
         unemailed = (
             supabase.table("swoon_trending_topics")
@@ -800,7 +785,7 @@ def send_digest_email(ranked_themes, supabase):
 
 
 # ══════════════════════════════════════════════════════════════
-# RUN IT — This is what happens when the script executes
+# RUN IT
 # ══════════════════════════════════════════════════════════════
 
 def main():
@@ -809,36 +794,33 @@ def main():
     print(f"  {datetime.now().strftime('%Y-%m-%d %H:%M')}")
     print("=" * 55)
 
-    # Step 1: Connect to Reddit and Supabase
-    print("\n-> Connecting to Reddit...")
-    reddit = create_reddit_client()
-
-    print("-> Connecting to Supabase...")
+    # Step 1: Connect to Supabase
+    print("\n-> Connecting to Supabase...")
     supabase = create_supabase_client()
 
-    # Step 2: Collect posts from the past 7 days across all subreddits
+    # Step 2: Collect posts from the past 7 days
     print("\n-> Collecting posts from the past 7 days...\n")
-    posts = collect_posts(reddit)
+    posts = collect_posts()
 
     if not posts:
-        print("  No posts collected. Check your Reddit credentials or try again later.")
+        print("  No posts collected. Reddit may be rate-limiting. Try again in a few minutes.")
         return
 
-    # Step 3: Match posts to predefined themes using keyword lists
+    # Step 3: Match posts to themes
     print("-> Matching posts to themes...\n")
     theme_results = match_posts_to_themes(posts)
 
-    # Step 4: Rank themes by frequency + engagement
+    # Step 4: Rank themes
     ranked_themes = rank_themes(theme_results)
     print(f"  Found {len(ranked_themes)} active themes this week.\n")
 
-    # Print a quick preview to the console
+    # Print a quick preview
     print("  Top themes:")
     for i, theme in enumerate(ranked_themes[:10]):
         print(f"    {i+1}. {theme['name']} ({theme['post_count']} posts, "
               f"{theme['engagement_score']:,} engagement)")
 
-    # Step 5: Save to Supabase for historical tracking
+    # Step 5: Save to Supabase
     print("\n-> Saving to Supabase...")
     save_to_supabase(supabase, ranked_themes)
 
