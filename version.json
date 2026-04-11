@@ -1,12 +1,12 @@
 {
-  "version": "v260410.01 3:58p",
+  "version": "v260411.01 2:31p",
   "release": 1,
-  "sha": "7ba7d3e",
-  "fullSha": "7ba7d3ee4c51eefd87ce7d9069f818adba599ddb",
+  "sha": "57e285c",
+  "fullSha": "57e285c81f824b5a361ebf0a13d516ec8dd40a8a",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-10T11:58:22-04:00",
-  "commits": [{"sha":"7ba7d3e","message":"Remove Reddit API dependency — use public JSON feeds instead (#6)","author":"chloeprent"}]
+  "pushedAt": "2026-04-11T10:30:56-04:00",
+  "commits": [{"sha":"57e285c","message":"Add Kit webhook for lead magnet tracking, fix ManyChat default stage (#7)","author":"chloeprent"}]
 }
