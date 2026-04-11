@@ -390,7 +390,7 @@
           <td><strong>${esc(name)}</strong><br><span style="font-size:0.75rem;color:#a09080;">${esc(ig)}</span></td>
           <td><span class="badge badge-${c.stage}">${cfg.emoji||''} ${cfg.label||c.stage}</span></td>
           <td>${c.source||'-'}</td>
-          <td style="text-align:center">${c.lead_magnet_sent?'✅':'—'}</td>
+          <td style="text-align:center">${c.lead_magnet_opened?'✅ Opened':c.lead_magnet_sent?'📨 Sent':'—'}</td>
           <td>${timeAgo(c.last_activity_at)}</td>
           <td>${c.next_follow_up||'—'}</td>
           <td><button class="btn btn-secondary btn-small" onclick="event.stopPropagation();openEditModal(${c.id})">Edit</button></td>
@@ -504,7 +504,7 @@
         <div class="detail-field"><label>Stage</label><p><span class="badge badge-${c.stage}">${cfg.label}</span></p></div>
         <div class="detail-field"><label>Source</label><p>${esc(c.source||'—')}</p></div>
         <div class="detail-field"><label>Keyword</label><p>${esc(c.keyword_used||'—')}</p></div>
-        <div class="detail-field"><label>Lead Magnet</label><p>${c.lead_magnet_sent?'✅ Sent':'—'}</p></div>
+        <div class="detail-field"><label>Lead Magnet</label><p>${c.lead_magnet_opened?'✅ Opened':''}${!c.lead_magnet_opened&&c.lead_magnet_sent?'📨 Sent (not opened yet)':''}${!c.lead_magnet_sent?'—':''}</p></div>
         ${c.notes?`<div class="detail-field" style="grid-column:1/-1"><label>Notes</label><p>${esc(c.notes)}</p></div>`:''}
       `;
 
