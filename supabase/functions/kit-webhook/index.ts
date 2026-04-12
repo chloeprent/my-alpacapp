@@ -26,29 +26,68 @@ Deno.serve(async (req) => {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
-  }
-
+  // Accept both GET and POST — Kit may use either
   try {
-    const payload = await req.json();
-    console.log('Kit webhook received:', JSON.stringify(payload));
+    let payload: any = {};
 
-    // Kit sends subscriber data in { subscriber: { ... } } format
-    const sub = payload.subscriber || payload;
+    if (req.method === 'POST') {
+      const text = await req.text();
+      console.log('Kit webhook raw body:', text);
+      try {
+        payload = JSON.parse(text);
+      } catch {
+        // Try URL-encoded form data
+        const params = new URLSearchParams(text);
+        for (const [key, value] of params) {
+          payload[key] = value;
+        }
+      }
+    } else if (req.method === 'GET') {
+      const url = new URL(req.url);
+      for (const [key, value] of url.searchParams) {
+        payload[key] = value;
+      }
+      console.log('Kit webhook GET params:', JSON.stringify(payload));
+    }
+
+    console.log('Kit webhook parsed payload:', JSON.stringify(payload));
+
+    // Kit sends data in several formats:
+    // { subscriber: { email_address, first_name, ... } }
+    // { subscribers: [{ id, email, first_name, ... }] }  (action_node format)
+    // or flat: { email_address, first_name, ... }
+    let sub = payload.subscriber || payload;
+
+    // Handle the subscribers array format (Kit action_node events)
+    if (payload.subscribers && Array.isArray(payload.subscribers) && payload.subscribers.length > 0) {
+      sub = payload.subscribers[0];
+    }
 
     const email = sub.email_address || sub.email || payload.email_address || payload.email || null;
-    const firstName = sub.first_name || payload.first_name || null;
-    const igUsername = sub.fields?.ig_username || sub.fields?.instagram || null;
+    const firstName = sub.first_name || sub.name || payload.first_name || payload.name || null;
+    const igUsername = sub.fields?.ig_username || sub.fields?.instagram
+      || payload.ig_username || payload.instagram || null;
 
+    // If no email, log the full payload to Supabase for debugging
     if (!email) {
+      const supabaseDebug = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      );
+      await supabaseDebug.from('swoon_crm_activity').insert({
+        contact_id: null,
+        activity_type: 'kit_debug',
+        description: `Kit webhook received but no email found. Keys: ${Object.keys(payload).join(', ')}`,
+        metadata: payload,
+      });
+
       return new Response(JSON.stringify({
-        error: 'No email found in Kit webhook payload',
+        success: true,
+        note: 'Logged payload for debugging — no email found',
         received_keys: Object.keys(payload),
+        sub_keys: Object.keys(sub),
       }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 

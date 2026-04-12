@@ -73,10 +73,10 @@ Deno.serve(async (req) => {
 
     // Extract email and phone
     let email = sub.email || payload.email || null;
-    if (email === '' || email === 'undefined') email = null;
+    if (!email || email === '' || email === 'undefined' || email.includes('{{')) email = null;
 
     let phone = sub.phone || payload.phone || null;
-    if (phone === '' || phone === 'undefined') phone = null;
+    if (!phone || phone === '' || phone === 'undefined' || phone.includes('{{')) phone = null;
 
     // Extract keyword
     const keyword = sub.keyword || payload.keyword || sub.trigger_keyword
@@ -110,22 +110,25 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    // Check if contact already exists (by manychat_id, ig_username, or email)
+    // Check if contact already exists
+    // Priority: ig_username first (most reliable), then manychat_id, then email.
+    // This prevents a new IG user from being matched to the wrong contact
+    // via a stale or reused ManyChat subscriber ID.
     let existing = null;
-    if (subscriberId) {
-      const { data } = await supabase
-        .from('swoon_crm_contacts')
-        .select('*')
-        .eq('manychat_id', String(subscriberId))
-        .maybeSingle();
-      existing = data;
-    }
-    if (!existing && igUsername) {
+    if (igUsername) {
       const cleanIg = igUsername.replace(/^@/, '');
       const { data } = await supabase
         .from('swoon_crm_contacts')
         .select('*')
         .eq('ig_username', cleanIg)
+        .maybeSingle();
+      existing = data;
+    }
+    if (!existing && subscriberId) {
+      const { data } = await supabase
+        .from('swoon_crm_contacts')
+        .select('*')
+        .eq('manychat_id', String(subscriberId))
         .maybeSingle();
       existing = data;
     }

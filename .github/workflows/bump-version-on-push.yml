@@ -1,7 +1,8 @@
-# Bump version on every push to main, build Tailwind, deploy to Cloudflare Pages.
+# Bump version on every push to main and build Tailwind.
+# Cloudflare Pages auto-deploys on push — no Wrangler step needed.
 # Runs only when the push is NOT our own bump commit ([skip ci]), so we avoid a loop.
 
-name: Build & Deploy to Cloudflare Pages
+name: Build & Bump Version
 
 on:
   push:
@@ -51,9 +52,3 @@ jobs:
           git commit -m "chore: bump version [skip ci]"
           git push origin main
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy . --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT || 'your-project' }}
