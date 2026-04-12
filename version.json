@@ -1,12 +1,12 @@
 {
-  "version": "v260411.01 2:31p",
+  "version": "v260412.01 6:40p",
   "release": 1,
-  "sha": "57e285c",
-  "fullSha": "57e285c81f824b5a361ebf0a13d516ec8dd40a8a",
+  "sha": "2be9349",
+  "fullSha": "2be9349f8dd1bef18984c9c524de297128b08bce",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-11T10:30:56-04:00",
-  "commits": [{"sha":"57e285c","message":"Add Kit webhook for lead magnet tracking, fix ManyChat default stage (#7)","author":"chloeprent"}]
+  "pushedAt": "2026-04-12T14:40:15-04:00",
+  "commits": [{"sha":"2be9349","message":"Remove Wrangler deploy step (Cloudflare auto-deploys on push), fix webhook contact matching","author":"Chloe Prentoulis"}]
 }
