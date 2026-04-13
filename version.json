@@ -1,12 +1,12 @@
 {
-  "version": "v260413.02 2:29a",
-  "release": 2,
-  "sha": "c0bce69",
-  "fullSha": "c0bce69387d0e42fb560b5d4b45f41df02b389dd",
+  "version": "v260413.03 2:43a",
+  "release": 3,
+  "sha": "5affa0a",
+  "fullSha": "5affa0aa7954038b75adba59abc0217eae36f8dc",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-12T22:29:31-04:00",
-  "commits": [{"sha":"c0bce69","message":"Add TidyCal API sync function (polls for bookings every 5 min)","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-12T22:43:10-04:00",
+  "commits": [{"sha":"5affa0a","message":"Fix TidyCal sync: remove broken rpc call, deploy with --no-verify-jwt for cron","author":"Chloe Prentoulis"}]
 }
