@@ -1,12 +1,12 @@
 {
-  "version": "v260413.01 2:19a",
-  "release": 1,
-  "sha": "3371fad",
-  "fullSha": "3371fadd09c506e9a9acd1c0b20cdedc86bdb3a5",
+  "version": "v260413.02 2:29a",
+  "release": 2,
+  "sha": "c0bce69",
+  "fullSha": "c0bce69387d0e42fb560b5d4b45f41df02b389dd",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-12T22:19:13-04:00",
-  "commits": [{"sha":"3371fad","message":"Add TidyCal calendar integration and follow-up sequence system for warm leads","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-12T22:29:31-04:00",
+  "commits": [{"sha":"c0bce69","message":"Add TidyCal API sync function (polls for bookings every 5 min)","author":"Chloe Prentoulis"}]
 }
