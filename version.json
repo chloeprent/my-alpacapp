@@ -1,12 +1,12 @@
 {
-  "version": "v260413.05 2:54a",
-  "release": 5,
-  "sha": "7938d4a",
-  "fullSha": "7938d4a9b5e996bb56cb42f1daa05c363a8b9962",
+  "version": "v260413.06 2:56a",
+  "release": 6,
+  "sha": "d585130",
+  "fullSha": "d585130e4db0180748f385ddb0b61571d9aa9fde",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-12T22:53:59-04:00",
-  "commits": [{"sha":"7938d4a","message":"Fix sync: move past calls to in_conversation, store sync timestamp in sequences table","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-12T22:56:40-04:00",
+  "commits": [{"sha":"d585130","message":"Fix duplicate contacts: match by name + email, auto-dedup on every sync","author":"Chloe Prentoulis"}]
 }
