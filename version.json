@@ -1,12 +1,12 @@
 {
-  "version": "v260413.03 2:43a",
-  "release": 3,
-  "sha": "5affa0a",
-  "fullSha": "5affa0aa7954038b75adba59abc0217eae36f8dc",
+  "version": "v260413.04 2:45a",
+  "release": 4,
+  "sha": "d97583d",
+  "fullSha": "d97583d7a020a1895ce8e9270a575ca84d97e379",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-12T22:43:10-04:00",
-  "commits": [{"sha":"5affa0a","message":"Fix TidyCal sync: remove broken rpc call, deploy with --no-verify-jwt for cron","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-12T22:45:29-04:00",
+  "commits": [{"sha":"d97583d","message":"Auto-complete past calls, only show future call dates in CRM cards","author":"Chloe Prentoulis"}]
 }
