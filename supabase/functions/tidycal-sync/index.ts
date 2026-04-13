@@ -50,14 +50,14 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    // ── Get last sync timestamp ──
-    const { data: config } = await supabase
-      .from('property_config')
-      .select('config')
-      .eq('id', 1)
-      .single();
+    // ── Get last sync timestamp (stored in swoon_follow_up_sequences as a config row) ──
+    const { data: syncMeta } = await supabase
+      .from('swoon_follow_up_sequences')
+      .select('description')
+      .eq('name', '_tidycal_sync_meta')
+      .maybeSingle();
 
-    const lastSyncedAt = config?.config?.tidycal_last_synced_at || null;
+    const lastSyncedAt = syncMeta?.description || null;
     const now = new Date().toISOString();
 
     // ── Fetch bookings from TidyCal ──
@@ -157,6 +157,7 @@ Deno.serve(async (req) => {
           await supabase
             .from('swoon_crm_contacts')
             .update({
+              stage: 'in_conversation',
               call_completed_at: startsAt,
               follow_up_sequence: 'post_call_nurture',
               follow_up_step: 0,
@@ -283,21 +284,15 @@ Deno.serve(async (req) => {
     }
 
     // ── Update last sync timestamp ──
-    try {
-      const { data: currentConfig } = await supabase
-        .from('property_config')
-        .select('config')
-        .eq('id', 1)
-        .single();
-
-      const updatedConfig = { ...(currentConfig?.config || {}), tidycal_last_synced_at: now };
-      await supabase
-        .from('property_config')
-        .update({ config: updatedConfig })
-        .eq('id', 1);
-    } catch (e) {
-      console.warn('Could not update last sync timestamp:', e);
-    }
+    await supabase
+      .from('swoon_follow_up_sequences')
+      .upsert({
+        name: '_tidycal_sync_meta',
+        stage: '_system',
+        description: now,
+        is_active: false,
+        steps: '[]',
+      }, { onConflict: 'name' });
 
     const summary = { created, updated, cancelled, skipped, total: bookings.length, synced_at: now };
     console.log('TidyCal sync complete:', JSON.stringify(summary));
