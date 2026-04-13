@@ -1,12 +1,12 @@
 {
-  "version": "v260413.06 2:56a",
-  "release": 6,
-  "sha": "d585130",
-  "fullSha": "d585130e4db0180748f385ddb0b61571d9aa9fde",
+  "version": "v260413.07 10:29a",
+  "release": 7,
+  "sha": "23c0fde",
+  "fullSha": "23c0fde77d97b84b133708a57acf3e5a83cce9dc",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-12T22:56:40-04:00",
-  "commits": [{"sha":"d585130","message":"Fix duplicate contacts: match by name + email, auto-dedup on every sync","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-13T06:29:38-04:00",
+  "commits": [{"sha":"23c0fde","message":"Fix sync re-processing bug, add CRM cleanup function for dedup + past call fix","author":"Chloe Prentoulis"}]
 }
