@@ -52,6 +52,9 @@ export const EMAIL_TYPES = {
   RESERVATION_SUBMITTED: 'reservation_submitted',
   RESERVATION_APPROVED: 'reservation_approved',
   RESERVATION_DENIED: 'reservation_denied',
+  // CRM follow-ups
+  CRM_FOLLOW_UP: 'crm_follow_up',
+  CRM_BOOKING_LINK: 'crm_booking_link',
 };
 
 /**

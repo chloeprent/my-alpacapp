@@ -75,6 +75,15 @@
           <div id="followUpList" class="crm-follow-up-list"></div>
         </div>
 
+        <!-- ── Upcoming Calls ── -->
+        <div class="crm-upcoming-calls hidden" id="upcomingCallsAlert">
+          <div class="crm-upcoming-calls-header">
+            <span>📞 Upcoming calls</span>
+            <span class="crm-upcoming-calls-count" id="upcomingCallsCount">0</span>
+          </div>
+          <div id="upcomingCallsList" class="crm-follow-up-list"></div>
+        </div>
+
         <!-- ── Toolbar: Search + Add ── -->
         <div class="crm-toolbar">
           <input type="text" id="crmSearch" placeholder="Search by name or @username..." class="form-input crm-search">
@@ -217,6 +226,9 @@
               <select id="contactSource">
                 <option value="instagram">Instagram</option>
                 <option value="manychat">ManyChat</option>
+                <option value="tidycal">TidyCal</option>
+                <option value="kit">Kit</option>
+                <option value="website">Website</option>
                 <option value="reddit">Reddit</option>
                 <option value="referral">Referral</option>
                 <option value="other">Other</option>
@@ -259,6 +271,42 @@
 
         <!-- Stage move buttons -->
         <div class="crm-detail-actions" id="detailStageActions"></div>
+
+        <!-- Booking Link + Follow-up Actions -->
+        <div class="crm-detail-booking" id="detailBookingSection" style="margin-top: 1.5rem;">
+          <h3 style="margin-bottom: 0.75rem;">Booking & Follow-ups</h3>
+          <div class="crm-booking-actions">
+            <div class="crm-booking-link-row">
+              <input type="text" id="bookingLinkInput" placeholder="TidyCal booking link..." class="form-input" style="flex: 1;">
+              <button class="btn-small btn-primary" id="sendBookingLinkBtn" title="Copy link + log it">Send Link</button>
+            </div>
+            <div class="crm-sequence-row" id="sequenceRow">
+              <select id="sequenceSelect" class="form-input" style="flex: 1;">
+                <option value="">Start a follow-up sequence...</option>
+              </select>
+              <button class="btn-small" id="startSequenceBtn">Start</button>
+              <button class="btn-small hidden" id="pauseSequenceBtn">Pause</button>
+              <button class="btn-small hidden" id="resumeSequenceBtn">Resume</button>
+            </div>
+          </div>
+          <!-- Current follow-up step preview -->
+          <div class="crm-current-step hidden" id="currentStepPreview">
+            <div class="crm-step-header">
+              <span class="crm-step-label" id="stepLabel">Step 1/4</span>
+              <span class="crm-step-sequence" id="stepSequenceName"></span>
+            </div>
+            <div class="crm-step-message" id="stepMessage"></div>
+            <div class="crm-step-actions">
+              <button class="btn-small btn-primary" id="markSentBtn">Mark as Sent</button>
+              <button class="btn-small" id="copyMessageBtn">Copy Message</button>
+              <button class="btn-small" id="skipStepBtn">Skip</button>
+            </div>
+          </div>
+          <!-- Call info if scheduled -->
+          <div class="crm-call-info hidden" id="callInfoSection">
+            <div class="crm-call-badge" id="callBadge"></div>
+          </div>
+        </div>
 
         <!-- Activity log -->
         <div style="margin-top: 1.5rem;">

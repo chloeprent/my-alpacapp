@@ -33,7 +33,18 @@ const ACTIVITY_ICONS = {
   follow_up: '👋',
   stage_change: '➡️',
   note: '📝',
+  tidycal_booked: '📅',
+  tidycal_cancelled: '❌',
+  tidycal_rescheduled: '🔄',
+  booking_link_sent: '🔗',
+  follow_up_email: '📧',
+  follow_up_dm: '💬',
 };
+
+// Default TidyCal booking link — update this to your actual link
+const DEFAULT_BOOKING_LINK = 'https://tidycal.com/chloeprent/30-minute-meeting';
+
+let allSequences = [];
 
 // ══════════════════════════════════════════
 // INITIALIZATION
@@ -58,7 +69,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadData() {
   try {
-    allContacts = await crmService.getContacts();
+    [allContacts, allSequences] = await Promise.all([
+      crmService.getContacts(),
+      crmService.getSequences(),
+    ]);
   } catch (error) {
     console.error('Failed to load contacts:', error);
     showToast('Failed to load contacts: ' + error.message, 'error');
@@ -74,6 +88,7 @@ function render() {
   renderPipeline();
   renderTable();
   renderFollowUps();
+  renderUpcomingCalls();
 }
 
 function renderStats() {
@@ -137,14 +152,31 @@ function renderCard(contact) {
   const timeAgo = formatTimeAgo(contact.last_activity_at);
   const keyword = contact.keyword_used ? `<span class="crm-card-keyword">${contact.keyword_used}</span>` : '';
 
+  // Show call date for call_booked contacts
+  let callInfo = '';
+  if (contact.call_scheduled_at) {
+    const callDate = new Date(contact.call_scheduled_at);
+    const isToday = callDate.toISOString().split('T')[0] === today;
+    const label = isToday ? 'Today' : callDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const time = callDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    callInfo = `<div class="crm-card-call ${isToday ? 'today' : ''}">📞 ${label} ${time}</div>`;
+  }
+
+  // Show sequence indicator
+  let seqBadge = '';
+  if (contact.follow_up_sequence && !contact.follow_up_paused) {
+    seqBadge = `<span class="crm-card-keyword" style="background:#e8f5e9; color:#2e7d32;">seq ${contact.follow_up_step + 1}</span>`;
+  }
+
   return `
     <div class="crm-card ${isOverdue ? 'overdue' : ''} ${hasFollowUp ? 'has-follow-up' : ''}"
          data-contact-id="${contact.id}" onclick="window.crmOpenDetail(${contact.id})">
       <div class="crm-card-name">${name}</div>
       ${ig ? `<div class="crm-card-ig">${ig}</div>` : ''}
+      ${callInfo}
       <div class="crm-card-meta">
         <span>${timeAgo}</span>
-        ${keyword}
+        ${keyword}${seqBadge}
       </div>
     </div>
   `;
@@ -232,6 +264,40 @@ function renderFollowUps() {
       <div class="crm-follow-up-item" onclick="window.crmOpenDetail(${c.id})">
         <span>${stageConfig.emoji || ''} ${name}</span>
         <span class="text-muted">${c.next_follow_up}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderUpcomingCalls() {
+  const now = new Date();
+  const weekFromNow = new Date(Date.now() + 7 * 86400000);
+  const upcoming = allContacts.filter(c =>
+    c.call_scheduled_at && new Date(c.call_scheduled_at) >= now && new Date(c.call_scheduled_at) <= weekFromNow
+  ).sort((a, b) => new Date(a.call_scheduled_at) - new Date(b.call_scheduled_at));
+
+  const alertEl = document.getElementById('upcomingCallsAlert');
+  const listEl = document.getElementById('upcomingCallsList');
+  const countEl = document.getElementById('upcomingCallsCount');
+
+  if (!upcoming.length) {
+    alertEl.classList.add('hidden');
+    return;
+  }
+
+  alertEl.classList.remove('hidden');
+  countEl.textContent = upcoming.length;
+  listEl.innerHTML = upcoming.map(c => {
+    const name = c.full_name || c.ig_username || 'Unknown';
+    const callDate = new Date(c.call_scheduled_at);
+    const today = new Date().toISOString().split('T')[0];
+    const isToday = callDate.toISOString().split('T')[0] === today;
+    const dayLabel = isToday ? 'Today' : callDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const time = callDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return `
+      <div class="crm-follow-up-item" onclick="window.crmOpenDetail(${c.id})">
+        <span>${isToday ? '🔴' : '📞'} ${name}</span>
+        <span class="text-muted">${dayLabel} ${time}</span>
       </div>
     `;
   }).join('');
@@ -334,6 +400,8 @@ async function openDetail(contactId) {
     <div class="crm-detail-field"><label>Lead Magnet</label><p>${contact.lead_magnet_sent ? '✅ Sent' : '—'}</p></div>
     <div class="crm-detail-field"><label>First Contact</label><p>${formatDate(contact.first_contact_at)}</p></div>
     <div class="crm-detail-field"><label>Next Follow-up</label><p>${contact.next_follow_up || '—'}</p></div>
+    ${contact.call_scheduled_at ? `<div class="crm-detail-field"><label>Call Scheduled</label><p>📞 ${formatDate(contact.call_scheduled_at)}</p></div>` : ''}
+    ${contact.follow_up_sequence ? `<div class="crm-detail-field"><label>Sequence</label><p>${contact.follow_up_sequence.replace(/_/g, ' ')} (step ${(contact.follow_up_step || 0) + 1}) ${contact.follow_up_paused ? '⏸️' : '▶️'}</p></div>` : ''}
     ${contact.notes ? `<div class="crm-detail-field" style="grid-column: 1/-1;"><label>Notes</label><p>${contact.notes}</p></div>` : ''}
   `;
 
@@ -348,6 +416,9 @@ async function openDetail(contactId) {
                 ${config.emoji} ${config.label}
               </button>`;
     }).join('');
+
+  // ── Booking & Follow-up section ──
+  renderDetailBooking(contact);
 
   // Load activity
   try {
@@ -375,6 +446,182 @@ async function openDetail(contactId) {
   }
 
   modal.classList.remove('hidden');
+}
+
+async function renderDetailBooking(contact) {
+  // Booking link input
+  const linkInput = document.getElementById('bookingLinkInput');
+  linkInput.value = contact.tidycal_booking_url || DEFAULT_BOOKING_LINK;
+
+  // Populate sequence selector
+  const seqSelect = document.getElementById('sequenceSelect');
+  seqSelect.innerHTML = '<option value="">Start a follow-up sequence...</option>' +
+    allSequences.map(s =>
+      `<option value="${s.name}" ${contact.follow_up_sequence === s.name ? 'selected' : ''}>${s.description || s.name.replace(/_/g, ' ')}</option>`
+    ).join('');
+
+  // Show pause/resume buttons based on state
+  const pauseBtn = document.getElementById('pauseSequenceBtn');
+  const resumeBtn = document.getElementById('resumeSequenceBtn');
+  const startBtn = document.getElementById('startSequenceBtn');
+
+  if (contact.follow_up_sequence && !contact.follow_up_paused) {
+    pauseBtn.classList.remove('hidden');
+    resumeBtn.classList.add('hidden');
+    startBtn.classList.add('hidden');
+  } else if (contact.follow_up_sequence && contact.follow_up_paused) {
+    pauseBtn.classList.add('hidden');
+    resumeBtn.classList.remove('hidden');
+    startBtn.classList.add('hidden');
+  } else {
+    pauseBtn.classList.add('hidden');
+    resumeBtn.classList.add('hidden');
+    startBtn.classList.remove('hidden');
+  }
+
+  // Current step preview
+  const stepPreview = document.getElementById('currentStepPreview');
+  if (contact.follow_up_sequence && !contact.follow_up_paused) {
+    try {
+      const step = await crmService.getCurrentStep(contact, linkInput.value);
+      if (step) {
+        document.getElementById('stepLabel').textContent = `Step ${step.stepNumber}/${step.totalSteps}`;
+        document.getElementById('stepSequenceName').textContent = step.sequenceDescription || step.sequenceName.replace(/_/g, ' ');
+        document.getElementById('stepMessage').textContent = step.message;
+        stepPreview.classList.remove('hidden');
+      } else {
+        stepPreview.classList.add('hidden');
+      }
+    } catch {
+      stepPreview.classList.add('hidden');
+    }
+  } else {
+    stepPreview.classList.add('hidden');
+  }
+
+  // Call info
+  const callSection = document.getElementById('callInfoSection');
+  if (contact.call_scheduled_at) {
+    const callDate = new Date(contact.call_scheduled_at);
+    const now = new Date();
+    const isPast = callDate < now;
+    const label = isPast ? 'Call was' : 'Call scheduled';
+    const dateStr = callDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const timeStr = callDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    document.getElementById('callBadge').innerHTML = `${isPast ? '✅' : '📞'} ${label}: ${dateStr} at ${timeStr}`;
+    callSection.classList.remove('hidden');
+  } else {
+    callSection.classList.add('hidden');
+  }
+}
+
+async function sendBookingLink() {
+  if (!currentDetailContact) return;
+  const link = document.getElementById('bookingLinkInput').value.trim();
+  if (!link) { showToast('Enter a booking link first', 'error'); return; }
+
+  try {
+    // Copy to clipboard
+    await navigator.clipboard.writeText(link);
+    // Log it in CRM
+    await crmService.logBookingLinkSent(currentDetailContact.id, link);
+    const idx = allContacts.findIndex(c => c.id === currentDetailContact.id);
+    if (idx !== -1) allContacts[idx].tidycal_booking_url = link;
+    showToast('Booking link copied & logged!', 'success');
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+  }
+}
+
+async function startSequence() {
+  if (!currentDetailContact) return;
+  const seqName = document.getElementById('sequenceSelect').value;
+  if (!seqName) { showToast('Select a sequence first', 'error'); return; }
+
+  try {
+    const updated = await crmService.startSequence(currentDetailContact.id, seqName);
+    const idx = allContacts.findIndex(c => c.id === currentDetailContact.id);
+    if (idx !== -1) allContacts[idx] = updated;
+    showToast('Follow-up sequence started!', 'success');
+    render();
+    await openDetail(currentDetailContact.id);
+  } catch (err) {
+    showToast('Failed to start sequence: ' + err.message, 'error');
+  }
+}
+
+async function pauseSequence() {
+  if (!currentDetailContact) return;
+  try {
+    const updated = await crmService.pauseSequence(currentDetailContact.id);
+    const idx = allContacts.findIndex(c => c.id === currentDetailContact.id);
+    if (idx !== -1) allContacts[idx] = updated;
+    showToast('Sequence paused', 'success');
+    render();
+    await openDetail(currentDetailContact.id);
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+  }
+}
+
+async function resumeSequence() {
+  if (!currentDetailContact) return;
+  try {
+    const updated = await crmService.resumeSequence(currentDetailContact.id);
+    const idx = allContacts.findIndex(c => c.id === currentDetailContact.id);
+    if (idx !== -1) allContacts[idx] = updated;
+    showToast('Sequence resumed', 'success');
+    render();
+    await openDetail(currentDetailContact.id);
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+  }
+}
+
+async function markStepSent() {
+  if (!currentDetailContact) return;
+  const step = await crmService.getCurrentStep(currentDetailContact, document.getElementById('bookingLinkInput').value);
+  if (!step) return;
+
+  try {
+    const updated = await crmService.logFollowUpSent(
+      currentDetailContact.id,
+      step.type,
+      `[${step.sequenceName} step ${step.stepNumber}] ${step.message.substring(0, 100)}...`
+    );
+    const idx = allContacts.findIndex(c => c.id === currentDetailContact.id);
+    if (idx !== -1) allContacts[idx] = updated;
+    showToast(`Step ${step.stepNumber} marked as sent!`, 'success');
+    render();
+    await openDetail(currentDetailContact.id);
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+  }
+}
+
+async function copyStepMessage() {
+  const msg = document.getElementById('stepMessage')?.textContent;
+  if (!msg) return;
+  try {
+    await navigator.clipboard.writeText(msg);
+    showToast('Message copied!', 'success');
+  } catch {
+    showToast('Failed to copy', 'error');
+  }
+}
+
+async function skipStep() {
+  if (!currentDetailContact) return;
+  try {
+    const updated = await crmService.advanceSequence(currentDetailContact.id);
+    const idx = allContacts.findIndex(c => c.id === currentDetailContact.id);
+    if (idx !== -1 && updated) allContacts[idx] = updated;
+    showToast('Step skipped', 'success');
+    render();
+    await openDetail(currentDetailContact.id);
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+  }
 }
 
 async function addActivityNote() {
@@ -450,6 +697,15 @@ function setupEventListeners() {
   document.getElementById('closeDetailModal')?.addEventListener('click', () => {
     document.getElementById('detailModal').classList.add('hidden');
   });
+
+  // Booking & follow-up actions
+  document.getElementById('sendBookingLinkBtn')?.addEventListener('click', sendBookingLink);
+  document.getElementById('startSequenceBtn')?.addEventListener('click', startSequence);
+  document.getElementById('pauseSequenceBtn')?.addEventListener('click', pauseSequence);
+  document.getElementById('resumeSequenceBtn')?.addEventListener('click', resumeSequence);
+  document.getElementById('markSentBtn')?.addEventListener('click', markStepSent);
+  document.getElementById('copyMessageBtn')?.addEventListener('click', copyStepMessage);
+  document.getElementById('skipStepBtn')?.addEventListener('click', skipStep);
 
   // Detail modal actions
   document.getElementById('editFromDetailBtn')?.addEventListener('click', () => {

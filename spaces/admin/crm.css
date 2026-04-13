@@ -212,6 +212,19 @@
   font-weight: 500;
 }
 
+/* ── Card Call Date ── */
+.crm-card-call {
+  font-size: 0.7rem;
+  color: #2e7d32;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.crm-card-call.today {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
 /* ── Stage Badge ── */
 .stage-badge {
   font-size: 0.7rem;
@@ -347,6 +360,106 @@
 .crm-activity-time {
   font-size: 0.7rem;
   color: var(--text-muted, #a9a39a);
+}
+
+/* ── Upcoming Calls ── */
+.crm-upcoming-calls {
+  background: #e8f5e9;
+  border: 1px solid #4caf50;
+  border-radius: var(--radius, 8px);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.crm-upcoming-calls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.crm-upcoming-calls-count {
+  background: #4caf50;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ── Booking & Follow-up Section ── */
+.crm-booking-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.crm-booking-link-row,
+.crm-sequence-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* ── Current Step Preview ── */
+.crm-current-step {
+  margin-top: 1rem;
+  background: var(--bg-card, #f5f4f2);
+  border-radius: var(--radius, 8px);
+  padding: 1rem;
+  border-left: 3px solid var(--accent, #d4883a);
+}
+
+.crm-step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.crm-step-label {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--accent, #d4883a);
+}
+
+.crm-step-sequence {
+  font-size: 0.7rem;
+  color: var(--text-muted, #a9a39a);
+}
+
+.crm-step-message {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text, #1f1720);
+  padding: 0.75rem;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.crm-step-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ── Call Info Badge ── */
+.crm-call-info {
+  margin-top: 0.75rem;
+}
+
+.crm-call-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 /* ── Responsive ── */
