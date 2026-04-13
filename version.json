@@ -1,12 +1,12 @@
 {
-  "version": "v260413.04 2:45a",
-  "release": 4,
-  "sha": "d97583d",
-  "fullSha": "d97583d7a020a1895ce8e9270a575ca84d97e379",
+  "version": "v260413.05 2:54a",
+  "release": 5,
+  "sha": "7938d4a",
+  "fullSha": "7938d4a9b5e996bb56cb42f1daa05c363a8b9962",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-12T22:45:29-04:00",
-  "commits": [{"sha":"d97583d","message":"Auto-complete past calls, only show future call dates in CRM cards","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-12T22:53:59-04:00",
+  "commits": [{"sha":"7938d4a","message":"Fix sync: move past calls to in_conversation, store sync timestamp in sequences table","author":"Chloe Prentoulis"}]
 }
