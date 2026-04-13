@@ -147,8 +147,37 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      // ── Skip past bookings — only sync future/recent ones into call_booked ──
+      const isPastCall = startsAt && new Date(startsAt) < new Date(Date.now() - 3600000); // more than 1hr ago
+
       // ── Handle new/updated booking ──
       if (existing) {
+        // If the call already happened, mark as completed instead of call_booked
+        if (isPastCall && existing.tidycal_event_id === bookingId && existing.stage === 'call_booked') {
+          await supabase
+            .from('swoon_crm_contacts')
+            .update({
+              call_completed_at: startsAt,
+              follow_up_sequence: 'post_call_nurture',
+              follow_up_step: 0,
+              follow_up_started_at: now,
+              follow_up_paused: false,
+              next_follow_up: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+              last_activity_at: now,
+              updated_at: now,
+            })
+            .eq('id', existing.id);
+
+          await supabase.from('swoon_crm_activity').insert({
+            contact_id: existing.id,
+            activity_type: 'call_completed',
+            description: `Call completed (${bookingType})`,
+            metadata: { booking_id: bookingId, starts_at: startsAt },
+          });
+          updated++;
+          continue;
+        }
+
         // Skip if we already processed this exact booking
         if (existing.tidycal_event_id === bookingId && existing.stage === 'call_booked') {
           // Check for reschedule (different starts_at)
@@ -214,13 +243,14 @@ Deno.serve(async (req) => {
 
         updated++;
       } else {
-        // Create new contact
+        // Create new contact — use appropriate stage based on whether call is past
+        const stage = isPastCall ? 'in_conversation' : 'call_booked';
         const { data: newContact, error } = await supabase
           .from('swoon_crm_contacts')
           .insert({
             email,
             full_name: name || null,
-            stage: 'call_booked',
+            stage,
             source: 'tidycal',
             call_booked_at: now,
             call_scheduled_at: startsAt,

@@ -152,14 +152,17 @@ function renderCard(contact) {
   const timeAgo = formatTimeAgo(contact.last_activity_at);
   const keyword = contact.keyword_used ? `<span class="crm-card-keyword">${contact.keyword_used}</span>` : '';
 
-  // Show call date for call_booked contacts
+  // Show call date for call_booked contacts (only future/today calls)
   let callInfo = '';
   if (contact.call_scheduled_at) {
     const callDate = new Date(contact.call_scheduled_at);
+    const isPast = callDate < new Date();
     const isToday = callDate.toISOString().split('T')[0] === today;
-    const label = isToday ? 'Today' : callDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const time = callDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    callInfo = `<div class="crm-card-call ${isToday ? 'today' : ''}">📞 ${label} ${time}</div>`;
+    if (!isPast || isToday) {
+      const label = isToday ? 'Today' : callDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const time = callDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      callInfo = `<div class="crm-card-call ${isToday ? 'today' : ''}">📞 ${label} ${time}</div>`;
+    }
   }
 
   // Show sequence indicator
