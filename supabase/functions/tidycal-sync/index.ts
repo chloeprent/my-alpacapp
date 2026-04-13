@@ -110,12 +110,44 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // ── Find existing contact ──
-      const { data: existing } = await supabase
+      // ── Find existing contact (by email, then by name) ──
+      let existing = null;
+
+      const { data: byEmail } = await supabase
         .from('swoon_crm_contacts')
         .select('*')
         .eq('email', email)
         .maybeSingle();
+      existing = byEmail;
+
+      // If no email match, try matching by full name (handles IG leads who book via TidyCal)
+      if (!existing && name) {
+        const { data: byName } = await supabase
+          .from('swoon_crm_contacts')
+          .select('*')
+          .ilike('full_name', name)
+          .maybeSingle();
+        existing = byName;
+
+        // Also fill in their email since we now have it from TidyCal
+        if (existing && !existing.email && email) {
+          await supabase
+            .from('swoon_crm_contacts')
+            .update({ email, updated_at: now })
+            .eq('id', existing.id);
+          existing.email = email;
+        }
+      }
+
+      // Also check by tidycal_event_id in case we already processed this booking
+      if (!existing) {
+        const { data: byBooking } = await supabase
+          .from('swoon_crm_contacts')
+          .select('*')
+          .eq('tidycal_event_id', bookingId)
+          .maybeSingle();
+        existing = byBooking;
+      }
 
       const callDate = startsAt
         ? new Date(startsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
@@ -281,6 +313,69 @@ Deno.serve(async (req) => {
 
         created++;
       }
+    }
+
+    // ── Dedup: merge contacts that share the same email ──
+    const { data: allContacts } = await supabase
+      .from('swoon_crm_contacts')
+      .select('*')
+      .not('email', 'is', null)
+      .order('created_at', { ascending: true });
+
+    if (allContacts) {
+      const emailMap = new Map<string, any[]>();
+      for (const c of allContacts) {
+        const key = c.email.toLowerCase().trim();
+        if (!emailMap.has(key)) emailMap.set(key, []);
+        emailMap.get(key)!.push(c);
+      }
+
+      let merged = 0;
+      for (const [, dupes] of emailMap) {
+        if (dupes.length < 2) continue;
+
+        // Keep the oldest (first created) as the primary — it likely has the IG data
+        const primary = dupes[0];
+        const toMerge = dupes.slice(1);
+
+        for (const dupe of toMerge) {
+          // Merge missing fields from dupe into primary
+          const updates: Record<string, unknown> = {};
+          if (!primary.ig_username && dupe.ig_username) updates.ig_username = dupe.ig_username;
+          if (!primary.full_name && dupe.full_name) updates.full_name = dupe.full_name;
+          if (!primary.phone && dupe.phone) updates.phone = dupe.phone;
+          if (!primary.tidycal_event_id && dupe.tidycal_event_id) updates.tidycal_event_id = dupe.tidycal_event_id;
+          if (!primary.tidycal_booking_url && dupe.tidycal_booking_url) updates.tidycal_booking_url = dupe.tidycal_booking_url;
+          if (!primary.call_scheduled_at && dupe.call_scheduled_at) updates.call_scheduled_at = dupe.call_scheduled_at;
+          if (!primary.call_booked_at && dupe.call_booked_at) updates.call_booked_at = dupe.call_booked_at;
+          if (!primary.keyword_used && dupe.keyword_used) updates.keyword_used = dupe.keyword_used;
+          if (!primary.manychat_id && dupe.manychat_id) updates.manychat_id = dupe.manychat_id;
+          // Take the more advanced stage
+          const stageOrder = ['new_lead', 'lead_magnet_sent', 'in_conversation', 'call_booked', 'client'];
+          if (stageOrder.indexOf(dupe.stage) > stageOrder.indexOf(primary.stage)) {
+            updates.stage = dupe.stage;
+          }
+
+          if (Object.keys(updates).length) {
+            updates.updated_at = now;
+            await supabase.from('swoon_crm_contacts').update(updates).eq('id', primary.id);
+          }
+
+          // Move activity logs from dupe to primary
+          await supabase
+            .from('swoon_crm_activity')
+            .update({ contact_id: primary.id })
+            .eq('contact_id', dupe.id);
+
+          // Delete the duplicate
+          await supabase.from('swoon_crm_contacts').delete().eq('id', dupe.id);
+
+          merged++;
+          console.log(`Merged duplicate: ${dupe.email} (id ${dupe.id} → ${primary.id})`);
+        }
+      }
+
+      if (merged > 0) console.log(`Dedup: merged ${merged} duplicate contacts`);
     }
 
     // ── Update last sync timestamp ──
