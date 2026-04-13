@@ -211,10 +211,10 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Skip if we already processed this exact booking
-        if (existing.tidycal_event_id === bookingId && existing.stage === 'call_booked') {
-          // Check for reschedule (different starts_at)
-          if (existing.call_scheduled_at && startsAt &&
+        // Skip if we already processed this booking (regardless of current stage)
+        if (existing.tidycal_event_id === bookingId) {
+          // Only check for reschedule if still in call_booked with a future call
+          if (existing.stage === 'call_booked' && existing.call_scheduled_at && startsAt &&
               new Date(existing.call_scheduled_at).toISOString() !== new Date(startsAt).toISOString()) {
             await supabase
               .from('swoon_crm_contacts')
@@ -238,7 +238,20 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        // Update existing contact → move to call_booked
+        // Skip past calls entirely — don't move existing contacts backwards
+        if (isPastCall) {
+          // Just fill in missing TidyCal data without changing stage
+          const fills: Record<string, unknown> = { updated_at: now };
+          if (!existing.tidycal_event_id) fills.tidycal_event_id = bookingId;
+          if (!existing.email && email) fills.email = email;
+          if (!existing.call_scheduled_at && startsAt) fills.call_scheduled_at = startsAt;
+          if (!existing.call_booked_at) fills.call_booked_at = createdAt || now;
+          await supabase.from('swoon_crm_contacts').update(fills).eq('id', existing.id);
+          skipped++;
+          continue;
+        }
+
+        // Update existing contact → move to call_booked (future calls only)
         const updates: Record<string, unknown> = {
           stage: 'call_booked',
           call_booked_at: now,
