@@ -1,12 +1,12 @@
 {
-  "version": "v260413.07 10:29a",
-  "release": 7,
-  "sha": "23c0fde",
-  "fullSha": "23c0fde77d97b84b133708a57acf3e5a83cce9dc",
+  "version": "v260414.01 6:46p",
+  "release": 1,
+  "sha": "7a7f221",
+  "fullSha": "7a7f22195ef52ce9334fef9b0344d1ede3573c83",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-13T06:29:38-04:00",
-  "commits": [{"sha":"23c0fde","message":"Fix sync re-processing bug, add CRM cleanup function for dedup + past call fix","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-14T14:46:21-04:00",
+  "commits": [{"sha":"7a7f221","message":"Activate follow-up sequences with auto-start, action dashboard, and quick responses","author":"Chloe Prentoulis"}]
 }
