@@ -66,22 +66,45 @@
           </div>
         </div>
 
-        <!-- ── Follow-up Alert ── -->
-        <div class="crm-follow-ups hidden" id="followUpAlert">
-          <div class="crm-follow-up-header">
-            <span>📋 Follow-ups due</span>
-            <span class="crm-follow-up-count" id="followUpCount">0</span>
-          </div>
-          <div id="followUpList" class="crm-follow-up-list"></div>
-        </div>
+        <!-- ── Action Center: Follow-ups + Calls + Quick Replies ── -->
+        <div class="crm-action-center" id="actionCenter">
 
-        <!-- ── Upcoming Calls ── -->
-        <div class="crm-upcoming-calls hidden" id="upcomingCallsAlert">
-          <div class="crm-upcoming-calls-header">
-            <span>📞 Upcoming calls</span>
-            <span class="crm-upcoming-calls-count" id="upcomingCallsCount">0</span>
+          <!-- Due Follow-ups (expanded with message previews) -->
+          <div class="crm-follow-ups hidden" id="followUpAlert">
+            <div class="crm-follow-up-header">
+              <span>🔥 Follow-ups Due Today</span>
+              <span class="crm-follow-up-count" id="followUpCount">0</span>
+            </div>
+            <div id="followUpList" class="crm-follow-up-list"></div>
           </div>
-          <div id="upcomingCallsList" class="crm-follow-up-list"></div>
+
+          <!-- Contacts needing a sequence -->
+          <div class="crm-needs-sequence hidden" id="needsSequenceAlert">
+            <div class="crm-follow-up-header">
+              <span>⚡ Leads without follow-up sequences</span>
+              <span class="crm-follow-up-count" id="needsSequenceCount">0</span>
+            </div>
+            <div id="needsSequenceList" class="crm-follow-up-list"></div>
+            <button class="btn-small btn-primary" id="autoStartAllBtn" style="margin-top: 0.5rem;">Auto-start all sequences</button>
+          </div>
+
+          <!-- Upcoming Calls -->
+          <div class="crm-upcoming-calls hidden" id="upcomingCallsAlert">
+            <div class="crm-upcoming-calls-header">
+              <span>📞 Upcoming calls</span>
+              <span class="crm-upcoming-calls-count" id="upcomingCallsCount">0</span>
+            </div>
+            <div id="upcomingCallsList" class="crm-follow-up-list"></div>
+          </div>
+
+          <!-- Quick Response Templates -->
+          <details class="crm-quick-responses" id="quickResponsesSection">
+            <summary class="crm-follow-up-header" style="cursor:pointer;">
+              <span>💬 Quick Responses</span>
+              <span class="text-muted" style="font-size:0.75rem;">click to expand</span>
+            </summary>
+            <div class="crm-quick-response-list" id="quickResponseList"></div>
+          </details>
         </div>
 
         <!-- ── Toolbar: Search + Add ── -->
