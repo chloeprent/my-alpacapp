@@ -46,6 +46,60 @@ const DEFAULT_BOOKING_LINK = 'https://tidycal.com/chloeprent/30-minute-meeting';
 
 let allSequences = [];
 
+// ── Quick Response Templates ──
+const QUICK_RESPONSES = [
+  {
+    label: '👋 New DM — warm intro',
+    context: 'Someone new follows or DMs you',
+    message: `Hey! Thanks so much for reaching out 💛 I'm Chloe — I help couples navigate the conversation around opening up their relationship. What's going on for you right now?`,
+  },
+  {
+    label: '🧲 Lead magnet follow-up',
+    context: 'They got the guide but haven\'t replied',
+    message: `Hey! Just wanted to check in — did you get a chance to look through the guide? I'd love to hear what resonated with you, or if anything came up that felt tricky. No pressure at all 💛`,
+  },
+  {
+    label: '📞 Suggest a call',
+    context: 'Conversation is warm, time to pitch the call',
+    message: `I think a quick call could really help here — I do free 30-min discovery sessions where we can talk through your specific situation. No sales pitch, just clarity. Want me to send you a link to book?`,
+  },
+  {
+    label: '🔗 Send booking link',
+    context: 'They said yes to a call',
+    message: `Amazing! Here's my calendar — pick whatever works best for you: https://tidycal.com/chloeprent/30-minute-meeting\n\nLooking forward to chatting! 💛`,
+  },
+  {
+    label: '🔔 Call reminder (day before)',
+    context: 'Call is tomorrow',
+    message: `Hey! Just a friendly reminder — we have our call tomorrow. Can't wait to chat with you! If anything comes up and you need to reschedule, no worries at all.`,
+  },
+  {
+    label: '😔 No-show follow-up',
+    context: 'They missed their call',
+    message: `Hey! I noticed we missed each other today — totally no worries, life happens! Here's my link if you'd like to rebook: https://tidycal.com/chloeprent/30-minute-meeting\n\nHope everything's okay 💛`,
+  },
+  {
+    label: '💰 Post-call — pricing',
+    context: 'After discovery call, share package details',
+    message: `So great talking with you today! As I mentioned, my coaching package is $900/month and includes weekly sessions plus voice/text support between calls. I think you'd see a real shift within the first few weeks.\n\nWant to chat more about what that would look like for you?`,
+  },
+  {
+    label: '🤔 Handling "I need to think"',
+    context: 'They\'re interested but not ready to commit',
+    message: `Totally understand — this is a big step! Take whatever time you need. I'll check back in a few days, and in the meantime, feel free to message me if any questions come up. You're already doing the brave part by thinking about this 💛`,
+  },
+  {
+    label: '❄️ Re-engage cold lead',
+    context: 'Someone who went quiet',
+    message: `Hey! Haven't heard from you in a while and just wanted to check in. No pressure at all — I just want you to know I'm here if things come up again. Hope you're doing well! 💛`,
+  },
+  {
+    label: '🎉 New client welcome',
+    context: 'They signed up!',
+    message: `WELCOME! I'm so excited to work with you 🎉💛 I'll be sending over the intake form shortly. Our first session is going to be all about understanding where you are and where you want to go. You're going to love this journey!`,
+  },
+];
+
 // ══════════════════════════════════════════
 // INITIALIZATION
 // ══════════════════════════════════════════
@@ -89,6 +143,8 @@ function render() {
   renderTable();
   renderFollowUps();
   renderUpcomingCalls();
+  renderNeedsSequence();
+  renderQuickResponses();
 }
 
 function renderStats() {
@@ -243,11 +299,15 @@ function renderTable() {
   }).join('');
 }
 
-function renderFollowUps() {
+async function renderFollowUps() {
   const today = new Date().toISOString().split('T')[0];
   const due = allContacts.filter(c =>
     c.next_follow_up && c.next_follow_up <= today && c.stage !== 'client' && c.stage !== 'cold'
   );
+
+  // Sort: lead_magnet_sent contacts first (priority), then by date
+  const stagePriority = { lead_magnet_sent: 0, in_conversation: 1, call_booked: 2, new_lead: 3 };
+  due.sort((a, b) => (stagePriority[a.stage] ?? 9) - (stagePriority[b.stage] ?? 9));
 
   const alertEl = document.getElementById('followUpAlert');
   const listEl = document.getElementById('followUpList');
@@ -260,16 +320,87 @@ function renderFollowUps() {
 
   alertEl.classList.remove('hidden');
   countEl.textContent = due.length;
-  listEl.innerHTML = due.map(c => {
+
+  // Build items with message previews for contacts with active sequences
+  const items = [];
+  for (const c of due) {
+    const name = c.full_name || c.ig_username || 'Unknown';
+    const stageConfig = STAGES[c.stage] || {};
+    let messagePreview = '';
+    let copyBtn = '';
+
+    if (c.follow_up_sequence && !c.follow_up_paused) {
+      try {
+        const step = await crmService.getCurrentStep(c, DEFAULT_BOOKING_LINK);
+        if (step) {
+          const truncated = step.message.length > 120 ? step.message.substring(0, 120) + '...' : step.message;
+          messagePreview = `
+            <div class="crm-followup-message-preview">${truncated}</div>
+          `;
+          copyBtn = `<button class="btn-tiny" onclick="event.stopPropagation(); window.crmCopyFollowUp(${c.id})" title="Copy message">📋 Copy</button>
+                      <button class="btn-tiny btn-primary" onclick="event.stopPropagation(); window.crmMarkSentFromDash(${c.id})" title="Mark as sent">✅ Sent</button>`;
+        }
+      } catch { /* skip */ }
+    }
+
+    const seqLabel = c.follow_up_sequence ? `<span class="crm-mini-badge">${c.follow_up_sequence.replace(/_/g, ' ')} step ${(c.follow_up_step || 0) + 1}</span>` : '';
+
+    items.push(`
+      <div class="crm-follow-up-item-expanded" onclick="window.crmOpenDetail(${c.id})">
+        <div class="crm-followup-top">
+          <span>${stageConfig.emoji || ''} <strong>${name}</strong> ${seqLabel}</span>
+          <span class="crm-followup-actions">${copyBtn}</span>
+        </div>
+        ${messagePreview}
+      </div>
+    `);
+  }
+
+  listEl.innerHTML = items.join('');
+}
+
+function renderNeedsSequence() {
+  const needs = allContacts.filter(c =>
+    ['lead_magnet_sent', 'in_conversation'].includes(c.stage) && !c.follow_up_sequence
+  );
+
+  const alertEl = document.getElementById('needsSequenceAlert');
+  const listEl = document.getElementById('needsSequenceList');
+  const countEl = document.getElementById('needsSequenceCount');
+
+  if (!needs.length) {
+    alertEl.classList.add('hidden');
+    return;
+  }
+
+  alertEl.classList.remove('hidden');
+  countEl.textContent = needs.length;
+  listEl.innerHTML = needs.map(c => {
     const name = c.full_name || c.ig_username || 'Unknown';
     const stageConfig = STAGES[c.stage] || {};
     return `
       <div class="crm-follow-up-item" onclick="window.crmOpenDetail(${c.id})">
         <span>${stageConfig.emoji || ''} ${name}</span>
-        <span class="text-muted">${c.next_follow_up}</span>
+        <span class="text-muted">${c.stage.replace(/_/g, ' ')}</span>
       </div>
     `;
   }).join('');
+}
+
+function renderQuickResponses() {
+  const listEl = document.getElementById('quickResponseList');
+  if (!listEl) return;
+
+  listEl.innerHTML = QUICK_RESPONSES.map((r, i) => `
+    <div class="crm-quick-response-item">
+      <div class="crm-qr-header">
+        <span class="crm-qr-label">${r.label}</span>
+        <button class="btn-tiny" onclick="window.crmCopyQuickResponse(${i})" title="Copy to clipboard">📋 Copy</button>
+      </div>
+      <div class="crm-qr-context">${r.context}</div>
+      <div class="crm-qr-message">${r.message.replace(/\n/g, '<br>')}</div>
+    </div>
+  `).join('');
 }
 
 function renderUpcomingCalls() {
@@ -710,6 +841,19 @@ function setupEventListeners() {
   document.getElementById('copyMessageBtn')?.addEventListener('click', copyStepMessage);
   document.getElementById('skipStepBtn')?.addEventListener('click', skipStep);
 
+  // Auto-start sequences for leads without one
+  document.getElementById('autoStartAllBtn')?.addEventListener('click', async () => {
+    try {
+      const count = await crmService.autoStartSequences();
+      showToast(`Started sequences for ${count} contacts!`, 'success');
+      // Reload data to reflect changes
+      await loadData();
+      render();
+    } catch (err) {
+      showToast('Failed: ' + err.message, 'error');
+    }
+  });
+
   // Detail modal actions
   document.getElementById('editFromDetailBtn')?.addEventListener('click', () => {
     if (!currentDetailContact) return;
@@ -743,6 +887,51 @@ window.crmEditContact = (id) => {
   if (contact) openContactModal(contact);
 };
 window.crmMoveStage = (id, stage) => moveStage(id, stage);
+
+// Copy follow-up message from the dashboard
+window.crmCopyFollowUp = async (contactId) => {
+  const contact = allContacts.find(c => c.id === contactId);
+  if (!contact) return;
+  try {
+    const step = await crmService.getCurrentStep(contact, DEFAULT_BOOKING_LINK);
+    if (step) {
+      await navigator.clipboard.writeText(step.message);
+      showToast(`Copied step ${step.stepNumber} for ${contact.full_name || contact.ig_username}!`, 'success');
+    }
+  } catch (err) {
+    showToast('Failed to copy: ' + err.message, 'error');
+  }
+};
+
+// Mark step as sent from the dashboard
+window.crmMarkSentFromDash = async (contactId) => {
+  const contact = allContacts.find(c => c.id === contactId);
+  if (!contact) return;
+  try {
+    const step = await crmService.getCurrentStep(contact, DEFAULT_BOOKING_LINK);
+    if (!step) return;
+    const updated = await crmService.logFollowUpSent(
+      contactId, step.type,
+      `[${step.sequenceName} step ${step.stepNumber}] ${step.message.substring(0, 100)}...`
+    );
+    const idx = allContacts.findIndex(c => c.id === contactId);
+    if (idx !== -1) allContacts[idx] = updated;
+    showToast(`✅ Step ${step.stepNumber} marked sent for ${contact.full_name || contact.ig_username}`, 'success');
+    render();
+  } catch (err) {
+    showToast('Failed: ' + err.message, 'error');
+  }
+};
+
+// Copy a quick response template
+window.crmCopyQuickResponse = async (index) => {
+  try {
+    await navigator.clipboard.writeText(QUICK_RESPONSES[index].message);
+    showToast('Message copied!', 'success');
+  } catch {
+    showToast('Failed to copy', 'error');
+  }
+};
 
 // ══════════════════════════════════════════
 // HELPERS

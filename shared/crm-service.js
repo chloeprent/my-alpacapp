@@ -55,6 +55,13 @@ class CRMService {
     return data;
   }
 
+  // Map of stages → which sequence to auto-start
+  static STAGE_SEQUENCES = {
+    lead_magnet_sent: 'post_lead_magnet',
+    in_conversation: 'post_conversation',
+    call_booked: 'pre_call_reminder',
+  };
+
   /** Move a contact to a new pipeline stage */
   async moveToStage(id, newStage) {
     const updates = {
@@ -80,7 +87,50 @@ class CRMService {
     // Log the stage change
     await this.logActivity(id, 'stage_change', `Moved to ${newStage.replace(/_/g, ' ')}`);
 
+    // Auto-start follow-up sequence if mapped and not already running
+    const autoSeq = CRMService.STAGE_SEQUENCES[newStage];
+    if (autoSeq && !contact.follow_up_sequence) {
+      try {
+        const updated = await this.startSequence(id, autoSeq);
+        return updated;
+      } catch (e) {
+        console.warn('Auto-start sequence failed:', e);
+      }
+    }
+
     return contact;
+  }
+
+  /** Get contacts that should have a sequence but don't */
+  async getContactsNeedingSequence() {
+    const { data, error } = await supabase
+      .from('swoon_crm_contacts')
+      .select('*')
+      .in('stage', ['lead_magnet_sent', 'in_conversation'])
+      .is('follow_up_sequence', null)
+      .neq('stage', 'client')
+      .neq('stage', 'cold')
+      .order('last_activity_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  }
+
+  /** Bulk-start sequences for contacts that need them */
+  async autoStartSequences() {
+    const contacts = await this.getContactsNeedingSequence();
+    let started = 0;
+    for (const contact of contacts) {
+      const seqName = CRMService.STAGE_SEQUENCES[contact.stage];
+      if (seqName) {
+        try {
+          await this.startSequence(contact.id, seqName);
+          started++;
+        } catch (e) {
+          console.warn(`Failed to auto-start for ${contact.full_name || contact.id}:`, e);
+        }
+      }
+    }
+    return started;
   }
 
   /** Delete a contact */
