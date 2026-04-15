@@ -1,12 +1,12 @@
 {
-  "version": "v260414.01 6:46p",
+  "version": "v260415.01 1:54a",
   "release": 1,
-  "sha": "7a7f221",
-  "fullSha": "7a7f22195ef52ce9334fef9b0344d1ede3573c83",
+  "sha": "0178844",
+  "fullSha": "0178844662d23ceb2a3ea659476cd303da9ba544",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-14T14:46:21-04:00",
-  "commits": [{"sha":"7a7f221","message":"Activate follow-up sequences with auto-start, action dashboard, and quick responses","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-14T21:54:07-04:00",
+  "commits": [{"sha":"0178844","message":"Add follow-up sequences, auto-start, and quick responses to swoon/crm.html","author":"Chloe Prentoulis"}]
 }
