@@ -133,6 +133,47 @@
     .toast.error { background: #c62828; }
     @keyframes slideIn { from { transform: translateY(1rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+    /* ── Needs Sequence Alert ── */
+    .needs-sequence-alert { background: #e3f2fd; border: 1px solid #64b5f6; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: none; }
+    .needs-sequence-alert.visible { display: block; }
+    .needs-sequence-alert h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+
+    /* ── Expanded follow-up items ── */
+    .follow-up-item-expanded { padding: 0.5rem 0; border-bottom: 1px solid rgba(0,0,0,0.06); cursor: pointer; }
+    .follow-up-item-expanded:last-child { border-bottom: none; }
+    .followup-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; gap: 0.5rem; }
+    .followup-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
+    .followup-msg-preview { font-size: 0.78rem; color: #555; line-height: 1.4; margin-top: 0.35rem; padding: 0.4rem 0.6rem; background: #fff; border-radius: 4px; border-left: 2px solid #8b6f5e; }
+    .mini-badge { font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; background: #e8f5e9; color: #2e7d32; font-weight: 500; margin-left: 0.25rem; }
+
+    /* ── Tiny buttons ── */
+    .btn-tiny { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; border: 1px solid #e8e0d8; background: #fff; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .btn-tiny:hover { background: #ede4d7; border-color: #8b6f5e; }
+    .btn-tiny.btn-primary { background: #8b6f5e; color: #fff; border-color: #8b6f5e; }
+
+    /* ── Quick Responses ── */
+    .quick-responses { background: #fff; border: 1px solid #e8e0d8; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .quick-responses summary { cursor: pointer; font-weight: 600; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
+    .quick-responses[open] summary { margin-bottom: 0.75rem; }
+    .qr-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .qr-item { background: #faf8f5; border-radius: 8px; padding: 0.75rem; border-left: 3px solid #8b6f5e; }
+    .qr-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
+    .qr-label { font-weight: 600; font-size: 0.85rem; }
+    .qr-context { font-size: 0.72rem; color: #a09080; font-style: italic; margin-bottom: 0.5rem; }
+    .qr-message { font-size: 0.82rem; line-height: 1.5; white-space: pre-wrap; }
+
+    /* ── Booking section in detail ── */
+    .booking-section { margin: 1rem 0; padding: 1rem 0; border-top: 1px solid #f0ebe5; }
+    .booking-section h3 { font-size: 0.9rem; margin-bottom: 0.75rem; }
+    .booking-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .booking-row input, .booking-row select { flex: 1; padding: 0.4rem 0.65rem; border: 1px solid #e8e0d8; border-radius: 8px; font-size: 0.85rem; }
+    .step-preview { background: #faf8f5; border-radius: 8px; padding: 0.75rem; border-left: 3px solid #8b6f5e; margin-top: 0.75rem; }
+    .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+    .step-label { font-weight: 700; font-size: 0.8rem; color: #8b6f5e; }
+    .step-seq-name { font-size: 0.7rem; color: #a09080; }
+    .step-msg { font-size: 0.85rem; line-height: 1.5; padding: 0.6rem; background: #fff; border-radius: 6px; margin-bottom: 0.5rem; white-space: pre-wrap; }
+    .step-actions { display: flex; gap: 0.5rem; }
+
     /* ── Responsive ── */
     @media (max-width: 900px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -166,11 +207,24 @@
       <div class="stat-card"><span class="stat-number" id="statClients">0</span><span class="stat-label">Clients</span></div>
     </div>
 
-    <!-- Follow-up Alert -->
+    <!-- Follow-up Alert (enhanced with message previews) -->
     <div class="follow-up-alert" id="followUpAlert">
-      <h3>📋 Follow-ups due today</h3>
+      <h3>🔥 Follow-ups Due Today <span id="followUpCount" style="background:#ffc107;color:#000;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px;">0</span></h3>
       <div id="followUpList"></div>
     </div>
+
+    <!-- Needs Sequence Alert -->
+    <div class="needs-sequence-alert" id="needsSequenceAlert">
+      <h3>⚡ Leads without follow-up sequences <span id="needsSequenceCount" style="background:#64b5f6;color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px;">0</span></h3>
+      <div id="needsSequenceList"></div>
+      <button class="btn btn-primary btn-small" onclick="autoStartAll()" style="margin-top:0.5rem;">Auto-start all sequences</button>
+    </div>
+
+    <!-- Quick Responses -->
+    <details class="quick-responses">
+      <summary>💬 Quick Responses <span style="font-size:0.72rem;color:#a09080;font-weight:400;">click to expand</span></summary>
+      <div class="qr-list" id="quickResponseList"></div>
+    </details>
 
     <!-- Toolbar -->
     <div class="toolbar">
@@ -290,6 +344,23 @@
       <div class="modal-body">
         <div class="detail-grid" id="detailGrid"></div>
         <div class="stage-actions" id="stageActions"></div>
+        <!-- Booking & Follow-up Section -->
+        <div class="booking-section" id="bookingSection">
+          <h3>Booking & Follow-ups</h3>
+          <div class="booking-row">
+            <input type="text" id="bookingLinkInput" value="https://tidycal.com/chloeprent/30-minute-meeting">
+            <button class="btn btn-primary btn-small" onclick="sendBookingLink()">Send Link</button>
+          </div>
+          <div class="booking-row">
+            <select id="seqSelect">
+              <option value="">Start a follow-up sequence...</option>
+            </select>
+            <button class="btn btn-small" id="startSeqBtn" onclick="startSequence()">Start</button>
+            <button class="btn btn-small" id="pauseSeqBtn" onclick="pauseSequence()" style="display:none;">Pause</button>
+            <button class="btn btn-small" id="resumeSeqBtn" onclick="resumeSequence()" style="display:none;">Resume</button>
+          </div>
+          <div id="stepPreview" style="display:none;"></div>
+        </div>
         <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem;">Activity Log</h3>
         <div class="activity-add">
           <input type="text" id="noteInput" placeholder="Add a note..." style="padding:0.4rem 0.65rem; border:1px solid #e8e0d8; border-radius:8px; font-size:0.85rem;">
@@ -316,7 +387,28 @@
     // STATE
     // ══════════════════════════════════════════
     let contacts = [];
+    let sequences = [];
     let currentContact = null;
+    const DEFAULT_BOOKING_LINK = 'https://tidycal.com/chloeprent/30-minute-meeting';
+
+    const STAGE_SEQUENCES = {
+      lead_magnet_sent: 'post_lead_magnet',
+      in_conversation: 'post_conversation',
+      call_booked: 'pre_call_reminder',
+    };
+
+    const QUICK_RESPONSES = [
+      { label: '👋 New DM — warm intro', context: "Someone new follows or DMs you", message: "Hey! Thanks so much for reaching out 💛 I'm Chloe — I help couples navigate the conversation around opening up their relationship. What's going on for you right now?" },
+      { label: '🧲 Lead magnet follow-up', context: "They got the guide but haven't replied", message: "Hey! Just wanted to check in — did you get a chance to look through the guide? I'd love to hear what resonated with you, or if anything came up that felt tricky. No pressure at all 💛" },
+      { label: '📞 Suggest a call', context: "Conversation is warm, time to pitch", message: "I think a quick call could really help here — I do free 30-min discovery sessions where we can talk through your specific situation. No sales pitch, just clarity. Want me to send you a link to book?" },
+      { label: '🔗 Send booking link', context: "They said yes to a call", message: "Amazing! Here's my calendar — pick whatever works best for you: https://tidycal.com/chloeprent/30-minute-meeting\n\nLooking forward to chatting! 💛" },
+      { label: '🔔 Call reminder (day before)', context: "Call is tomorrow", message: "Hey! Just a friendly reminder — we have our call tomorrow. Can't wait to chat with you! If anything comes up and you need to reschedule, no worries at all." },
+      { label: '😔 No-show follow-up', context: "They missed their call", message: "Hey! I noticed we missed each other today — totally no worries, life happens! Here's my link if you'd like to rebook: https://tidycal.com/chloeprent/30-minute-meeting\n\nHope everything's okay 💛" },
+      { label: '💰 Post-call — pricing', context: "After discovery call, share package", message: "So great talking with you today! As I mentioned, my coaching package is $900/month and includes weekly sessions plus voice/text support between calls. I think you'd see a real shift within the first few weeks.\n\nWant to chat more about what that would look like for you?" },
+      { label: '🤔 Handling "I need to think"', context: "Interested but not ready to commit", message: "Totally understand — this is a big step! Take whatever time you need. I'll check back in a few days, and in the meantime, feel free to message me if any questions come up. You're already doing the brave part by thinking about this 💛" },
+      { label: '❄️ Re-engage cold lead', context: "Someone who went quiet", message: "Hey! Haven't heard from you in a while and just wanted to check in. No pressure at all — I just want you to know I'm here if things come up again. Hope you're doing well! 💛" },
+      { label: '🎉 New client welcome', context: "They signed up!", message: "WELCOME! I'm so excited to work with you 🎉💛 I'll be sending over the intake form shortly. Our first session is going to be all about understanding where you are and where you want to go. You're going to love this journey!" },
+    ];
 
     const STAGES = {
       new_lead:         { label: 'New Lead',         emoji: '🆕', cards: 'cardsNewLead',     count: 'countNewLead' },
@@ -337,9 +429,13 @@
     // LOAD & RENDER
     // ══════════════════════════════════════════
     async function loadContacts() {
-      const { data, error } = await sb.from('swoon_crm_contacts').select('*').order('last_activity_at', { ascending: false });
-      if (error) { showToast('Failed to load: ' + error.message, 'error'); return; }
-      contacts = data || [];
+      const [contactsRes, seqRes] = await Promise.all([
+        sb.from('swoon_crm_contacts').select('*').order('last_activity_at', { ascending: false }),
+        sb.from('swoon_follow_up_sequences').select('*').eq('is_active', true).order('name'),
+      ]);
+      if (contactsRes.error) { showToast('Failed to load: ' + contactsRes.error.message, 'error'); return; }
+      contacts = contactsRes.data || [];
+      sequences = (seqRes.data || []).filter(s => s.name !== '_tidycal_sync_meta');
       render();
     }
 
@@ -397,17 +493,59 @@
         </tr>`;
       }).join('');
 
-      // Follow-ups
+      // Follow-ups (enhanced with message previews)
+      renderFollowUps();
+      renderNeedsSequence();
+      renderQuickResponses();
+    }
+
+    async function renderFollowUps() {
       const today = new Date().toISOString().split('T')[0];
       const due = contacts.filter(c => c.next_follow_up && c.next_follow_up <= today && c.stage !== 'client' && c.stage !== 'cold');
+      // Sort: lead_magnet_sent first
+      const prio = { lead_magnet_sent: 0, in_conversation: 1, call_booked: 2, new_lead: 3 };
+      due.sort((a, b) => (prio[a.stage] ?? 9) - (prio[b.stage] ?? 9));
+
       const alertEl = document.getElementById('followUpAlert');
-      if (due.length) {
-        alertEl.classList.add('visible');
-        document.getElementById('followUpList').innerHTML = due.map(c => {
-          const name = c.full_name || c.ig_username || 'Unknown';
-          return `<div class="follow-up-item" onclick="openDetail(${c.id})"><span>${STAGES[c.stage]?.emoji||''} ${esc(name)}</span><span style="color:#a09080">${c.next_follow_up}</span></div>`;
-        }).join('');
-      } else { alertEl.classList.remove('visible'); }
+      if (!due.length) { alertEl.classList.remove('visible'); return; }
+      alertEl.classList.add('visible');
+      document.getElementById('followUpCount').textContent = due.length;
+
+      const items = [];
+      for (const c of due) {
+        const name = c.full_name || c.ig_username || 'Unknown';
+        let msgPreview = '';
+        let btns = '';
+        if (c.follow_up_sequence && !c.follow_up_paused) {
+          const step = getStepForContact(c);
+          if (step) {
+            const trunc = step.message.length > 120 ? step.message.substring(0, 120) + '...' : step.message;
+            msgPreview = `<div class="followup-msg-preview">${esc(trunc)}</div>`;
+            btns = `<button class="btn-tiny" onclick="event.stopPropagation();copyFollowUp(${c.id})" title="Copy">📋</button><button class="btn-tiny btn-primary" onclick="event.stopPropagation();markSentFromDash(${c.id})" title="Sent">✅</button>`;
+          }
+        }
+        const seqBadge = c.follow_up_sequence ? `<span class="mini-badge">${c.follow_up_sequence.replace(/_/g,' ')} step ${(c.follow_up_step||0)+1}</span>` : '';
+        items.push(`<div class="follow-up-item-expanded" onclick="openDetail(${c.id})"><div class="followup-top"><span>${STAGES[c.stage]?.emoji||''} <strong>${esc(name)}</strong> ${seqBadge}</span><span class="followup-actions">${btns}</span></div>${msgPreview}</div>`);
+      }
+      document.getElementById('followUpList').innerHTML = items.join('');
+    }
+
+    function renderNeedsSequence() {
+      const needs = contacts.filter(c => ['lead_magnet_sent','in_conversation'].includes(c.stage) && !c.follow_up_sequence);
+      const alertEl = document.getElementById('needsSequenceAlert');
+      if (!needs.length) { alertEl.classList.remove('visible'); return; }
+      alertEl.classList.add('visible');
+      document.getElementById('needsSequenceCount').textContent = needs.length;
+      document.getElementById('needsSequenceList').innerHTML = needs.map(c => {
+        const name = c.full_name || c.ig_username || 'Unknown';
+        return `<div class="follow-up-item" onclick="openDetail(${c.id})"><span>${STAGES[c.stage]?.emoji||''} ${esc(name)}</span><span style="color:#a09080">${c.stage.replace(/_/g,' ')}</span></div>`;
+      }).join('');
+    }
+
+    function renderQuickResponses() {
+      document.getElementById('quickResponseList').innerHTML = QUICK_RESPONSES.map((r, i) =>
+        `<div class="qr-item"><div class="qr-header"><span class="qr-label">${r.label}</span><button class="btn-tiny" onclick="copyQR(${i})">📋 Copy</button></div><div class="qr-context">${r.context}</div><div class="qr-message">${esc(r.message)}</div></div>`
+      ).join('');
     }
 
     function cardHTML(c) {
@@ -512,6 +650,32 @@
       document.getElementById('stageActions').innerHTML = '<span style="font-size:0.7rem;color:#a09080;margin-right:0.25rem;">Move to:</span>' +
         Object.entries(STAGES).map(([s,cfg]) => `<button class="stage-btn ${c.stage===s?'active':''}" onclick="moveStage(${c.id},'${s}')" ${c.stage===s?'disabled':''}>${cfg.emoji} ${cfg.label}</button>`).join('');
 
+      // ── Booking & Sequence section ──
+      const seqSelect = document.getElementById('seqSelect');
+      seqSelect.innerHTML = '<option value="">Start a follow-up sequence...</option>' +
+        sequences.map(s => `<option value="${s.name}" ${c.follow_up_sequence===s.name?'selected':''}>${s.description || s.name.replace(/_/g,' ')}</option>`).join('');
+
+      const startBtn = document.getElementById('startSeqBtn');
+      const pauseBtn = document.getElementById('pauseSeqBtn');
+      const resumeBtn = document.getElementById('resumeSeqBtn');
+      if (c.follow_up_sequence && !c.follow_up_paused) {
+        startBtn.style.display='none'; pauseBtn.style.display=''; resumeBtn.style.display='none';
+      } else if (c.follow_up_sequence && c.follow_up_paused) {
+        startBtn.style.display='none'; pauseBtn.style.display='none'; resumeBtn.style.display='';
+      } else {
+        startBtn.style.display=''; pauseBtn.style.display='none'; resumeBtn.style.display='none';
+      }
+
+      // Step preview
+      const stepEl = document.getElementById('stepPreview');
+      if (c.follow_up_sequence && !c.follow_up_paused) {
+        const step = getStepForContact(c);
+        if (step) {
+          stepEl.style.display = 'block';
+          stepEl.innerHTML = `<div class="step-preview"><div class="step-header"><span class="step-label">Step ${step.stepNumber}/${step.totalSteps}</span><span class="step-seq-name">${step.sequenceDescription||step.sequenceName.replace(/_/g,' ')}</span></div><div class="step-msg">${esc(step.message)}</div><div class="step-actions"><button class="btn btn-primary btn-small" onclick="markStepSent()">Mark as Sent</button><button class="btn btn-secondary btn-small" onclick="copyStepMsg()">Copy Message</button><button class="btn btn-secondary btn-small" onclick="skipStep()">Skip</button></div></div>`;
+        } else { stepEl.style.display = 'none'; }
+      } else { stepEl.style.display = 'none'; }
+
       // Activity log
       const { data: acts } = await sb.from('swoon_crm_activity').select('*').eq('contact_id', id).order('created_at', { ascending: false });
       const logEl = document.getElementById('activityLog');
@@ -531,6 +695,14 @@
       const { error } = await sb.from('swoon_crm_contacts').update(updates).eq('id', id);
       if (error) { showToast('Error: ' + error.message, 'error'); return; }
       await sb.from('swoon_crm_activity').insert({ contact_id: id, activity_type: 'stage_change', description: `Moved to ${STAGES[stage]?.label||stage}` });
+
+      // Auto-start follow-up sequence if mapped
+      const c = contacts.find(x => x.id === id);
+      const autoSeq = STAGE_SEQUENCES[stage];
+      if (autoSeq && (!c || !c.follow_up_sequence)) {
+        try { await startSequenceForContact(id, autoSeq); } catch(e) { console.warn('Auto-start failed:', e); }
+      }
+
       showToast(`Moved to ${STAGES[stage]?.emoji} ${STAGES[stage]?.label}`, 'success');
       await loadContacts();
       openDetail(id);
@@ -562,6 +734,145 @@
       if (!currentContact) return;
       closeModal('detailOverlay');
       openEditModal(currentContact.id);
+    }
+
+    // ══════════════════════════════════════════
+    // FOLLOW-UP SEQUENCES
+    // ══════════════════════════════════════════
+    function getStepForContact(c) {
+      if (!c.follow_up_sequence) return null;
+      const seq = sequences.find(s => s.name === c.follow_up_sequence);
+      if (!seq) return null;
+      const step = seq.steps[c.follow_up_step || 0];
+      if (!step) return null;
+      const name = c.full_name || c.ig_username || 'there';
+      const message = step.template
+        .replace(/\{name\}/g, name)
+        .replace(/\{booking_link\}/g, DEFAULT_BOOKING_LINK)
+        .replace(/\{ig\}/g, c.ig_username ? '@' + c.ig_username : '');
+      return { ...step, message, stepNumber: (c.follow_up_step || 0) + 1, totalSteps: seq.steps.length, sequenceName: seq.name, sequenceDescription: seq.description };
+    }
+
+    async function startSequenceForContact(contactId, seqName) {
+      const seq = sequences.find(s => s.name === seqName);
+      if (!seq?.steps?.length) return;
+      const now = new Date().toISOString();
+      const nextDate = new Date();
+      nextDate.setDate(nextDate.getDate() + (seq.steps[0].day || 1));
+      await sb.from('swoon_crm_contacts').update({
+        follow_up_sequence: seqName, follow_up_step: 0, follow_up_started_at: now,
+        follow_up_paused: false, next_follow_up: nextDate.toISOString().split('T')[0], updated_at: now,
+      }).eq('id', contactId);
+      await sb.from('swoon_crm_activity').insert({ contact_id: contactId, activity_type: 'follow_up', description: `Started "${seqName.replace(/_/g,' ')}" sequence` });
+    }
+
+    async function advanceSequence(contactId) {
+      const c = contacts.find(x => x.id === contactId); if (!c?.follow_up_sequence) return;
+      const seq = sequences.find(s => s.name === c.follow_up_sequence); if (!seq) return;
+      const nextStep = (c.follow_up_step || 0) + 1;
+      const now = new Date().toISOString();
+      if (nextStep >= seq.steps.length) {
+        await sb.from('swoon_crm_contacts').update({ follow_up_step: nextStep, follow_up_paused: true, last_follow_up_at: now, next_follow_up: null, follow_up_count: (c.follow_up_count||0)+1, updated_at: now }).eq('id', contactId);
+        return;
+      }
+      const nextDayOffset = seq.steps[nextStep].day;
+      const nextDate = new Date(c.follow_up_started_at || now);
+      nextDate.setDate(nextDate.getDate() + nextDayOffset);
+      if (nextDate < new Date()) nextDate.setTime(Date.now() + 86400000);
+      await sb.from('swoon_crm_contacts').update({ follow_up_step: nextStep, last_follow_up_at: now, follow_up_count: (c.follow_up_count||0)+1, next_follow_up: nextDate.toISOString().split('T')[0], updated_at: now }).eq('id', contactId);
+    }
+
+    async function startSequence() {
+      if (!currentContact) return;
+      const seqName = document.getElementById('seqSelect').value;
+      if (!seqName) { showToast('Select a sequence first', 'error'); return; }
+      await startSequenceForContact(currentContact.id, seqName);
+      showToast('Follow-up sequence started!', 'success');
+      await loadContacts(); openDetail(currentContact.id);
+    }
+
+    async function pauseSequence() {
+      if (!currentContact) return;
+      await sb.from('swoon_crm_contacts').update({ follow_up_paused: true, updated_at: new Date().toISOString() }).eq('id', currentContact.id);
+      await sb.from('swoon_crm_activity').insert({ contact_id: currentContact.id, activity_type: 'follow_up', description: 'Follow-up sequence paused' });
+      showToast('Sequence paused', 'success');
+      await loadContacts(); openDetail(currentContact.id);
+    }
+
+    async function resumeSequence() {
+      if (!currentContact) return;
+      await sb.from('swoon_crm_contacts').update({ follow_up_paused: false, updated_at: new Date().toISOString() }).eq('id', currentContact.id);
+      await sb.from('swoon_crm_activity').insert({ contact_id: currentContact.id, activity_type: 'follow_up', description: 'Follow-up sequence resumed' });
+      showToast('Sequence resumed', 'success');
+      await loadContacts(); openDetail(currentContact.id);
+    }
+
+    async function markStepSent() {
+      if (!currentContact) return;
+      const step = getStepForContact(currentContact); if (!step) return;
+      const actType = step.type === 'email' ? 'follow_up_email' : 'follow_up_dm';
+      await sb.from('swoon_crm_activity').insert({ contact_id: currentContact.id, activity_type: actType, description: `[${step.sequenceName} step ${step.stepNumber}] ${step.message.substring(0,100)}...` });
+      await advanceSequence(currentContact.id);
+      showToast(`Step ${step.stepNumber} marked as sent!`, 'success');
+      await loadContacts(); openDetail(currentContact.id);
+    }
+
+    async function copyStepMsg() {
+      if (!currentContact) return;
+      const step = getStepForContact(currentContact); if (!step) return;
+      await navigator.clipboard.writeText(step.message);
+      showToast('Message copied!', 'success');
+    }
+
+    async function skipStep() {
+      if (!currentContact) return;
+      await advanceSequence(currentContact.id);
+      showToast('Step skipped', 'success');
+      await loadContacts(); openDetail(currentContact.id);
+    }
+
+    async function sendBookingLink() {
+      if (!currentContact) return;
+      const link = document.getElementById('bookingLinkInput').value.trim();
+      if (!link) { showToast('Enter a link first', 'error'); return; }
+      await navigator.clipboard.writeText(link);
+      await sb.from('swoon_crm_activity').insert({ contact_id: currentContact.id, activity_type: 'booking_link_sent', description: 'Booking link shared: ' + link });
+      await sb.from('swoon_crm_contacts').update({ tidycal_booking_url: link, updated_at: new Date().toISOString() }).eq('id', currentContact.id);
+      showToast('Booking link copied & logged!', 'success');
+    }
+
+    async function autoStartAll() {
+      const needs = contacts.filter(c => ['lead_magnet_sent','in_conversation'].includes(c.stage) && !c.follow_up_sequence);
+      let started = 0;
+      for (const c of needs) {
+        const seqName = STAGE_SEQUENCES[c.stage];
+        if (seqName) { try { await startSequenceForContact(c.id, seqName); started++; } catch(e) { console.warn(e); } }
+      }
+      showToast(`Started sequences for ${started} contacts!`, 'success');
+      await loadContacts();
+    }
+
+    // Dashboard quick actions
+    async function copyFollowUp(id) {
+      const c = contacts.find(x => x.id === id); if (!c) return;
+      const step = getStepForContact(c); if (!step) return;
+      await navigator.clipboard.writeText(step.message);
+      showToast(`Copied step ${step.stepNumber} for ${c.full_name || c.ig_username}!`, 'success');
+    }
+
+    async function markSentFromDash(id) {
+      const c = contacts.find(x => x.id === id); if (!c) return;
+      const step = getStepForContact(c); if (!step) return;
+      const actType = step.type === 'email' ? 'follow_up_email' : 'follow_up_dm';
+      await sb.from('swoon_crm_activity').insert({ contact_id: id, activity_type: actType, description: `[${step.sequenceName} step ${step.stepNumber}] ${step.message.substring(0,100)}...` });
+      await advanceSequence(id);
+      showToast(`✅ Step ${step.stepNumber} marked sent for ${c.full_name || c.ig_username}`, 'success');
+      await loadContacts();
+    }
+
+    async function copyQR(index) {
+      await navigator.clipboard.writeText(QUICK_RESPONSES[index].message);
+      showToast('Message copied!', 'success');
     }
 
     // ══════════════════════════════════════════
