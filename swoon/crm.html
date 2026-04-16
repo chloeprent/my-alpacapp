@@ -49,7 +49,7 @@
     .filter-select { padding: 0.5rem; border: 1px solid #e8e0d8; border-radius: 8px; font-size: 0.85rem; background: #fff; }
 
     /* ── Pipeline ── */
-    .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 2rem; }
+    .pipeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.6rem; margin-bottom: 2rem; }
     .pipeline-col { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); min-height: 200px; display: flex; flex-direction: column; }
     .pipeline-col-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #f0ebe5; }
     .pipeline-col-header h3 { font-size: 0.8rem; font-weight: 600; }
@@ -89,6 +89,7 @@
     .badge-in_conversation { background: #f3e5f5; color: #7b1fa2; }
     .badge-call_booked { background: #e8f5e9; color: #2e7d32; }
     .badge-client { background: #e8f5e9; color: #1b5e20; }
+    .badge-past_client { background: #fff8e1; color: #b8860b; }
     .badge-cold { background: #eceff1; color: #546e7a; }
 
     /* ── Modal ── */
@@ -150,6 +151,21 @@
     .btn-tiny { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; border: 1px solid #e8e0d8; background: #fff; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
     .btn-tiny:hover { background: #ede4d7; border-color: #8b6f5e; }
     .btn-tiny.btn-primary { background: #8b6f5e; color: #fff; border-color: #8b6f5e; }
+    .btn-tiny.btn-danger { background: #fff; color: #c62828; border-color: #f5c2c2; }
+    .btn-tiny.btn-danger:hover { background: #ffebee; border-color: #c62828; }
+
+    /* ── Edit Sequences modal ── */
+    .seq-editor-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .seq-editor-card { border: 1px solid #e8e0d8; border-radius: 10px; padding: 0.75rem 1rem; }
+    .seq-editor-card summary { cursor: pointer; font-weight: 600; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+    .seq-editor-card summary small { font-weight: 400; color: #a09080; font-size: 0.72rem; }
+    .seq-step-editor { margin-top: 0.75rem; padding: 0.6rem; background: #faf8f5; border-radius: 8px; border-left: 3px solid #8b6f5e; }
+    .seq-step-editor .step-meta { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem; font-size: 0.75rem; color: #5a4a3a; }
+    .seq-step-editor .step-meta input[type="number"] { width: 70px; padding: 0.25rem 0.4rem; border: 1px solid #e8e0d8; border-radius: 6px; font-size: 0.8rem; }
+    .seq-step-editor .step-meta select { padding: 0.25rem 0.4rem; border: 1px solid #e8e0d8; border-radius: 6px; font-size: 0.8rem; background: #fff; }
+    .seq-step-editor textarea { width: 100%; min-height: 80px; padding: 0.5rem 0.65rem; border: 1px solid #e8e0d8; border-radius: 8px; font-size: 0.82rem; font-family: inherit; line-height: 1.5; resize: vertical; }
+    .seq-step-editor textarea:focus { outline: none; border-color: #8b6f5e; }
+    .seq-step-editor .step-tip { font-size: 0.7rem; color: #a09080; margin-top: 0.3rem; }
 
     /* ── Quick Responses ── */
     .quick-responses { background: #fff; border: 1px solid #e8e0d8; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
@@ -193,6 +209,7 @@
   <div class="header">
     <h1>Swoon CRM</h1>
     <div class="header-actions">
+      <button class="btn btn-secondary" onclick="openSequencesModal()">✏️ Edit Sequences</button>
       <button class="btn btn-primary" onclick="openAddModal()">+ Add Contact</button>
     </div>
   </div>
@@ -236,6 +253,7 @@
         <option value="in_conversation">In Conversation</option>
         <option value="call_booked">Call Booked</option>
         <option value="client">Client</option>
+        <option value="past_client">Past Client</option>
         <option value="cold">Cold</option>
       </select>
     </div>
@@ -261,6 +279,10 @@
       <div class="pipeline-col" data-stage="client">
         <div class="pipeline-col-header"><h3>✅ Client</h3><span class="pipeline-col-count" id="countClient">0</span></div>
         <div class="pipeline-col-cards" id="cardsClient"></div>
+      </div>
+      <div class="pipeline-col" data-stage="past_client">
+        <div class="pipeline-col-header"><h3>🏆 Past Client</h3><span class="pipeline-col-count" id="countPastClient">0</span></div>
+        <div class="pipeline-col-cards" id="cardsPastClient"></div>
       </div>
     </div>
 
@@ -310,6 +332,7 @@
               <option value="in_conversation">In Conversation</option>
               <option value="call_booked">Call Booked</option>
               <option value="client">Client</option>
+              <option value="past_client">Past Client</option>
               <option value="cold">Cold / Not Now</option>
             </select>
           </div>
@@ -330,6 +353,26 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('editOverlay')">Cancel</button>
         <button class="btn btn-primary" onclick="saveContact()">Save Contact</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ EDIT SEQUENCES MODAL ═══ -->
+  <div class="modal-overlay" id="sequencesOverlay">
+    <div class="modal" style="max-width: 680px;">
+      <div class="modal-header">
+        <h2>✏️ Edit Follow-up Sequences</h2>
+        <button class="modal-close" onclick="closeModal('sequencesOverlay')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.78rem; color:#a09080; margin-bottom:0.75rem;">
+          Edit the message templates for each step. Placeholders: <code>{name}</code>, <code>{booking_link}</code>, <code>{ig}</code>.
+          Click a sequence to expand its steps.
+        </p>
+        <div id="seqEditorList" class="seq-editor-list"><p style="color:#a09080;">Loading...</p></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('sequencesOverlay')">Close</button>
       </div>
     </div>
   </div>
@@ -358,6 +401,7 @@
             <button class="btn btn-small" id="startSeqBtn" onclick="startSequence()">Start</button>
             <button class="btn btn-small" id="pauseSeqBtn" onclick="pauseSequence()" style="display:none;">Pause</button>
             <button class="btn btn-small" id="resumeSeqBtn" onclick="resumeSequence()" style="display:none;">Resume</button>
+            <button class="btn btn-small btn-danger" id="stopSeqBtn" onclick="stopFollowUps()" style="display:none;" title="Remove from follow-up list entirely">✕ Stop</button>
           </div>
           <div id="stepPreview" style="display:none;"></div>
         </div>
@@ -395,6 +439,7 @@
       lead_magnet_sent: 'post_lead_magnet',
       in_conversation: 'post_conversation',
       call_booked: 'pre_call_reminder',
+      past_client: 'past_client_nurture',
     };
 
     const QUICK_RESPONSES = [
@@ -416,6 +461,7 @@
       in_conversation:  { label: 'In Conversation',  emoji: '💬', cards: 'cardsConversation', count: 'countConversation' },
       call_booked:      { label: 'Call Booked',      emoji: '📞', cards: 'cardsCallBooked',  count: 'countCallBooked' },
       client:           { label: 'Client',           emoji: '✅', cards: 'cardsClient',      count: 'countClient' },
+      past_client:      { label: 'Past Client',      emoji: '🏆', cards: 'cardsPastClient',  count: 'countPastClient' },
       cold:             { label: 'Cold',             emoji: '❄️', cards: null,                count: 'countCold' },
     };
 
@@ -524,6 +570,8 @@
             btns = `<button class="btn-tiny" onclick="event.stopPropagation();copyFollowUp(${c.id})" title="Copy">📋</button><button class="btn-tiny btn-primary" onclick="event.stopPropagation();markSentFromDash(${c.id})" title="Sent">✅</button>`;
           }
         }
+        // Quick ✕ to remove from follow-up list (not a candidate)
+        btns += `<button class="btn-tiny btn-danger" onclick="event.stopPropagation();removeFromFollowUps(${c.id})" title="Remove from follow-up list">✕</button>`;
         const seqBadge = c.follow_up_sequence ? `<span class="mini-badge">${c.follow_up_sequence.replace(/_/g,' ')} step ${(c.follow_up_step||0)+1}</span>` : '';
         items.push(`<div class="follow-up-item-expanded" onclick="openDetail(${c.id})"><div class="followup-top"><span>${STAGES[c.stage]?.emoji||''} <strong>${esc(name)}</strong> ${seqBadge}</span><span class="followup-actions">${btns}</span></div>${msgPreview}</div>`);
       }
@@ -658,6 +706,8 @@
       const startBtn = document.getElementById('startSeqBtn');
       const pauseBtn = document.getElementById('pauseSeqBtn');
       const resumeBtn = document.getElementById('resumeSeqBtn');
+      const stopBtn = document.getElementById('stopSeqBtn');
+      const hasFU = !!(c.follow_up_sequence || c.next_follow_up);
       if (c.follow_up_sequence && !c.follow_up_paused) {
         startBtn.style.display='none'; pauseBtn.style.display=''; resumeBtn.style.display='none';
       } else if (c.follow_up_sequence && c.follow_up_paused) {
@@ -665,6 +715,7 @@
       } else {
         startBtn.style.display=''; pauseBtn.style.display='none'; resumeBtn.style.display='none';
       }
+      stopBtn.style.display = hasFU ? '' : 'none';
 
       // Step preview
       const stepEl = document.getElementById('stepPreview');
@@ -690,6 +741,12 @@
       if (stage === 'lead_magnet_sent') { updates.lead_magnet_sent = true; updates.lead_magnet_sent_at = new Date().toISOString(); }
       if (stage === 'call_booked') updates.call_booked_at = new Date().toISOString();
       if (stage === 'client') updates.became_client_at = new Date().toISOString();
+      if (stage === 'past_client') {
+        // Clear any existing follow-up sequence so the past_client_nurture sequence auto-starts fresh
+        updates.follow_up_sequence = null;
+        updates.follow_up_step = 0;
+        updates.follow_up_paused = false;
+      }
       if (stage === 'cold') updates.is_warm = false;
 
       const { error } = await sb.from('swoon_crm_contacts').update(updates).eq('id', id);
@@ -697,9 +754,11 @@
       await sb.from('swoon_crm_activity').insert({ contact_id: id, activity_type: 'stage_change', description: `Moved to ${STAGES[stage]?.label||stage}` });
 
       // Auto-start follow-up sequence if mapped
+      // (for past_client, always start the nurture sequence since we cleared any existing one above)
       const c = contacts.find(x => x.id === id);
       const autoSeq = STAGE_SEQUENCES[stage];
-      if (autoSeq && (!c || !c.follow_up_sequence)) {
+      const shouldAutoStart = stage === 'past_client' || !c || !c.follow_up_sequence;
+      if (autoSeq && shouldAutoStart) {
         try { await startSequenceForContact(id, autoSeq); } catch(e) { console.warn('Auto-start failed:', e); }
       }
 
@@ -873,6 +932,106 @@
     async function copyQR(index) {
       await navigator.clipboard.writeText(QUICK_RESPONSES[index].message);
       showToast('Message copied!', 'success');
+    }
+
+    // ══════════════════════════════════════════
+    // STOP / REMOVE FROM FOLLOW-UPS
+    // ══════════════════════════════════════════
+    /** Stop follow-ups for the contact open in the detail modal */
+    async function stopFollowUps() {
+      if (!currentContact) return;
+      if (!confirm('Stop all follow-ups for this contact? They will be removed from the follow-up list. You can start a new sequence later if you want.')) return;
+      await sb.from('swoon_crm_contacts').update({
+        follow_up_sequence: null,
+        follow_up_step: 0,
+        follow_up_paused: false,
+        next_follow_up: null,
+        updated_at: new Date().toISOString(),
+      }).eq('id', currentContact.id);
+      await sb.from('swoon_crm_activity').insert({ contact_id: currentContact.id, activity_type: 'follow_up', description: 'Stopped follow-ups — removed from follow-up list' });
+      showToast('Follow-ups stopped', 'success');
+      await loadContacts(); openDetail(currentContact.id);
+    }
+
+    /** Quick remove from follow-ups list (from the dashboard alert) */
+    async function removeFromFollowUps(id) {
+      const c = contacts.find(x => x.id === id); if (!c) return;
+      const name = c.full_name || c.ig_username || 'this contact';
+      if (!confirm(`Remove ${name} from the follow-up list? (They stay in your CRM — you can restart a sequence later.)`)) return;
+      await sb.from('swoon_crm_contacts').update({
+        follow_up_sequence: null,
+        follow_up_step: 0,
+        follow_up_paused: false,
+        next_follow_up: null,
+        updated_at: new Date().toISOString(),
+      }).eq('id', id);
+      await sb.from('swoon_crm_activity').insert({ contact_id: id, activity_type: 'follow_up', description: 'Removed from follow-up list' });
+      showToast(`${name} removed from follow-ups`, 'success');
+      await loadContacts();
+    }
+
+    // ══════════════════════════════════════════
+    // EDIT SEQUENCES MODAL
+    // ══════════════════════════════════════════
+    function openSequencesModal() {
+      renderSequencesEditor();
+      document.getElementById('sequencesOverlay').classList.add('open');
+    }
+
+    function renderSequencesEditor() {
+      const wrap = document.getElementById('seqEditorList');
+      if (!sequences.length) { wrap.innerHTML = '<p style="color:#a09080;">No sequences found.</p>'; return; }
+      wrap.innerHTML = sequences.map((seq, si) => {
+        const stepsHTML = (seq.steps || []).map((step, idx) => `
+          <div class="seq-step-editor">
+            <div class="step-meta">
+              <strong>Step ${idx + 1}</strong>
+              <span>· Day</span>
+              <input type="number" min="0" value="${step.day ?? 0}" data-seq="${si}" data-step="${idx}" data-field="day">
+              <span>· Type</span>
+              <select data-seq="${si}" data-step="${idx}" data-field="type">
+                <option value="dm" ${step.type==='dm'?'selected':''}>DM</option>
+                <option value="email" ${step.type==='email'?'selected':''}>Email</option>
+              </select>
+              ${step.subject !== undefined ? `<input type="text" placeholder="Subject" value="${esc(step.subject||'')}" data-seq="${si}" data-step="${idx}" data-field="subject" style="flex:1;padding:0.25rem 0.4rem;border:1px solid #e8e0d8;border-radius:6px;font-size:0.8rem;">` : ''}
+            </div>
+            <textarea data-seq="${si}" data-step="${idx}" data-field="template">${esc(step.template || '')}</textarea>
+            <div class="step-tip">Placeholders: {name}, {booking_link}, {ig}</div>
+          </div>
+        `).join('');
+        return `
+          <details class="seq-editor-card">
+            <summary>
+              <span>${esc(seq.description || seq.name)} <small>(${(seq.steps||[]).length} steps)</small></span>
+              <button class="btn btn-primary btn-small" onclick="event.preventDefault();event.stopPropagation();saveSequence(${si})">Save Sequence</button>
+            </summary>
+            <div style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.6rem;">${stepsHTML}</div>
+          </details>
+        `;
+      }).join('');
+    }
+
+    async function saveSequence(seqIndex) {
+      const seq = sequences[seqIndex];
+      if (!seq) return;
+      // Gather all inputs for this sequence
+      const inputs = document.querySelectorAll(`#seqEditorList [data-seq="${seqIndex}"]`);
+      const newSteps = JSON.parse(JSON.stringify(seq.steps || []));
+      inputs.forEach(el => {
+        const idx = parseInt(el.dataset.step);
+        const field = el.dataset.field;
+        let value = el.value;
+        if (field === 'day') value = parseInt(value) || 0;
+        if (!newSteps[idx]) newSteps[idx] = {};
+        newSteps[idx][field] = value;
+      });
+      const { error } = await sb.from('swoon_follow_up_sequences')
+        .update({ steps: newSteps, updated_at: new Date().toISOString() })
+        .eq('id', seq.id);
+      if (error) { showToast('Error saving: ' + error.message, 'error'); return; }
+      showToast(`"${seq.description || seq.name}" saved!`, 'success');
+      await loadContacts();
+      renderSequencesEditor();
     }
 
     // ══════════════════════════════════════════
