@@ -1,12 +1,12 @@
 {
-  "version": "v260416.01 2:33p",
-  "release": 1,
-  "sha": "2f1ec4f",
-  "fullSha": "2f1ec4f6cadb2c79b185f4b6186ecb71bf89333a",
+  "version": "v260416.02 2:38p",
+  "release": 2,
+  "sha": "017c6a0",
+  "fullSha": "017c6a0533fe009603d85b1e29189e4ad693a871",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-16T10:32:54-04:00",
-  "commits": [{"sha":"2f1ec4f","message":"Add past-client stage, stop/remove from follow-ups, and sequence editing","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-16T10:38:19-04:00",
+  "commits": [{"sha":"017c6a0","message":"Allow past_client in swoon_crm_contacts stage CHECK constraint","author":"Chloe Prentoulis"}]
 }
