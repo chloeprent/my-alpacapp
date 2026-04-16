@@ -98,17 +98,13 @@ Deno.serve(async (req) => {
 
     const now = new Date().toISOString();
 
-    // Try to find the contact by email first, then by IG username
+    // Try to find the contact by IG handle first (catches ManyChat-originated
+    // rows that don't have an email yet — the common case when someone DMs a
+    // trigger word on Instagram and then fills out the Kit opt-in form).
+    // Fall back to email lookup if no IG match.
     let existing = null;
 
-    const { data: byEmail } = await supabase
-      .from('swoon_crm_contacts')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
-    existing = byEmail;
-
-    if (!existing && igUsername) {
+    if (igUsername) {
       const cleanIg = igUsername.replace(/^@/, '');
       const { data: byIg } = await supabase
         .from('swoon_crm_contacts')
@@ -116,6 +112,15 @@ Deno.serve(async (req) => {
         .eq('ig_username', cleanIg)
         .maybeSingle();
       existing = byIg;
+    }
+
+    if (!existing) {
+      const { data: byEmail } = await supabase
+        .from('swoon_crm_contacts')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+      existing = byEmail;
     }
 
     if (existing) {
