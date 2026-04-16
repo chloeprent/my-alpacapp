@@ -1,12 +1,12 @@
 {
-  "version": "v260415.01 1:54a",
+  "version": "v260416.01 2:33p",
   "release": 1,
-  "sha": "0178844",
-  "fullSha": "0178844662d23ceb2a3ea659476cd303da9ba544",
+  "sha": "2f1ec4f",
+  "fullSha": "2f1ec4f6cadb2c79b185f4b6186ecb71bf89333a",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-14T21:54:07-04:00",
-  "commits": [{"sha":"0178844","message":"Add follow-up sequences, auto-start, and quick responses to swoon/crm.html","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-16T10:32:54-04:00",
+  "commits": [{"sha":"2f1ec4f","message":"Add past-client stage, stop/remove from follow-ups, and sequence editing","author":"Chloe Prentoulis"}]
 }
