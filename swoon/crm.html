@@ -248,7 +248,7 @@
       <input type="text" class="search-input" id="searchInput" placeholder="Search by name or @username...">
       <select class="filter-select" id="filterStage">
         <option value="">All stages</option>
-        <option value="new_lead">New Lead</option>
+        <option value="new_lead">Miscellaneous</option>
         <option value="lead_magnet_sent">Lead Magnet Sent</option>
         <option value="in_conversation">In Conversation</option>
         <option value="call_booked">Call Booked</option>
@@ -261,7 +261,7 @@
     <!-- Pipeline -->
     <div class="pipeline" id="pipeline">
       <div class="pipeline-col" data-stage="new_lead">
-        <div class="pipeline-col-header"><h3>🆕 New Lead</h3><span class="pipeline-col-count" id="countNewLead">0</span></div>
+        <div class="pipeline-col-header"><h3>🗂️ Miscellaneous</h3><span class="pipeline-col-count" id="countNewLead">0</span></div>
         <div class="pipeline-col-cards" id="cardsNewLead"></div>
       </div>
       <div class="pipeline-col" data-stage="lead_magnet_sent">
@@ -327,7 +327,7 @@
           <div class="form-group"><label>Phone</label><input type="tel" id="editPhone" placeholder="(555) 123-4567"></div>
           <div class="form-group"><label>Stage</label>
             <select id="editStage">
-              <option value="new_lead">New Lead</option>
+              <option value="new_lead">Miscellaneous</option>
               <option value="lead_magnet_sent">Lead Magnet Sent</option>
               <option value="in_conversation">In Conversation</option>
               <option value="call_booked">Call Booked</option>
@@ -456,7 +456,7 @@
     ];
 
     const STAGES = {
-      new_lead:         { label: 'New Lead',         emoji: '🆕', cards: 'cardsNewLead',     count: 'countNewLead' },
+      new_lead:         { label: 'Miscellaneous',    emoji: '🗂️', cards: 'cardsNewLead',     count: 'countNewLead' },
       lead_magnet_sent: { label: 'Lead Magnet Sent', emoji: '🧲', cards: 'cardsLeadMagnet',  count: 'countLeadMagnet' },
       in_conversation:  { label: 'In Conversation',  emoji: '💬', cards: 'cardsConversation', count: 'countConversation' },
       call_booked:      { label: 'Call Booked',      emoji: '📞', cards: 'cardsCallBooked',  count: 'countCallBooked' },
