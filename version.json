@@ -1,12 +1,12 @@
 {
-  "version": "v260416.03 2:52p",
-  "release": 3,
-  "sha": "4702486",
-  "fullSha": "470248615605d73ddde17104b1acec7253e7347c",
+  "version": "v260416.04 3:40p",
+  "release": 4,
+  "sha": "3f4a7cb",
+  "fullSha": "3f4a7cb8940ff30e7a293fa8c49e49b5e28a6eed",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
-  "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-16T10:52:34-04:00",
-  "commits": [{"sha":"4702486","message":"Rename \"New Lead\" column to \"Miscellaneous\"","author":"Chloe Prentoulis"}]
+  "machine": "runnervmeorf1",
+  "pushedAt": "2026-04-16T11:40:39-04:00",
+  "commits": [{"sha":"3f4a7cb","message":"Prefer IG handle over email for Kit webhook contact lookup","author":"Chloe Prentoulis"}]
 }
