@@ -1,3 +1,18 @@
+-- Allow the new "past_client" pipeline stage on swoon_crm_contacts
+-- (the original CHECK constraint only allowed new_lead, lead_magnet_sent,
+-- in_conversation, call_booked, client, cold)
+ALTER TABLE swoon_crm_contacts DROP CONSTRAINT IF EXISTS swoon_crm_contacts_stage_check;
+ALTER TABLE swoon_crm_contacts ADD CONSTRAINT swoon_crm_contacts_stage_check
+  CHECK (stage = ANY (ARRAY[
+    'new_lead'::text,
+    'lead_magnet_sent'::text,
+    'in_conversation'::text,
+    'call_booked'::text,
+    'client'::text,
+    'past_client'::text,
+    'cold'::text
+  ]));
+
 -- Allow editing follow-up sequence message templates from the browser (via anon key)
 -- The previous migration restricted swoon_follow_up_sequences to authenticated users only;
 -- a public SELECT policy was added later. This adds the matching UPDATE/INSERT/DELETE
