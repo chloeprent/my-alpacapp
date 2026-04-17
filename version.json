@@ -1,12 +1,12 @@
 {
-  "version": "v260417.01 2:30a",
-  "release": 1,
-  "sha": "dc53e31",
-  "fullSha": "dc53e3143150fcfa57179b47efbc7580715ac8ec",
+  "version": "v260417.02 2:50a",
+  "release": 2,
+  "sha": "dc9694e",
+  "fullSha": "dc9694e2d92f739df499bcb798147f90d26919e8",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
   "machine": "runnervm35a4x",
-  "pushedAt": "2026-04-16T22:29:57-04:00",
-  "commits": [{"sha":"dc53e31","message":"Add inbox-triage: daily Gmail digest + filter XML","author":"Chloe Prentoulis"}]
+  "pushedAt": "2026-04-16T22:50:06-04:00",
+  "commits": [{"sha":"dc9694e","message":"Add daily receipt forwarder to bookkeeper","author":"Chloe Prentoulis"}]
 }
