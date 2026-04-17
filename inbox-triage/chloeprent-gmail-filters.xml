@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:apps="http://schemas.google.com/apps/2006">
+<title>Mail Filters</title>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:8198192562592039</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="hasTheWord" value="{receipt invoice &quot;your order&quot; &quot;order confirmation&quot; &quot;payment received&quot; &quot;payment confirmation&quot; &quot;shipping confirmation&quot; &quot;tracking number&quot;}"/>
+    <apps:property name="label" value="Transactions"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:4848981955850215</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="aquasana.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:3201215268184838</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="thredup.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:4358377375992078</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="10xhealthsystem.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:2374396467222211</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="emails.hertz.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:4821299752645162</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="olneytheatre.org"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:6527566122824062</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="quora.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:2100443869869723</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="nowbehealed.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:7090789402919068</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="feverup.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:7234052213127273</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="eventbrite.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:6426198078637355</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="loopspark.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:1073390786843539</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="lingokids.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:899803957298156</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="lifetimetrustedadvisor.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:3188136619741043</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="vrbo.com"/>
+    <apps:property name="subject" value="{Save Deal Discover &quot;% off&quot; &quot;Up to&quot;}"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Unsubscribe queue"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:1456088745517375</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="vrbo.com"/>
+    <apps:property name="subject" value="{booking reservation confirmed trip}"/>
+    <apps:property name="label" value="Travel"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:8095968288879888</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="hospitri.com"/>
+    <apps:property name="label" value="Rentals"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:1577801418530450</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="kit.com"/>
+    <apps:property name="label" value="Coaching/Platform"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:2328298364725405</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="tidycal.com"/>
+    <apps:property name="label" value="Coaching/Platform"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:7054637315196700</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="manychat.com"/>
+    <apps:property name="label" value="Coaching/Platform"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:8730825188247459</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="positiveintelligence.com"/>
+    <apps:property name="label" value="Coaching/Platform"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:8038378274672946</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="upwork.com"/>
+    <apps:property name="label" value="Work"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:6012374990699516</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="asana.com"/>
+    <apps:property name="label" value="Work"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:6370393176949041</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="drive-shares-dm-noreply@google.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Auto-archive"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:7640443800300604</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="avg.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Auto-archive"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:17107985897568</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="chloe@swoon.coach"/>
+    <apps:property name="subject" value="{Re: Fwd: FW:}"/>
+    <apps:property name="label" value="Personal"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:3764845848754774</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="newscientist.com"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Reading"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:627829108062731</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="chacruna.net"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Reading"/>
+  </entry>
+  <entry>
+    <category term="filter"/>
+    <title>Mail Filter</title>
+    <id>tag:mail.google.com,2008:filter:2593653111783210</id>
+    <updated>2026-04-16T22:40:33Z</updated>
+    <content/>
+    <apps:property name="from" value="maps.org"/>
+    <apps:property name="shouldArchive" value="true"/>
+    <apps:property name="label" value="Reading"/>
+  </entry>
+</feed>
