@@ -1,12 +1,12 @@
 {
-  "version": "v260416.04 3:40p",
-  "release": 4,
-  "sha": "3f4a7cb",
-  "fullSha": "3f4a7cb8940ff30e7a293fa8c49e49b5e28a6eed",
+  "version": "v260417.01 2:30a",
+  "release": 1,
+  "sha": "dc53e31",
+  "fullSha": "dc53e3143150fcfa57179b47efbc7580715ac8ec",
   "actor": "chloeprent",
   "source": "cloudflare-pages-deploy",
   "model": "ci",
-  "machine": "runnervmeorf1",
-  "pushedAt": "2026-04-16T11:40:39-04:00",
-  "commits": [{"sha":"3f4a7cb","message":"Prefer IG handle over email for Kit webhook contact lookup","author":"Chloe Prentoulis"}]
+  "machine": "runnervm35a4x",
+  "pushedAt": "2026-04-16T22:29:57-04:00",
+  "commits": [{"sha":"dc53e31","message":"Add inbox-triage: daily Gmail digest + filter XML","author":"Chloe Prentoulis"}]
 }
